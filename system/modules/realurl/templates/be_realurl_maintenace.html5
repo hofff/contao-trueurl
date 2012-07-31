@@ -1,0 +1,24 @@
+<div id="tl_maintenance_realurl" class="maintenance_<?php echo $this->isActive ? 'active' : 'inactive'; ?>">
+
+    <h2 class="sub_headline_realurl sub_headline_all"><?php echo $this->realurlHeadline; ?></h2>
+
+    <?php if ($this->realurlMessage): ?>
+
+    <div class="tl_message">
+      <p class="tl_error"><?php echo $this->realurlMessage; ?></p>
+    </div>
+    <?php endif; ?>
+
+    <form action="<?php echo $this->action; ?>" class="tl_form" method="get">
+        <div class="tl_formbody_edit">
+            <input type="hidden" name="act" value="realurl">
+            <input type="hidden" name="do" value="maintenance">
+                <div class="tl_tbox">
+                    <h3><label for="ctrl_user"><?php echo $this->realurlLabel; ?></label></h3>
+                </div>
+        </div>
+        <div class="tl_submit_container">
+            <input type="submit" id="realurl" class="tl_submit" value="<?php echo $this->realurlSubmit; ?>"> 
+        </div>
+    </form>
+</div>
