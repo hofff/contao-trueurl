@@ -107,7 +107,6 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['realurl_basealias'] = array(
 
 class tl_page_realurl extends tl_page
 {
-
     /**
      * Only use the last portion of the page alias for the article alias
      * 
@@ -145,17 +144,22 @@ class tl_page_realurl extends tl_page
      */
     public function generateFolderAlias($varValue, $dc)
     {    
-        // Check if realUrl is enabled
+        // Load current page
         $objPage = $this->getPageDetails($dc->id);
+        
+        // Load root page
         if ($objPage->type == 'root')
         {
             $objRoot = $objPage;
         }
         else
-        {
-            $objRoot = $this->Database->execute("SELECT * FROM tl_page WHERE id=" . (int) $objPage->rootId);
+        {          
+            $objRoot = $this->Database
+                    ->prepare("SELECT * FROM tl_page WHERE id=?")
+                    ->execute($objPage->rootId);
         }
 
+        // Check if real url is enabeld
         if (!$objRoot->folderAlias)
         {
             return parent::generateAlias($varValue, $dc);
@@ -223,10 +227,10 @@ class tl_page_realurl extends tl_page
         // Check whether the page alias exists, if add laguage to url is enabled
         // search only in one language page tree        
         if ($GLOBALS['TL_CONFIG']['addLanguageToUrl'] == true)
-        {
+        {            
             $objAlias = $this->Database
-                    ->prepare("SELECT id FROM tl_page WHERE (id=? OR alias=?) AND rootId=?")
-                    ->execute($dc->id, $varValue, $objPage->rootId);
+                    ->prepare("SELECT id FROM tl_page WHERE (id=? OR alias=?) AND id IN(" . implode(", ", $this->getChildRecords(array($objPage->rootId), 'tl_page', false)) . ")")
+                    ->execute($dc->id, $varValue);
         }
         else
         {
@@ -361,6 +365,10 @@ class tl_page_realurl extends tl_page
         }
     }
 
+    /**
+     * 
+     * @param type $intParentID
+     */
     public function generateAliasRecursive($intParentID)
     {
         $arrChildren = $this->getChildRecords($intParentID, 'tl_page', true);
@@ -381,7 +389,7 @@ class tl_page_realurl extends tl_page
 
                 $arrFolders = trimsplit("/", $objChildren->alias);
                 $strAlias   = array_pop($arrFolders);
-                $strAlias   = $this->generateFolderAlias($strAlias, (object) array('id'           => $objChildren->id, 'activeRecord' => $objChildren));
+                $strAlias   = $this->generateFolderAlias($strAlias, (object) array('id' => $objChildren->id, 'activeRecord' => $objChildren));
 
                 $this->Database
                         ->prepare("UPDATE tl_page SET alias=? WHERE id=?")
@@ -391,5 +399,4 @@ class tl_page_realurl extends tl_page
             }
         }
     }
-
 }
