@@ -31,8 +31,9 @@
 /**
  * Hooks
  */
-$GLOBALS['TL_HOOKS']['addCustomRegexp'][]  = array('RealUrl', 'validateRegexp');
-$GLOBALS['TL_HOOKS']['getPageIdFromUrl'][] = array('RealUrl', 'findAlias');
+$GLOBALS['TL_HOOKS']['addCustomRegexp'][]       = array('RealUrl', 'validateRegexp');
+$GLOBALS['TL_HOOKS']['getPageIdFromUrl'][]      = array('RealUrl', 'findAlias');
+$GLOBALS['TL_HOOKS']['generateFrontendUrl'][]   = array('RealUrl', 'realUrlGenerateFrontendUrl');
 
 
 /**
