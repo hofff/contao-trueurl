@@ -1,7 +1,4 @@
-<?php
-
-if (!defined('TL_ROOT'))
-    die('You can not access this file directly!');
+<?php if (!defined('TL_ROOT')) die('You can not access this file directly!');
 
 /**
  * TYPOlight Open Source CMS
@@ -72,7 +69,8 @@ foreach ($GLOBALS['TL_DCA']['tl_page']['palettes'] as $keyPalette => $valuePalet
 /**
  * Fields
  */
-$GLOBALS['TL_DCA']['tl_page']['fields']['alias']['eval']['rgxp']    = 'folderurl';
+$GLOBALS['TL_DCA']['tl_page']['fields']['alias']['eval']['rgxp']        = 'folderurl';
+$GLOBALS['TL_DCA']['tl_page']['fields']['alias']['eval']['alwaysSave']  = true;
 $GLOBALS['TL_DCA']['tl_page']['fields']['alias']['load_callback'][] = array('tl_page_realurl', 'hideParentAlias');
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['folderAlias'] = array(
@@ -146,7 +144,7 @@ class tl_page_realurl extends tl_page
      * @version 2.0
      */
     public function generateFolderAlias($varValue, $dc)
-    {
+    {    
         // Check if realUrl is enabled
         $objPage = $this->getPageDetails($dc->id);
         if ($objPage->type == 'root')
@@ -165,6 +163,15 @@ class tl_page_realurl extends tl_page
 
         // init vars
         $autoAlias = false;
+        $blnRealUrlOverwrite = false;
+        $strRealUrlOverwrite = "";
+        
+        if($this->Input->post('realurl_overwrite') == true)
+        {
+            $blnRealUrlOverwrite = true;
+            $strRealUrlOverwrite = $this->Input->post('realurl_basealias');
+        }
+        
 
         // Generate an alias if there is none
         if ($varValue == '')
@@ -175,32 +182,39 @@ class tl_page_realurl extends tl_page
 
         // Create Alais
         // Check if no overwirte, no rootpage and no add language to url
-        if ($objPage->realurl_overwrite == false && $objPage->type != 'root' && $GLOBALS['TL_CONFIG']['addLanguageToUrl'] == false)
+        if ($blnRealUrlOverwrite == false && $objPage->type != 'root' && $GLOBALS['TL_CONFIG']['addLanguageToUrl'] == false)
         {
             $objParent = $this->Database->executeUncached("SELECT * FROM tl_page WHERE id=" . (int) $objPage->pid);
             $varValue  = $objParent->alias . '/' . $varValue;
         }
         // Check if no overwirte, no rootpage and add language to url
-        else if ($objPage->realurl_overwrite == false && $objPage->type != 'root' && $GLOBALS['TL_CONFIG']['addLanguageToUrl'] == true)
+        else if ($blnRealUrlOverwrite == false && $objPage->type != 'root' && $GLOBALS['TL_CONFIG']['addLanguageToUrl'] == true)
         {
             $objParent = $this->Database->executeUncached("SELECT * FROM tl_page WHERE id=" . (int) $objPage->pid);
 
             // If parent is a root page dont't use the alias from it
             if ($objParent->type == 'root')
             {
-                $varValue = $varValue;
+                $varValue =  $varValue;
             }
             else
             {
                 $varValue = $objParent->alias . '/' . $varValue;
             }
         }
-        // If overwrite is enabled, return value here, another save call back will handel this
-        else if ($objPage->realurl_overwrite == true && $objPage->type != 'root')
+        // If overwrite is enabled
+        else if ($blnRealUrlOverwrite == true && $objPage->type != 'root')
         {
-            return $varValue;
+            if(strlen($strRealUrlOverwrite) == 0)
+            {
+                $varValue = $varValue;
+            }
+            else
+            {
+                $varValue = preg_replace("/\/$/", "", $strRealUrlOverwrite) . '/' . $varValue;
+            }
         }
-        // Check if no overwirte, rootpage
+        // Check if rootpage
         else if ($objPage->type == 'root')
         {
             $varValue = $varValue;
