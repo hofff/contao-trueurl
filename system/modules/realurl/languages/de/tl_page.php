@@ -20,7 +20,9 @@
  *
  * PHP version 5
  * @copyright  Andreas Schempp 2008-2011
+ * @copyright  MEN AT WORK 2011-2012
  * @author     Andreas Schempp <andreas@schempp.ch>
+ * @author     MEN AT WORK <cms@men-at-work.de>
  * @license    http://opensource.org/licenses/lgpl-3.0.html
  * @version    $Id$
  */
@@ -31,4 +33,6 @@
  */
 $GLOBALS['TL_LANG']['tl_page']['folderAlias']		= array('Ordner-Alias erstellen', 'Klicken Sie hier wenn Seitenaliase automatisch mit übergeordneten Seiten generiert werden sollen (Ordner-ähnlich).');
 $GLOBALS['TL_LANG']['tl_page']['subAlias']		= array('Alias von Unterseiten aktualisieren', 'Generiert ein neues Alias für Unterseiten.');
+$GLOBALS['TL_LANG']['tl_page']['realurl_overwrite']	= array('Real Url überschreiben', 'Beschreibung ...');
+$GLOBALS['TL_LANG']['tl_page']['realurl_basealias']	= array('Real Url Basis Seitenalias', 'Beschreibung ...');
 
