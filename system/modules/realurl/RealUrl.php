@@ -41,22 +41,22 @@ class RealUrl extends Frontend
      */
     public function findAlias(array $arrFragments)
     {
-        if (!$arrFragments)
-        {
-            return $arrFragments;
-        }
-
         // Remove empty strings
         // Remove auto_item if found
         // Reset keys
-        $arrFragments = array_values(array_filter($arrFragments, array(__CLASS__, 'fragmentFilter')));
-
+        $arrFiltered = array_values(array_filter($arrFragments, array(__CLASS__, 'fragmentFilter')));
+    
+        if (!$arrFiltered)
+        {
+            return $arrFragments;
+        }
+        
         // Build alias 
         // Append fragments until an url parameter is found or no fragments are left
-        for($i = 1; $arrFragments[$i] !== null && !in_array($arrFragments[$i], $GLOBALS['URL_KEYWORDS']); $i++);
-        $arrFragments = array_merge((array) implode('/', array_slice($arrFragments, 0, $i)), array_slice($arrFragments, $i));
+        for($i = 1; $arrFiltered[$i] !== null && !in_array($arrFiltered[$i], $GLOBALS['URL_KEYWORDS']); $i++);
+        array_splice($arrFiltered, 0, $i, implode('/', array_slice($arrFiltered, 0, $i)));
         
-        return $arrFragments;
+        return $arrFiltered;
     }
     
     public static function fragmentFilter($strFragment) {
