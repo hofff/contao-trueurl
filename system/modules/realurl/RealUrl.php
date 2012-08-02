@@ -41,19 +41,13 @@ class RealUrl extends Frontend
      */
     public function findAlias(array $arrFragments)
     {
-        if (!count($arrFragments))
+        if (!$arrFragments)
         {
             return $arrFragments;
         }
 
         // Remove empty strings
-        foreach ($arrFragments as $key => $value)
-        {
-            if ($value == "")
-            {
-                unset($arrFragments[$key]);
-            }
-        }
+        $arrFragments = array_filter($arrFragments, 'strlen');
 
         // Remove auto_item if found
         if (($mixKey = array_search("auto_item", $arrFragments)) !== false)
@@ -65,21 +59,14 @@ class RealUrl extends Frontend
         $arrFragments = array_values($arrFragments);
         
         // Build alias 
-        $strAlias = array_shift($arrFragments);
-
-        while (($strFragment = array_shift($arrFragments)) !== null)
-        {
-            // Found an url parameter, stop generating the alias
-            if (in_array($strFragment, $GLOBALS['URL_KEYWORDS']))
-            {
-                array_unshift($arrFragments, $strFragment);
-                break;
-            }
-
-            $strAlias .= '/' . $strFragment;
+        // Append fragments until an url parameter is found or no fragments are left
+        $arrAlias = array();
+        do {
+            $arrAlias[] = array_shift($arrFragments);
         }
+        while ($arrFragments[0] !== null && !in_array($arrFragments[0], $GLOBALS['URL_KEYWORDS']));
 
-        array_unshift($arrFragments, $strAlias);
+        array_unshift($arrFragments, implode('/', $arrAlias));
 
         $this->Session->set("RealUrlParams", array());
 
