@@ -166,6 +166,11 @@ class tl_page_realurl extends tl_page
         {
             return parent::generateAlias($varValue, $dc);
         }
+        
+        if(in_array($varValue, $GLOBALS['URL_KEYWORDS']))
+        {
+            throw new Exception($GLOBALS['TL_LANG']['ERR']['realUrlKeywords']);
+        }
 
         // init vars
         $autoAlias = false;
