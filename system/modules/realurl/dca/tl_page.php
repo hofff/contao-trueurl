@@ -49,6 +49,8 @@ foreach ($GLOBALS['TL_DCA']['tl_page']['fields']['alias']['save_callback'] as $i
     }
 }
 
+$GLOBALS['TL_DCA']['tl_page']['config']['onload_callback'][] = array('tl_page_realurl', 'checkSystem');
+
 /**
  * Palettes
  */
@@ -397,6 +399,14 @@ class tl_page_realurl extends tl_page
 
                 $this->generateAliasRecursive($objChildren->id);
             }
+        }
+    }
+    
+    public function checkSystem()
+    {           
+        if($GLOBALS['TL_CONFIG']['useAutoItem'] == true)
+        {
+            $_SESSION["TL_ERROR"][] = $GLOBALS['TL_LANG']['ERR']['autoItemEnabeld'];
         }
     }
 }
