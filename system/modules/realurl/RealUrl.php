@@ -1,7 +1,4 @@
-<?php
-
-if (!defined('TL_ROOT'))
-    die('You can not access this file directly!');
+<?php if (!defined('TL_ROOT')) die('You can not access this file directly!');
 
 /**
  * TYPOlight Open Source CMS
@@ -67,34 +64,6 @@ class RealUrl extends Frontend
         // Reset keys
         $arrFragments = array_values($arrFragments);
         
-        // Check if auto_item is enabeld
-        if ($GLOBALS['TL_CONFIG']['useAutoItem'] == true)
-        {
-            // Session with information about params
-            $arrSessionParam = $this->Session->get("RealUrlParams");
-            if (!is_array($arrSessionParam))
-            {
-                $arrSessionParam = array();
-            }
-
-            if (key_exists(implode("/", $arrFragments), $arrSessionParam))
-            {
-                $arrPage          = $arrSessionParam[implode("/", $arrFragments)];
-                $arrAliasFragment = trimsplit("/", $arrPage['alias']);
-
-                $arrDiff = array_diff_assoc($arrFragments, $arrAliasFragment);
-
-                $arrFragments = array();
-                $arrFragments[] = $arrPage['alias'];
-                $arrFragments[] = "auto_item";
-                $arrFragments   = array_merge($arrFragments, $arrDiff);
-
-                $this->Session->set("RealUrlParams", array());
-
-                return array_values($arrFragments);
-            }
-        }
-
         // Build alias 
         $strAlias = array_shift($arrFragments);
 
@@ -153,61 +122,6 @@ class RealUrl extends Frontend
         }
 
         return false;
-    }
-
-    public function realUrlGenerateFrontendUrl($arrRow, $strParams, $strUrl)
-    {
-        if ($GLOBALS['TL_CONFIG']['useAutoItem'] == true && $strParams != '')
-        {
-            $strTmpUrl = $strUrl;
-
-            // Session with information about params
-            $arrSessionParam = $this->Session->get("RealUrlParams");
-            if (!is_array($arrSessionParam))
-            {
-                $arrSessionParam = array();
-            }
-
-            // Remove urlSuffix
-            $intSuffixLength = strlen($GLOBALS['TL_CONFIG']['urlSuffix']);
-            if ($intSuffixLength > 0)
-            {
-                $strTmpUrl = substr($strTmpUrl, 0, -$intSuffixLength);
-            }
-
-            // Make a array
-            $arrFragments = trimsplit("/", $strTmpUrl);
-
-            // Remove language tag
-            if ($GLOBALS['TL_CONFIG']['addLanguageToUrl'] == true)
-            {
-                array_shift($arrFragments);
-            }
-
-            if (stripos($strTmpUrl, "%s") !== false)
-            {
-                foreach ($arrFragments as $key => $value)
-                {
-                    if ($value == "%s")
-                    {
-                        unset($arrFragments[$key]);
-                    }
-                }
-                
-                $arrFragments = array_values($arrFragments);
-                $strParams = '';
-            }
-            
-            // Save informations
-            $arrSessionParam[implode("/", $arrFragments)] = array(
-                'alias'  => $arrRow["alias"],
-                'params' => $strParams
-            );
-
-            $this->Session->set("RealUrlParams", $arrSessionParam);
-        }
-
-        return $strUrl;
     }
 
 }
