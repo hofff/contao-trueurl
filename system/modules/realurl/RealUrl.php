@@ -47,23 +47,20 @@ class RealUrl extends Frontend
         }
 
         // Remove empty strings
-        $arrFragments = array_filter($arrFragments, 'strlen');
-
         // Remove auto_item if found
-        if (($mixKey = array_search("auto_item", $arrFragments)) !== false)
-        {
-            unset($arrFragments[$mixKey]);
-        }
-
         // Reset keys
-        $arrFragments = array_values($arrFragments);
-        
+        $arrFragments = array_values(array_filter($arrFragments, array(__CLASS__, 'fragmentFilter')));
+
         // Build alias 
         // Append fragments until an url parameter is found or no fragments are left
         for($i = 1; $arrFragments[$i] !== null && !in_array($arrFragments[$i], $GLOBALS['URL_KEYWORDS']); $i++);
         $arrFragments = array_merge((array) implode('/', array_slice($arrFragments, 0, $i)), array_slice($arrFragments, $i));
         
         return $arrFragments;
+    }
+    
+    public static function fragmentFilter($strFragment) {
+    	return strlen($strFragment) && $strFragment != 'auto_item';
     }
 
     /**
