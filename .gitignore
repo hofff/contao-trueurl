@@ -1,0 +1,7 @@
+/*
+!/.gitignore
+!/system/
+!/dev/
+!/ext/
+!/publish/
+!/build.xml
