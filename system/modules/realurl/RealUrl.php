@@ -60,14 +60,9 @@ class RealUrl extends Frontend
         
         // Build alias 
         // Append fragments until an url parameter is found or no fragments are left
-        $arrAlias = array();
-        do {
-            $arrAlias[] = array_shift($arrFragments);
-        }
-        while ($arrFragments[0] !== null && !in_array($arrFragments[0], $GLOBALS['URL_KEYWORDS']));
-
-        array_unshift($arrFragments, implode('/', $arrAlias));
-
+        for($i = 1; $arrFragments[$i] !== null && !in_array($arrFragments[$i], $GLOBALS['URL_KEYWORDS']); $i++);
+        $arrFragments = array_merge((array) implode('/', array_slice($arrFragments, 0, $i)), array_slice($arrFragments, $i));
+        
         $this->Session->set("RealUrlParams", array());
 
         return $arrFragments;
