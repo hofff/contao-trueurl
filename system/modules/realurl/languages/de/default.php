@@ -32,4 +32,5 @@
 $GLOBALS['TL_LANG']['ERR']['folderurl']         = 'Das Wort "%s" kann nicht im Alias verwendet werden, weil es von einer Erweiterung reserviert ist.<br>Gesperrte Schlüsselwörter: %s';
 $GLOBALS['TL_LANG']['ERR']['aliasExistsFolder'] = 'Der Alias "%s" existiert bereits! (Der übergeordnete Alias wurde automatisch hinzugefügt)';
 $GLOBALS['TL_LANG']['ERR']['noRootPageFound']   = 'Konnte keine Rootpage finden.';
+$GLOBALS['TL_LANG']['ERR']['autoItemEnabeld']   = 'Die Einstellung "auto_item-Parameter" kann nicht mit Real URL verwendet werden.';
 
