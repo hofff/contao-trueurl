@@ -23,12 +23,12 @@
  * @author     MEN AT WORK <cms@men-at-work.de>
  * @license    GNU/LGPL
  */
-
 include_once TL_ROOT . '/system/modules/backend/dca/tl_page.php';
 include_once TL_ROOT . '/system/modules/realurl/dca/tl_page.php';
 
 class RealUrlMaintenance extends Backend implements executable
 {
+
     public function isActive()
     {
         return ($this->Input->get('act') == 'realurl');
@@ -37,11 +37,11 @@ class RealUrlMaintenance extends Backend implements executable
     public function run()
     {
         // If true rebuld all folder urls
-        if($this->Input->get('act') == 'realurl')
+        if ($this->Input->get('act') == 'realurl')
         {
             // Load helper class            
             $objPageRealUrl = new tl_page_realurl();
-            
+
             // Get all rootpages
             $objRootPages = $this->Database
                     ->prepare("SELECT * FROM tl_page WHERE type='root'")
@@ -49,26 +49,41 @@ class RealUrlMaintenance extends Backend implements executable
 
             if ($objRootPages->numRows != 0)
             {
-                while ($objRootPages->next())
+                try
                 {
-                    // Load the current page
-                    $objRoot = $objPageRealUrl->getPageDetails($objRootPages->id);
+                    while ($objRootPages->next())
+                    {
+                        // Load the current page
+                        $objRoot = $objPageRealUrl->getPageDetails($objRootPages->id);
+
+                        // Check if alias exsist or create one
+                        if ($objRoot->alias == '')
+                        {
+                            $strAlias = $objPageRealUrl->generateFolderAlias('', (object) array('id'           => $objRootPages->id, 'activeRecord' => $objRootPages));
+
+                            $this->Database
+                                    ->prepare("UPDATE tl_page SET alias=? WHERE id=?")
+                                    ->execute($strAlias, $dc->id);
+                        }
+
+                        // Check if the subalias is enabled
+                        if ($objRoot->subAlias)
+                        {
+                            $objPageRealUrl->generateAliasRecursive($objRootPages->id);
+                        }
+                    }
+                }
+                catch (Exception $exc)
+                {
+                    $objTemplate                  = new BackendTemplate('be_realurl_maintenace');
+                    $objTemplate->isActive        = $this->isActive();
+                    $objTemplate->realurlHeadline = $GLOBALS['TL_LANG']['tl_maintenance']['realurlHeadline'];
+                    $objTemplate->realurlMessage  = $exc->getMessage();
+                    $objTemplate->action          = "contao/main.php?do=maintenance";
+                    $objTemplate->realurlLabel    = $GLOBALS['TL_LANG']['tl_maintenance']['realurlNote'];
+                    $objTemplate->realurlSubmit   = $GLOBALS['TL_LANG']['tl_maintenance']['realurlSubmit'];
                     
-                    // Check if alias exsist or create one
-                    if ($objRoot->alias == '')
-                    {
-                        $strAlias = $objPageRealUrl->generateFolderAlias('', (object) array('id' => $objRootPages->id, 'activeRecord' => $objRootPages));
-
-                        $this->Database
-                                ->prepare("UPDATE tl_page SET alias=? WHERE id=?")
-                                ->execute($strAlias, $dc->id);
-                    }
-
-                    // Check if the subalias is enabled
-                    if ($objRoot->subAlias)
-                    {
-                        $objPageRealUrl->generateAliasRecursive($objRootPages->id);
-                    }
+                    return $objTemplate->parse();
                 }
             }
 
