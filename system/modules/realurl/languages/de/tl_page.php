@@ -31,8 +31,9 @@
 /**
  * Fields
  */
-$GLOBALS['TL_LANG']['tl_page']['folderAlias']		= array('Ordner-Alias erstellen', 'Klicken Sie hier wenn Seitenaliase automatisch mit übergeordneten Seiten generiert werden sollen (Ordner-ähnlich).');
-$GLOBALS['TL_LANG']['tl_page']['subAlias']		= array('Alias von Unterseiten aktualisieren', 'Generiert ein neues Alias für Unterseiten.');
-$GLOBALS['TL_LANG']['tl_page']['realurl_overwrite']	= array('Real Url überschreiben', 'Beschreibung ...');
-$GLOBALS['TL_LANG']['tl_page']['realurl_basealias']	= array('Real Url Basis Seitenalias', 'Beschreibung ...');
+$GLOBALS['TL_LANG']['tl_page']['folderAlias']		    = array('Ordner-Alias erstellen', 'Seitenaliase automatisch mit übergeordneten Seiten generieren (Ordner-ähnlich).');
+$GLOBALS['TL_LANG']['tl_page']['subAlias']		        = array('Leere Alias von Unterseiten aktualisieren', 'Generiert ein neues Alias für Unterseiten, falls deren Alias leer ist.');
+$GLOBALS['TL_LANG']['tl_page']['useRootAlias']          = array('Alias des Startpunkts verwenden', 'Verwendet den Alias des Startpunkts als Basis für alle anderen Seiten.');
+$GLOBALS['TL_LANG']['tl_page']['realurl_overwrite']	    = array('Alias überschreiben', 'Klicken Sie hier, um den gesamten Alias neu zu setzen.');
+$GLOBALS['TL_LANG']['tl_page']['realurl_basealias']	    = array('Seitenalias', 'Der Seitenalias ist eine eindeutige Referenz, die anstelle der numerischen Seiten-ID aufgerufen werden kann.');
 

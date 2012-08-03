@@ -107,7 +107,8 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['realurl_basealias'] = array(
     'eval'      => array(
         'spaceToUnderscore' => true,
         'trailingSlash'     => true,
-        'doNotCopy'         => true
+        'doNotCopy'         => true,
+        'tl_class'          => 'w50'
     )
 );
 
