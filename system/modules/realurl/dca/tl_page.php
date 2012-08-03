@@ -54,7 +54,7 @@ $GLOBALS['TL_DCA']['tl_page']['config']['onload_callback'][] = array('tl_page_re
 /**
  * Palettes
  */
-$GLOBALS['TL_DCA']['tl_page']['palettes']['root'] .= ';{folderurl_legend},folderAlias,subAlias';
+$GLOBALS['TL_DCA']['tl_page']['palettes']['root'] .= ';{folderurl_legend},folderAlias,subAlias,useRootAlias';
 $GLOBALS['TL_DCA']['tl_page']['palettes']['__selector__'][]       = 'realurl_overwrite';
 $GLOBALS['TL_DCA']['tl_page']['subpalettes']['realurl_overwrite'] = 'realurl_basealias';
 
@@ -62,9 +62,7 @@ foreach ($GLOBALS['TL_DCA']['tl_page']['palettes'] as $keyPalette => $valuePalet
 {
     if ($keyPalette != "root" && $keyPalette != '__selector__')
     {
-        $arrPalettesParts = trimsplit(";", $valuePalette);
-        array_insert($arrPalettesParts, 1, array("{RealUrl},realurl_overwrite"));
-        $GLOBALS['TL_DCA']['tl_page']['palettes'][$keyPalette] = implode(";", $arrPalettesParts);
+        $GLOBALS['TL_DCA']['tl_page']['palettes'][$keyPalette] = preg_replace('@([,|;]type)([,|;])@', '$1,realurl_overwrite$2', $GLOBALS['TL_DCA']['tl_page']['palettes'][$keyPalette]);
     }
 }
 
@@ -83,6 +81,12 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['folderAlias'] = array(
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['subAlias'] = array(
     'label'     => &$GLOBALS['TL_LANG']['tl_page']['subAlias'],
+    'inputType' => 'checkbox',
+    'eval'      => array('tl_class' => 'w50'),
+);
+
+$GLOBALS['TL_DCA']['tl_page']['fields']['useRootAlias'] = array(
+    'label'     => &$GLOBALS['TL_LANG']['tl_page']['useRootAlias'],
     'inputType' => 'checkbox',
     'eval'      => array('tl_class' => 'w50'),
 );
