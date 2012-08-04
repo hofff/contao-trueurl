@@ -59,7 +59,7 @@ class RealUrlMaintenance extends Backend implements executable
                         // Check if alias exsist or create one
                         if ($objRoot->alias == '')
                         {
-                            $strAlias = $objPageRealUrl->generateFolderAlias('', (object) array('id'           => $objRootPages->id, 'activeRecord' => $objRootPages));
+                            $strAlias = $objPageRealUrl->generateFolderAlias('', (object) array('id'           => $objRootPages->id, 'activeRecord' => $objRootPages), true);
 
                             $this->Database
                                     ->prepare("UPDATE tl_page SET alias=? WHERE id=?")
@@ -69,7 +69,7 @@ class RealUrlMaintenance extends Backend implements executable
                         // Check if the subalias is enabled
                         if ($objRoot->subAlias)
                         {
-                            $objPageRealUrl->generateAliasRecursive($objRootPages->id);
+                            $objPageRealUrl->generateAliasRecursive($objRootPages->id, true);
                         }
                     }
                 }
@@ -93,7 +93,7 @@ class RealUrlMaintenance extends Backend implements executable
         $objTemplate                  = new BackendTemplate('be_realurl_maintenace');
         $objTemplate->isActive        = $this->isActive();
         $objTemplate->realurlHeadline = $GLOBALS['TL_LANG']['tl_maintenance']['realurlHeadline'];
-        $objTemplate->realurlMessage  = "Fehler Meldungen ...";
+        $objTemplate->realurlMessage  = "";
         $objTemplate->action          = "contao/main.php?do=maintenance";
         $objTemplate->realurlLabel    = $GLOBALS['TL_LANG']['tl_maintenance']['realurlNote'];
         $objTemplate->realurlSubmit   = $GLOBALS['TL_LANG']['tl_maintenance']['realurlSubmit'];
