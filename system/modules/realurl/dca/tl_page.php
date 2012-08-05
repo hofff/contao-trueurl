@@ -1,7 +1,4 @@
-<?php
-
-if (!defined('TL_ROOT'))
-    die('You can not access this file directly!');
+<?php if (!defined('TL_ROOT')) die('You can not access this file directly!');
 
 /**
  * TYPOlight Open Source CMS
@@ -29,6 +26,7 @@ if (!defined('TL_ROOT'))
  * @license    http://opensource.org/licenses/lgpl-3.0.html
  * @version    $Id$
  */
+
 /**
  * Replace core callbacks
  */
@@ -105,14 +103,14 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['realurl_overwrite'] = array(
 );
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['realurl_basealias'] = array(
-    'label' => &$GLOBALS['TL_LANG']['tl_page']['realurl_basealias'],
+    'label' => &$GLOBALS['TL_LANG']['tl_page']['alias'],
     'inputType' => 'text',
     'load_callback' => array(array('tl_page_realurl', 'loadFullAlias')),
     'eval' => array(
         'spaceToUnderscore' => true,
         'trailingSlash' => true,
         'doNotCopy' => true,
-        'tl_class' => 'w50'
+        'tl_class' => 'long'
     )
 );
 
@@ -123,9 +121,7 @@ class tl_page_realurl extends tl_page
      * Only use the last portion of the page alias for the article alias
      * 
      * @param	DataContainer
-     * 
      * @return	void
-     * 
      * @link	http://www.contao.org/callbacks.html#onsubmit_callback
      * @version 1.0
      */
@@ -148,7 +144,6 @@ class tl_page_realurl extends tl_page
      * 
      * @param type $varValue
      * @param type $dc
-     * 
      * @return type 
      */
     public function loadFullAlias($varValue, $dc)
@@ -163,9 +158,7 @@ class tl_page_realurl extends tl_page
      * 
      * @param	mixed
      * @param	DataContainer
-     * 
      * @return	mixed
-     * 
      * @link	http://www.contao.org/callbacks.html#save_callback
      * @version 2.0
      */
@@ -186,7 +179,7 @@ class tl_page_realurl extends tl_page
                     ->execute($objPage->rootId);
         }
 
-        // Check if real url is enabeld
+        // Check if realurl is enabeld
         if (!$objRoot->folderAlias)
         {
             return parent::generateAlias($varValue, $dc);
@@ -200,11 +193,11 @@ class tl_page_realurl extends tl_page
         {
             $strUrl = $this->Environment->base . "contao/main.php?do=page&act=edit&id=" . $objPage->id;
 
-            //'Der Alias ist als Keyword reserviert. <a href="%s">%s (ID: $s)</a>';
+            // The alias of the site includes a keyword. <a href="%s">%s (ID: $s)</a>
             throw new Exception(sprintf($GLOBALS['TL_LANG']['ERR']['realUrlKeywordsExt'], $strUrl, $objPage->title, $objPage->id, $varValue), $objPage->id);
         }
 
-        // init vars
+        // Init vars
         $autoAlias = false;
         $blnRealUrlOverwrite = false;
         $strRealUrlOverwrite = "";
@@ -222,19 +215,19 @@ class tl_page_realurl extends tl_page
             $varValue = standardize($objPage->title);
         }
 
-        // Create Alais
-        // Check if no overwirte, no rootpage and no add language to url
+        // Create Alias
+        // Check if no overwrite, no rootpage and no add language to url
         if ($blnRealUrlOverwrite == false && $objPage->type != 'root' && $objRoot->useRootAlias == true)
         {
             $objParent = $this->Database->executeUncached("SELECT * FROM tl_page WHERE id=" . (int) $objPage->pid);
             $varValue = $objParent->alias . '/' . $varValue;
         }
-        // Check if no overwirte, no rootpage and add language to url
+        // Check if no overwrite, no rootpage and add language to url
         else if ($blnRealUrlOverwrite == false && $objPage->type != 'root' && $objRoot->useRootAlias == false)
         {
             $objParent = $this->Database->executeUncached("SELECT * FROM tl_page WHERE id=" . (int) $objPage->pid);
 
-            // If parent is a root page dont't use the alias from it
+            // If parent is a root page don't use the alias from it
             if ($objParent->type == 'root')
             {
                 $varValue = $varValue;
@@ -249,7 +242,7 @@ class tl_page_realurl extends tl_page
         {
             if (strlen($strRealUrlOverwrite) == 0)
             {
-                throw new Exception($GLOBALS['TL_LANG']['ERR']['emptRealUrlOverwirte']);
+                throw new Exception($GLOBALS['TL_LANG']['ERR']['emptyRealUrlOverwrite']);
             }
             else
             {
@@ -263,7 +256,7 @@ class tl_page_realurl extends tl_page
         }
 
         // Check whether the page alias exists, if add laguage to url is enabled
-        // search only in one language page tree        
+        // Search only in one language page tree        
         if ($GLOBALS['TL_CONFIG']['addLanguageToUrl'] == true)
         {
             $objAlias = $this->Database
@@ -289,7 +282,7 @@ class tl_page_realurl extends tl_page
                 $domain = ($objCurrentPage->domain != '') ? $objCurrentPage->domain : '*';
                 $language = (!$objCurrentPage->rootIsFallback) ? $objCurrentPage->rootLanguage : '*';
 
-                // Store the current page's data
+                // Store the current page data
                 if ($objCurrentPage->id == $dc->id)
                 {
                     $strDomain = $domain;
@@ -331,13 +324,11 @@ class tl_page_realurl extends tl_page
 
     /**
      * Hide the parent alias from the user when editing the alias field.
-     * Including the root page aliase.
+     * Including the root page alias.
      * 
      * @param	string
      * @param	DataContainer
-     * 
      * @return	string
-     * 
      * @link	http://www.contao.org/callbacks.html#load_callback
      * @version 2.0
      */
@@ -359,9 +350,7 @@ class tl_page_realurl extends tl_page
      * Generate the page alias even if the alias field is hidden from the user
      * 
      * @param DataContainer
-     * 
      * @return void
-     * 
      * @link http://www.contao.org/callbacks.html#onsubmit_callback
      * @version 2.0
      */
@@ -388,13 +377,13 @@ class tl_page_realurl extends tl_page
                     ->execute($objPage->rootId);
         }
 
-        // Check if real url is enabeld
+        // Check if realurl is enabeld
         if (!$objRoot->folderAlias)
         {
             return;
         }
 
-        // Check if alias exsist or create one
+        // Check if alias exist or create one
         if ($dc->activeRecord->alias == '')
         {
             $strAlias = $this->generateFolderAlias('', $dc, false);
@@ -450,7 +439,7 @@ class tl_page_realurl extends tl_page
     {
         if ($GLOBALS['TL_CONFIG']['useAutoItem'] == true)
         {
-            $_SESSION["TL_ERROR"][] = $GLOBALS['TL_LANG']['ERR']['autoItemEnabeld'];
+            $_SESSION["TL_ERROR"][] = $GLOBALS['TL_LANG']['ERR']['autoItemEnabled'];
         }
     }
 

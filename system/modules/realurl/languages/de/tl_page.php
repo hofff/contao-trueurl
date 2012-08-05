@@ -19,12 +19,10 @@
  * Software Foundation website at <http://www.gnu.org/licenses/>.
  *
  * PHP version 5
- * @copyright  Andreas Schempp 2008-2011
- * @copyright  MEN AT WORK 2011-2012
- * @author     Andreas Schempp <andreas@schempp.ch>
- * @author     MEN AT WORK <cms@men-at-work.de>
- * @license    http://opensource.org/licenses/lgpl-3.0.html
- * @version    $Id$
+ * @copyright  MEN AT WORK 2012
+ * @package    Language
+ * @license    GNU/LGPL 
+ * @filesource
  */
 
 
@@ -32,8 +30,6 @@
  * Fields
  */
 $GLOBALS['TL_LANG']['tl_page']['folderAlias']		    = array('Ordner-Alias erstellen', 'Seitenaliase automatisch mit übergeordneten Seiten generieren (Ordner-ähnlich).');
-$GLOBALS['TL_LANG']['tl_page']['subAlias']		        = array('Leere Alias von Unterseiten aktualisieren', 'Generiert ein neues Alias für Unterseiten, falls deren Alias leer ist.');
+$GLOBALS['TL_LANG']['tl_page']['subAlias']		        = array('Leere Alias von Unterseiten aktualisieren', 'Generiert einen neuen Alias für Unterseiten, falls deren Alias leer ist.');
 $GLOBALS['TL_LANG']['tl_page']['useRootAlias']          = array('Alias des Startpunkts verwenden', 'Verwendet den Alias des Startpunkts als Basis für alle anderen Seiten.');
-$GLOBALS['TL_LANG']['tl_page']['realurl_overwrite']	    = array('Alias überschreiben', 'Klicken Sie hier, um den gesamten Alias neu zu setzen.');
-$GLOBALS['TL_LANG']['tl_page']['realurl_basealias']	    = array('Seitenalias', 'Der Seitenalias ist eine eindeutige Referenz, die anstelle der numerischen Seiten-ID aufgerufen werden kann.');
-
+$GLOBALS['TL_LANG']['tl_page']['realurl_overwrite']	    = array('Alias überschreiben', 'Klicken Sie hier, um den gesamten Alias zurückzusetzen.');

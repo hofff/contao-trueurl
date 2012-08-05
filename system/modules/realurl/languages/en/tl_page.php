@@ -19,16 +19,17 @@
  * Software Foundation website at <http://www.gnu.org/licenses/>.
  *
  * PHP version 5
- * @copyright  Andreas Schempp 2008-2011
- * @author     Andreas Schempp <andreas@schempp.ch>
- * @license    http://opensource.org/licenses/lgpl-3.0.html
- * @version    $Id$
+ * @copyright  MEN AT WORK 2012
+ * @package    Language
+ * @license    GNU/LGPL 
+ * @filesource
  */
 
 
 /**
  * Fields
  */
-$GLOBALS['TL_LANG']['tl_page']['folderAlias']		= array('Generate folder alias', 'Check here if you want to generate page alias including parent page alias (folder-like).');
-$GLOBALS['TL_LANG']['tl_page']['subAlias']		= array('Generate alias for subpages', 'Generate an alias for subpages.');
-
+$GLOBALS['TL_LANG']['tl_page']['folderAlias']		    = array('Generate folder alias', 'Check here if you want to generate page alias including parent page alias (folder-like).');
+$GLOBALS['TL_LANG']['tl_page']['subAlias']		        = array('Generate alias for empty subpages', 'Generate an alias for subpages if it is empty.');
+$GLOBALS['TL_LANG']['tl_page']['useRootAlias']          = array('Used the website root alias', 'Used the alias of the website root as the basis for all other pages.');
+$GLOBALS['TL_LANG']['tl_page']['realurl_overwrite']	    = array('Overwrite page alias', 'Click here, to reset the entire alias.');

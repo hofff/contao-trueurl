@@ -21,17 +21,15 @@
  * Software Foundation website at <http://www.gnu.org/licenses/>.
  *
  * PHP version 5
- * @copyright  MEN AT WORK 2011-2012
- * @author     MEN AT WORK <cms@men-at-work.de>
- * @license    GNU/LGPL
+ * @copyright  MEN AT WORK 2012
+ * @package    Language
+ * @license    GNU/LGPL 
+ * @filesource
  */
 
 /**
  * Miscellaneous
  */
-$GLOBALS['TL_LANG']['tl_maintenance']['realurlHeadline']    = 'Headline ...';
-$GLOBALS['TL_LANG']['tl_maintenance']['realurlSubmit']      = 'RealUrl aufbauen';
-$GLOBALS['TL_LANG']['tl_maintenance']['realurlNote']        = 'Beschreibung ...';
-
-
-?>
+$GLOBALS['TL_LANG']['tl_maintenance']['realurlHeadline']    = 'Seitenaliase generieren';
+$GLOBALS['TL_LANG']['tl_maintenance']['realurlSubmit']      = 'Seitenaliase generieren';
+$GLOBALS['TL_LANG']['tl_maintenance']['realurlNote']        = 'Den Alias aller Seiten neu generieren';

@@ -23,6 +23,7 @@
  * @author     MEN AT WORK <cms@men-at-work.de>
  * @license    GNU/LGPL
  */
+
 include_once TL_ROOT . '/system/modules/backend/dca/tl_page.php';
 include_once TL_ROOT . '/system/modules/realurl/dca/tl_page.php';
 
@@ -36,7 +37,7 @@ class RealUrlMaintenance extends Backend implements executable
 
     public function run()
     {
-        // If true rebuld all folder urls
+        // If true rebuild all folder urls
         if ($this->Input->get('act') == 'realurl')
         {
             // Load helper class            
@@ -56,7 +57,7 @@ class RealUrlMaintenance extends Backend implements executable
                         // Load the current page
                         $objRoot = $objPageRealUrl->getPageDetails($objRootPages->id);
 
-                        // Check if alias exsist or create one
+                        // Check if alias exist or create one
                         if ($objRoot->alias == '')
                         {
                             $strAlias = $objPageRealUrl->generateFolderAlias('', (object) array('id'           => $objRootPages->id, 'activeRecord' => $objRootPages), true);
@@ -75,7 +76,7 @@ class RealUrlMaintenance extends Backend implements executable
                 }
                 catch (Exception $exc)
                 {
-                    $objTemplate                  = new BackendTemplate('be_realurl_maintenace');
+                    $objTemplate                  = new BackendTemplate('be_realurl_maintenance');
                     $objTemplate->isActive        = $this->isActive();
                     $objTemplate->realurlHeadline = $GLOBALS['TL_LANG']['tl_maintenance']['realurlHeadline'];
                     $objTemplate->realurlMessage  = $exc->getMessage();
@@ -90,7 +91,7 @@ class RealUrlMaintenance extends Backend implements executable
             $this->redirect('contao/main.php?do=maintenance');
         }
 
-        $objTemplate                  = new BackendTemplate('be_realurl_maintenace');
+        $objTemplate                  = new BackendTemplate('be_realurl_maintenance');
         $objTemplate->isActive        = $this->isActive();
         $objTemplate->realurlHeadline = $GLOBALS['TL_LANG']['tl_maintenance']['realurlHeadline'];
         $objTemplate->realurlMessage  = "";

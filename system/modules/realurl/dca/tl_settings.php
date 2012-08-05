@@ -20,7 +20,9 @@
  *
  * PHP version 5
  * @copyright  Andreas Schempp 2008-2011
+ * @copyright  MEN AT WORK 2011-2012
  * @author     Andreas Schempp <andreas@schempp.ch>
+ * @author     MEN AT WORK <cms@men-at-work.de>
  * @license    http://opensource.org/licenses/lgpl-3.0.html
  * @version    $Id$
  */

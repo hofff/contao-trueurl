@@ -49,7 +49,7 @@ $GLOBALS['URL_KEYWORDS']   = array_unique(array_merge($GLOBALS['URL_KEYWORDS'], 
 $GLOBALS['TL_MAINTENANCE'][] = 'RealUrlMaintenance';
 
 /**
- * Css/Js 
+ * CSS/JS files
  */
 $objInput = Input::getInstance();
 if ($objInput->get("do") == 'maintenance')

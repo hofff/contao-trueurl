@@ -22,8 +22,8 @@
  * @copyright  Andreas Schempp 2008-2011
  * @copyright  MEN AT WORK 2011-2012
  * @author     Andreas Schempp <andreas@schempp.ch>
- * @author     Leo Unglaub <leo@leo-unglaub.net>
  * @author     MEN AT WORK <cms@men-at-work.de>
+ * @author     Leo Unglaub <leo@leo-unglaub.net> 
  * @license    http://opensource.org/licenses/lgpl-3.0.html
  * @version    $Id$
  */
@@ -35,7 +35,6 @@ class RealUrl extends Frontend
      *
      * @param	array
      * @return	array
-     * 
      * @link	http://www.contao.org/hooks.html?#getPageIdFromURL
      * @version 1.0
      */
@@ -70,9 +69,7 @@ class RealUrl extends Frontend
      * @param	string
      * @param	mixed
      * @param	Widget
-     * 
      * @return	bool
-     * 
      * @version 2.0
      */
     public function validateRegexp($strRegexp, $varValue, Widget $objWidget)
@@ -92,7 +89,7 @@ class RealUrl extends Frontend
             if (preg_match('#/' . implode('/|/', $GLOBALS['URL_KEYWORDS']) . '/|/' . implode('$|/', $GLOBALS['URL_KEYWORDS']) . '$#', $varValue, $match))
             {
                 $strError = str_replace('/', '', $match[0]);
-                $objWidget->addError(sprintf($GLOBALS['TL_LANG']['ERR']['folderurl'], $strError, implode(', ', $GLOBALS['URL_KEYWORDS'])));
+                $objWidget->addError(sprintf($GLOBALS['TL_LANG']['ERR']['realurl'], $strError, implode(', ', $GLOBALS['URL_KEYWORDS'])));
             }
 
             return true;

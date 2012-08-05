@@ -19,15 +19,14 @@
  * Software Foundation website at <http://www.gnu.org/licenses/>.
  *
  * PHP version 5
- * @copyright  Andreas Schempp 2008-2011
- * @author     Andreas Schempp <andreas@schempp.ch>
- * @license    http://opensource.org/licenses/lgpl-3.0.html
- * @version    $Id$
+ * @copyright  MEN AT WORK 2012
+ * @package    Language
+ * @license    GNU/LGPL 
+ * @filesource
  */
 
 
 /**
  * Fields
  */
-$GLOBALS['TL_LANG']['tl_settings']['urlKeywords'] = array('URL Keywords', 'Please enter additional (comma separated) keywords the FolderURL Extension should detect as variables.');
-
+$GLOBALS['TL_LANG']['tl_settings']['urlKeywords']		array('URL Keywords', 'Please enter additional (comma separated) keywords the RealURL Extension should detect as variables.');
