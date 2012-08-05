@@ -76,7 +76,7 @@ class RealUrlMaintenance extends Backend implements executable
                 }
                 catch (Exception $exc)
                 {
-                    $objTemplate                  = new BackendTemplate('be_realurl_maintenance');
+                    $objTemplate                  = new BackendTemplate('be_realurl');
                     $objTemplate->isActive        = $this->isActive();
                     $objTemplate->realurlHeadline = $GLOBALS['TL_LANG']['tl_maintenance']['realurlHeadline'];
                     $objTemplate->realurlMessage  = $exc->getMessage();
@@ -91,7 +91,7 @@ class RealUrlMaintenance extends Backend implements executable
             $this->redirect('contao/main.php?do=maintenance');
         }
 
-        $objTemplate                  = new BackendTemplate('be_realurl_maintenance');
+        $objTemplate                  = new BackendTemplate('be_realurl');
         $objTemplate->isActive        = $this->isActive();
         $objTemplate->realurlHeadline = $GLOBALS['TL_LANG']['tl_maintenance']['realurlHeadline'];
         $objTemplate->realurlMessage  = "";
