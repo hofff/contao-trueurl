@@ -1,4 +1,7 @@
-<?php if (!defined('TL_ROOT')) die('You can not access this file directly!');
+<?php
+
+if (!defined('TL_ROOT'))
+    die('You can not access this file directly!');
 
 /**
  * TYPOlight Open Source CMS
@@ -104,6 +107,7 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['realurl_overwrite'] = array(
 $GLOBALS['TL_DCA']['tl_page']['fields']['realurl_basealias'] = array(
     'label' => &$GLOBALS['TL_LANG']['tl_page']['realurl_basealias'],
     'inputType' => 'text',
+    'load_callback' => array(array('tl_page_realurl', 'loadFullAlias')),
     'eval' => array(
         'spaceToUnderscore' => true,
         'trailingSlash' => true,
@@ -137,6 +141,21 @@ class tl_page_realurl extends tl_page
         $dc->activeRecord->alias = array_pop($arrAlias);
 
         parent::generateArticle($dc);
+    }
+
+    /**
+     * Laod the current full alias
+     * 
+     * @param type $varValue
+     * @param type $dc
+     * 
+     * @return type 
+     */
+    public function loadFullAlias($varValue, $dc)
+    {
+        // Load current page alias
+        $objPage = $this->getPageDetails($dc->id);
+        return $objPage->alias;
     }
 
     /**
@@ -180,7 +199,7 @@ class tl_page_realurl extends tl_page
         else if (in_array($varValue, $GLOBALS['URL_KEYWORDS']) && $useExtException == true)
         {
             $strUrl = $this->Environment->base . "contao/main.php?do=page&act=edit&id=" . $objPage->id;
-            
+
             //'Der Alias ist als Keyword reserviert. <a href="%s">%s (ID: $s)</a>';
             throw new Exception(sprintf($GLOBALS['TL_LANG']['ERR']['realUrlKeywordsExt'], $strUrl, $objPage->title, $objPage->id, $varValue), $objPage->id);
         }
@@ -195,7 +214,6 @@ class tl_page_realurl extends tl_page
             $blnRealUrlOverwrite = true;
             $strRealUrlOverwrite = $this->Input->post('realurl_basealias');
         }
-
 
         // Generate an alias if there is none
         if ($varValue == '')
@@ -231,11 +249,11 @@ class tl_page_realurl extends tl_page
         {
             if (strlen($strRealUrlOverwrite) == 0)
             {
-                $varValue = $varValue;
+                throw new Exception($GLOBALS['TL_LANG']['ERR']['emptRealUrlOverwirte']);
             }
             else
             {
-                $varValue = preg_replace("/\/$/", "", $strRealUrlOverwrite) . '/' . $varValue;
+                $varValue = preg_replace("/\/$/", "", $strRealUrlOverwrite);
             }
         }
         // Check if rootpage
@@ -373,7 +391,7 @@ class tl_page_realurl extends tl_page
         // Check if real url is enabeld
         if (!$objRoot->folderAlias)
         {
-           return;
+            return;
         }
 
         // Check if alias exsist or create one

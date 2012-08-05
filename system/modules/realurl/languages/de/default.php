@@ -35,4 +35,5 @@ $GLOBALS['TL_LANG']['ERR']['noRootPageFound']       = 'Konnte keine Rootpage fin
 $GLOBALS['TL_LANG']['ERR']['autoItemEnabeld']       = 'Die Einstellung "auto_item-Parameter" kann nicht mit Real URL verwendet werden.';
 $GLOBALS['TL_LANG']['ERR']['realUrlKeywords']       = 'Der Alias ist als Keyword reserviert.';
 $GLOBALS['TL_LANG']['ERR']['realUrlKeywordsExt']    = 'Der Alias ist als Keyword reserviert. <a href="%s">%s (ID: %s)</a> Keyword: %s';
+$GLOBALS['TL_LANG']['ERR']['emptRealUrlOverwirte']  = 'Leere overweite.';
 
