@@ -57,18 +57,19 @@ class RealUrl extends Frontend
                 ->prepare("SELECT * FROM tl_realurl_aliases WHERE alias IN('".implode("', '", $arrFragments)."')")
                 ->execute();
         
-        $arrKnownAliases = array();
+        $arrKnownAliases = $objAlias->fetchEach("alias");
         
-        while ($objAlias->next())
-        {
-            $arrKnownAliases[] = $objAlias->alias;
-        }
-
         // Build alias 
         // Append fragments until an url parameter is found or no fragments are left
-        for ($i = 1; $arrFiltered[$i] !== null && !in_array($arrFiltered[$i], $GLOBALS['URL_KEYWORDS']) && in_array($arrFiltered[$i], $arrKnownAliases); $i++);
+        for ($i = 1; $arrFiltered[$i] !== null && in_array($arrFiltered[$i], $arrKnownAliases); $i++);
         array_splice($arrFiltered, 0, $i, implode('/', array_slice($arrFiltered, 0, $i)));
 
+        // Add the second fragment as auto_item if the number of fragments is even
+        if ($GLOBALS['TL_CONFIG']['useAutoItem'] && count($arrFiltered) % 2 == 0)
+        {
+            array_insert($arrFiltered, 1, array('auto_item'));
+        }
+        
         return $arrFiltered;
     }
 
