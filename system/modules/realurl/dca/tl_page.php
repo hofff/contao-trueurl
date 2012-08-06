@@ -1,19 +1,21 @@
-<?php if (!defined('TL_ROOT')) die('You can not access this file directly!');
+<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
 
 /**
- * TYPOlight Open Source CMS
+ * Contao Open Source CMS
  * Copyright (C) 2005-2010 Leo Feyer
+ *
+ * Formerly known as TYPOlight Open Source CMS.
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation, either
  * version 3 of the License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this program. If not, please visit the Free
  * Software Foundation website at <http://www.gnu.org/licenses/>.
@@ -55,7 +57,7 @@ $GLOBALS['TL_DCA']['tl_page']['config']['onload_callback'][] = array('tl_page_re
 /**
  * Palettes
  */
-$GLOBALS['TL_DCA']['tl_page']['palettes']['root'] .= ';{folderurl_legend},folderAlias,subAlias,useRootAlias';
+$GLOBALS['TL_DCA']['tl_page']['palettes']['root'] .= ';{realurl_legend},folderAlias,subAlias,useRootAlias';
 $GLOBALS['TL_DCA']['tl_page']['palettes']['__selector__'][] = 'realurl_overwrite';
 $GLOBALS['TL_DCA']['tl_page']['subpalettes']['realurl_overwrite'] = 'realurl_basealias';
 
@@ -179,7 +181,7 @@ class tl_page_realurl extends tl_page
                     ->execute($objPage->rootId);
         }
 
-        // Check if realurl is enabeld
+        // Check if realurl is enabled
         if (!$objRoot->folderAlias)
         {
             return parent::generateAlias($varValue, $dc);
@@ -215,14 +217,14 @@ class tl_page_realurl extends tl_page
             $varValue = standardize($objPage->title);
         }
 
-        // Create Alias
-        // Check if no overwrite, no rootpage and no add language to url
+        // Create alias
+        // Check if no overwrite, no root page and no add language to url
         if ($blnRealUrlOverwrite == false && $objPage->type != 'root' && $objRoot->useRootAlias == true)
         {
             $objParent = $this->Database->executeUncached("SELECT * FROM tl_page WHERE id=" . (int) $objPage->pid);
             $varValue = $objParent->alias . '/' . $varValue;
         }
-        // Check if no overwrite, no rootpage and add language to url
+        // Check if no overwrite, no root page and add language to url
         else if ($blnRealUrlOverwrite == false && $objPage->type != 'root' && $objRoot->useRootAlias == false)
         {
             $objParent = $this->Database->executeUncached("SELECT * FROM tl_page WHERE id=" . (int) $objPage->pid);
@@ -255,7 +257,7 @@ class tl_page_realurl extends tl_page
             $varValue = $varValue;
         }
 
-        // Check whether the page alias exists, if add laguage to url is enabled
+        // Check whether the page alias exists, if add language to url is enabled
         // Search only in one language page tree        
         if ($GLOBALS['TL_CONFIG']['addLanguageToUrl'] == true)
         {
@@ -377,13 +379,13 @@ class tl_page_realurl extends tl_page
                     ->execute($objPage->rootId);
         }
 
-        // Check if realurl is enabeld
+        // Check if realurl is enabled
         if (!$objRoot->folderAlias)
         {
             return;
         }
 
-        // Check if alias exist or create one
+        // Check if alias exists or create one
         if ($dc->activeRecord->alias == '')
         {
             $strAlias = $this->generateFolderAlias('', $dc, false);
