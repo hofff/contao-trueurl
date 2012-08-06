@@ -36,6 +36,6 @@ $GLOBALS['TL_LANG']['tl_page']['realurl_legend']        = 'Alias settings';
  * Fields
  */
 $GLOBALS['TL_LANG']['tl_page']['folderAlias']		    = array('Generate folder alias', 'Check here if you want to generate page alias including parent page alias (folder-like).');
-$GLOBALS['TL_LANG']['tl_page']['subAlias']		        = array('Generate alias for empty subpages', 'Generate an alias for subpages if it is empty.');
+$GLOBALS['TL_LANG']['tl_page']['subAlias']		        = array('Generate alias for subpages', 'Generate an alias for all subpages.');
 $GLOBALS['TL_LANG']['tl_page']['useRootAlias']          = array('Use the website root alias', 'Used the alias of the website root as the basis for all other pages.');
 $GLOBALS['TL_LANG']['tl_page']['realurl_overwrite']	    = array('Overwrite page alias', 'Click here to reset the entire alias.');
