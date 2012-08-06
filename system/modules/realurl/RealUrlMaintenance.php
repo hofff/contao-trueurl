@@ -75,9 +75,13 @@ class RealUrlMaintenance extends Backend implements executable
                             $objPageRealUrl->generateAliasRecursive($objRootPages->id, true);
                         }
                     }
+
+                    $objPageRealUrl->createAliasList();
                 }
                 catch (Exception $exc)
                 {
+                    $objPageRealUrl->createAliasList();
+
                     $objTemplate                  = new BackendTemplate('be_realurl');
                     $objTemplate->isActive        = $this->isActive();
                     $objTemplate->realurlHeadline = $GLOBALS['TL_LANG']['tl_maintenance']['realurlHeadline'];
@@ -85,7 +89,7 @@ class RealUrlMaintenance extends Backend implements executable
                     $objTemplate->action          = "contao/main.php?do=maintenance";
                     $objTemplate->realurlLabel    = $GLOBALS['TL_LANG']['tl_maintenance']['realurlNote'];
                     $objTemplate->realurlSubmit   = $GLOBALS['TL_LANG']['tl_maintenance']['realurlSubmit'];
-                    
+
                     return $objTemplate->parse();
                 }
             }

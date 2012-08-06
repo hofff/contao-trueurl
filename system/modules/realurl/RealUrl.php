@@ -52,16 +52,29 @@ class RealUrl extends Frontend
             return $arrFragments;
         }
         
+        // Load the global alias list
+        $objAlias = $this->Database
+                ->prepare("SELECT * FROM tl_realurl_aliases WHERE alias IN('".implode("', '", $arrFragments)."')")
+                ->execute();
+        
+        $arrKnownAliases = array();
+        
+        while ($objAlias->next())
+        {
+            $arrKnownAliases[] = $objAlias->alias;
+        }
+
         // Build alias 
         // Append fragments until an url parameter is found or no fragments are left
-        for($i = 1; $arrFiltered[$i] !== null && !in_array($arrFiltered[$i], $GLOBALS['URL_KEYWORDS']); $i++);
+        for ($i = 1; $arrFiltered[$i] !== null && !in_array($arrFiltered[$i], $GLOBALS['URL_KEYWORDS']) && in_array($arrFiltered[$i], $arrKnownAliases); $i++);
         array_splice($arrFiltered, 0, $i, implode('/', array_slice($arrFiltered, 0, $i)));
-        
+
         return $arrFiltered;
     }
-    
-    public static function fragmentFilter($strFragment) {
-    	return strlen($strFragment) && $strFragment != 'auto_item';
+
+    public static function fragmentFilter($strFragment)
+    {
+        return strlen($strFragment) && $strFragment != 'auto_item';
     }
 
     /**
