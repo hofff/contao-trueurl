@@ -33,7 +33,6 @@
 $GLOBALS['TL_LANG']['ERR']['realurl']                   = 'Das Wort "%s" kann nicht im Alias verwendet werden, weil es von einer Erweiterung reserviert ist.<br />Gesperrte Schlüsselwörter: %s';
 $GLOBALS['TL_LANG']['ERR']['aliasExistsFolder']         = 'Der Alias "%s" existiert bereits! (Der übergeordnete Alias wurde automatisch hinzugefügt)';
 $GLOBALS['TL_LANG']['ERR']['noRootPageFound']           = 'Es konnte kein passender Startpunkt gefunden werden.';
-$GLOBALS['TL_LANG']['ERR']['autoItemEnabled']           = 'Die Einstellung "auto_item-Parameter" kann nicht mit RealURL verwendet werden.';
 $GLOBALS['TL_LANG']['ERR']['realUrlKeywords']           = 'Der Alias beinhaltet ein für Keywords reserviertes Wort.';
 $GLOBALS['TL_LANG']['ERR']['realUrlKeywordsExt']        = 'Der Alias der folgenden Seite beinhaltet ein für Keywords reserviertes Wort. <a href="%s">%s (ID: %s)</a> Keyword: %s';
 $GLOBALS['TL_LANG']['ERR']['emptyRealUrlOverwrite']     = 'Der komplette Alias darf nicht leer sein.';
