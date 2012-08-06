@@ -29,4 +29,4 @@
 /**
  * Fields
  */
-$GLOBALS['TL_LANG']['tl_settings']['urlKeywords']		array('URL Keywords', 'Please enter additional (comma separated) keywords the RealURL Extension should detect as variables.');
+$GLOBALS['TL_LANG']['tl_settings']['urlKeywords']	= array('URL Keywords', 'Please enter additional (comma separated) keywords the RealURL Extension should detect as variables.');
