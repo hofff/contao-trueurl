@@ -29,19 +29,9 @@
  * @license    http://opensource.org/licenses/lgpl-3.0.html
  * @version    $Id$
  */
-class RealUrl extends Frontend
-{
+class RealURL extends Frontend {
 
-    /**
-     * Parse url fragments to see if they are a parameter or part of the alias
-     *
-     * @param	array
-     * @return	array
-     * @link	http://www.contao.org/hooks.html?#getPageIdFromURL
-     * @version 1.0
-     */
-    public function findAlias(array $arrFragments)
-    {
+    public function findAlias(array $arrFragments) {
         $arrFiltered = array_values(array_filter($arrFragments, array(__CLASS__, 'fragmentFilter')));
         
         if(!$arrFiltered) {
@@ -82,7 +72,7 @@ class RealUrl extends Frontend
         	AND		p1.type NOT IN (\'error_404\', \'error_403\')
         	' . $strLangCond . '
         	' . $strPublishCond . '
-        	ORDER BY p2.dns = \'\', p2.realurl_subdomains, LENGTH(p2.dns) DESC' . $strLangOrder . ', LENGTH(p1.alias) DESC, p2.sorting'
+        	ORDER BY p2.dns = \'\'' . $strLangOrder . ', LENGTH(p1.alias) DESC, p2.sorting'
         )->limit(1)->execute($arrParams);
         
         if($objAlias->numRows) {
@@ -99,39 +89,8 @@ class RealUrl extends Frontend
         return $arrFragments;
     }
 
-    public static function fragmentFilter($strFragment)
-    {
+    public static function fragmentFilter($strFragment) {
         return strlen($strFragment) && $strFragment != 'auto_item';
-    }
-
-    /**
-     * Validate a folderurl alias.
-     * The validation is identical to the regular "alnum" except that it also allows for slashes (/).
-     *
-     * @param	string
-     * @param	mixed
-     * @param	Widget
-     * @return	bool
-     * @version 2.0
-     */
-    public function validateRegexp($strRegexp, $varValue, Widget $objWidget)
-    {
-        if ($strRegexp == 'folderurl')
-        {
-            if (stripos($varValue, "/") !== false || stripos($varValue, "\\") !== false)
-            {
-                $objWidget->addError(sprintf($GLOBALS['TL_LANG']['ERR']['alnum'], $objWidget->label));
-            }
-
-            if (!preg_match('/^[\pN\pL \.\/_-]*$/u', $varValue))
-            {
-                $objWidget->addError(sprintf($GLOBALS['TL_LANG']['ERR']['alnum'], $objWidget->label));
-            }
-
-            return true;
-        }
-
-        return false;
     }
 
 }

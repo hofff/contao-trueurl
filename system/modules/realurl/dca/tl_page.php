@@ -29,102 +29,59 @@
  * @version    $Id$
  */
 
-/**
- * Replace core callbacks
- */
-array_unshift($GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'], array('RealURLBackend', 'verifyAliases'));
+array_unshift($GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'], array('RealURLBackend', 'onsubmitPage'));
+array_unshift($GLOBALS['TL_DCA']['tl_page']['config']['onrestore_callback'], array('RealURLBackend', 'onrestorePage'));
+array_unshift($GLOBALS['TL_DCA']['tl_page']['config']['oncopy_callback'], array('RealURLBackend', 'oncopyPage'));
+array_unshift($GLOBALS['TL_DCA']['tl_page']['config']['oncut_callback'], array('RealURLBackend', 'oncutPage'));
 
-foreach ($GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'] as &$arrCallback)
-{
-    if ($arrCallback[1] == 'generateArticle')
-    {
+foreach($GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'] as &$arrCallback) {
+    if($arrCallback[1] == 'generateArticle') {
         $arrCallback[0] = 'RealURLBackend';
         break;
     }
 }
 
-foreach ($GLOBALS['TL_DCA']['tl_page']['fields']['alias']['save_callback'] as &$arrCallback)
-{
-    if ($arrCallback[1] == 'generateAlias')
-    {
-        $arrCallback = array('RealURLBackend', 'generateFolderAlias');
-        break;
+foreach($GLOBALS['TL_DCA']['tl_page']['palettes'] as $strSelector => &$strPalette) if($strSelector != '__selector__') {
+    if($strSelector == 'root') {
+        $strPalette = str_replace(',alias', ',alias,realurl_defaultInherit,realurl_childrenInherit', $strPalette);
+    } else {
+        $strPalette = str_replace(',alias', ',alias,realurl_inherit,realurl_childrenInherit', $strPalette);
     }
 }
 
-/**
- * Palettes
- */
-$GLOBALS['TL_DCA']['tl_page']['palettes']['root'] .= ';{realurl_legend},folderAlias,subAlias,useRootAlias';
-$GLOBALS['TL_DCA']['tl_page']['palettes']['__selector__'][]       = 'realurl_overwrite';
-$GLOBALS['TL_DCA']['tl_page']['subpalettes']['realurl_overwrite'] = 'realurl_basealias';
+$GLOBALS['TL_DCA']['tl_page']['fields']['alias']['eval']['rgxp']		= 'realurl';
+$GLOBALS['TL_DCA']['tl_page']['fields']['alias']['eval']['alwaysSave']	= true;
 
-foreach ($GLOBALS['TL_DCA']['tl_page']['palettes'] as $strSelector => &$strPalette) if($strSelector != '__selector__')
-{
-    if ($strSelector != 'root')
-    {
-        $strPalette = str_replace(',alias', ',realurl_parentAlias,alias', $strPalette);
-        $strPalette = str_replace(',type', ',type,realurl_overwrite', $strPalette);
-    }
-}
-
-/**
- * Fields
- */
-$GLOBALS['TL_DCA']['tl_page']['fields']['alias']['eval']['rgxp']       = 'folderurl';
-$GLOBALS['TL_DCA']['tl_page']['fields']['alias']['eval']['alwaysSave'] = true;
-$GLOBALS['TL_DCA']['tl_page']['fields']['alias']['load_callback'][]    = array('tl_page_realurl', 'hideParentAlias');
-
-$GLOBALS['TL_DCA']['tl_page']['fields']['folderAlias'] = array(
-    'label'     => &$GLOBALS['TL_LANG']['tl_page']['folderAlias'],
-    'inputType' => 'checkbox',
-    'eval'      => array('tl_class' => 'w50'),
-);
-
-$GLOBALS['TL_DCA']['tl_page']['fields']['subAlias'] = array(
-    'label'     => &$GLOBALS['TL_LANG']['tl_page']['subAlias'],
-    'inputType' => 'checkbox',
-    'eval'      => array('tl_class' => 'w50'),
-);
-
-$GLOBALS['TL_DCA']['tl_page']['fields']['realurl_rootAlias'] = array(
-    'label'     => &$GLOBALS['TL_LANG']['tl_page']['realurl_rootAlias'],
-    'inputType' => 'select',
-	'options'	=> array('always', 'never'),
-    'eval'      => array('includeBlankOption' => true, 'tl_class' => 'w50'),
-);
-
-$GLOBALS['TL_DCA']['tl_page']['fields']['realurl_overwrite'] = array(
-    'label'     => &$GLOBALS['TL_LANG']['tl_page']['realurl_overwrite'],
-    'inputType' => 'checkbox',
-    'eval'      => array(
-        'submitOnChange' => true,
-        'tl_class'       => 'clr',
-        'doNotCopy'      => true
-    ),
-);
-
-$GLOBALS['TL_DCA']['tl_page']['fields']['realurl_basealias'] = array(
-	'label'         => &$GLOBALS['TL_LANG']['tl_page']['alias'],
-	'inputType'     => 'text',
-	'load_callback' => array(array('RealURLBackend', 'loadFullAlias')),
-	'eval' => array(
-		'spaceToUnderscore' => true,
-		'trailingSlash'     => true,
-		'doNotCopy'         => true,
-		'tl_class'          => 'long'
-	)
-);
-
-$GLOBALS['TL_DCA']['tl_page']['fields']['realurl_parentAlias'] = array(
-    'label'         => &$GLOBALS['TL_LANG']['tl_page']['alias'],
-    'inputType'     => 'text',
-    'load_callback' => array(array('RealURLBackend', 'loadParentAlias')),
-	'save_callback'	=> array(array('RealURLBackend', 'saveParentAlias')),
+$GLOBALS['TL_DCA']['tl_page']['fields']['realurl_defaultInherit'] = array(
+    'label'         => &$GLOBALS['TL_LANG']['tl_page']['realurl_defaultInherit'],
+    'inputType'     => 'checkbox',
     'eval' => array(
-        'spaceToUnderscore' => true,
-        'trailingSlash'     => true,
-        'doNotCopy'         => true,
-        'tl_class'          => 'long'
+        'tl_class'          => 'w50 m12 cbx'
     )
 );
+
+$GLOBALS['TL_DCA']['tl_page']['fields']['realurl_inherit'] = array(
+    'label'         => &$GLOBALS['TL_LANG']['tl_page']['realurl_inherit'],
+    'inputType'     => 'checkbox',
+    'eval' => array(
+        'tl_class'          => 'w50 m12 cbx'
+    )
+);
+
+/*
+$GLOBALS['TL_DCA']['tl_page']['fields']['realurl_childrenInherit'] = array(
+	'label'         => &$GLOBALS['TL_LANG']['tl_page']['realurl_childrenInherit'],
+	'inputType'     => 'checkbox',
+	'options_callback' => array('RealURLBackend', 'getChildrenInheritOptions'),
+	'eval' => array(
+		'multiple'	=> true,
+		'tl_class'	=> 'clr'
+	),
+	'load_callback' => array(
+		array('RealURLBackend', 'loadChildrenInherit')
+	),
+	'save_callback' => array(
+		array('RealURLBackend', 'saveChildrenInherit')
+	),
+);
+*/
