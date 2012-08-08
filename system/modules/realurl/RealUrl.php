@@ -128,12 +128,6 @@ class RealUrl extends Frontend
                 $objWidget->addError(sprintf($GLOBALS['TL_LANG']['ERR']['alnum'], $objWidget->label));
             }
 
-            if (preg_match('#/' . implode('/|/', $GLOBALS['URL_KEYWORDS']) . '/|/' . implode('$|/', $GLOBALS['URL_KEYWORDS']) . '$#', $varValue, $match))
-            {
-                $strError = str_replace('/', '', $match[0]);
-                $objWidget->addError(sprintf($GLOBALS['TL_LANG']['ERR']['realurl'], $strError, implode(', ', $GLOBALS['URL_KEYWORDS'])));
-            }
-
             return true;
         }
 

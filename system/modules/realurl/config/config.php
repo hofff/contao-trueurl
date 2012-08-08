@@ -35,15 +35,6 @@ $GLOBALS['TL_HOOKS']['addCustomRegexp'][]       = array('RealUrl', 'validateRege
 $GLOBALS['TL_HOOKS']['getPageIdFromUrl'][]      = array('RealUrl', 'findAlias');
 
 /**
- * URL Keywords
- */
-$GLOBALS['URL_KEYWORDS'][] = 'items';
-$GLOBALS['URL_KEYWORDS'][] = 'articles';
-$GLOBALS['URL_KEYWORDS'][] = 'events';
-$GLOBALS['URL_KEYWORDS'][] = 'page';
-$GLOBALS['URL_KEYWORDS']   = array_unique(array_merge($GLOBALS['URL_KEYWORDS'], trimsplit(',', $GLOBALS['TL_CONFIG']['urlKeywords'])));
-
-/**
  * Maintenance
  */
 $GLOBALS['TL_MAINTENANCE'][] = 'RealUrlMaintenance';
