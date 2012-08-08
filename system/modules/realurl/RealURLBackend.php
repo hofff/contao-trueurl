@@ -2,7 +2,7 @@
 
 class RealURLBackend extends tl_page {
 
-    public function validateRegexp($strRegexp, $varValue, Widget $objWidget) {
+    public function addCustomRegexp($strRegexp, $varValue, Widget $objWidget) {
         if($strRegexp == 'realurl') {
             if(!preg_match('/^[\pN\pL \.\/_-]*$/u', $varValue)) {
                 $objWidget->addError(sprintf($GLOBALS['TL_LANG']['ERR']['alnum'], $objWidget->label));

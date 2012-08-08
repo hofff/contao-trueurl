@@ -1,38 +1,13 @@
-<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
-
-/**
- * Contao Open Source CMS
- * Copyright (C) 2005-2010 Leo Feyer
- *
- * Formerly known as TYPOlight Open Source CMS.
- *
- * This program is free software: you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation, either
- * version 3 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this program. If not, please visit the Free
- * Software Foundation website at <http://www.gnu.org/licenses/>.
- *
- * PHP version 5
- * @copyright  Andreas Schempp 2008-2011
- * @copyright  MEN AT WORK 2011-2012
- * @author     Andreas Schempp <andreas@schempp.ch>
- * @author     MEN AT WORK <cms@men-at-work.de>
- * @license    http://opensource.org/licenses/lgpl-3.0.html
- * @version    $Id$
- */
+<?php
 
 array_unshift($GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'], array('RealURLBackend', 'onsubmitPage'));
+array_unshift($GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'], array('RealURLBackend', 'regeneratePageRoots'));
 array_unshift($GLOBALS['TL_DCA']['tl_page']['config']['onrestore_callback'], array('RealURLBackend', 'onrestorePage'));
+array_unshift($GLOBALS['TL_DCA']['tl_page']['config']['onrestore_callback'], array('RealURLBackend', 'regeneratePageRoots'));
 array_unshift($GLOBALS['TL_DCA']['tl_page']['config']['oncopy_callback'], array('RealURLBackend', 'oncopyPage'));
+array_unshift($GLOBALS['TL_DCA']['tl_page']['config']['oncopy_callback'], array('RealURLBackend', 'regeneratePageRoots'));
 array_unshift($GLOBALS['TL_DCA']['tl_page']['config']['oncut_callback'], array('RealURLBackend', 'oncutPage'));
+array_unshift($GLOBALS['TL_DCA']['tl_page']['config']['oncut_callback'], array('RealURLBackend', 'regeneratePageRoots'));
 
 foreach($GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'] as &$arrCallback) {
     if($arrCallback[1] == 'generateArticle') {
@@ -40,6 +15,15 @@ foreach($GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'] as &$arrCal
         break;
     }
 }
+
+$GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['realurl_regeneratePageRoots'] = array(
+	'label'	=> &$GLOBALS['TL_LANG']['tl_page']['realurl_regeneratePageRoots'],
+	'href'	=> 'key=realurl_regeneratePageRoots'
+);
+$GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['realurl_repair'] = array(
+	'label'	=> &$GLOBALS['TL_LANG']['tl_page']['realurl_repair'],
+	'href'	=> 'key=realurl_repair'
+);
 
 foreach($GLOBALS['TL_DCA']['tl_page']['palettes'] as $strSelector => &$strPalette) if($strSelector != '__selector__') {
     if($strSelector == 'root') {
