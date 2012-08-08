@@ -134,11 +134,13 @@ class tl_page_realurl extends tl_page
         {
             return;
         }
-
-        $arrAlias                = explode('/', $dc->activeRecord->alias);
+        
+        $strAlias = $dc->activeRecord->alias;
+        $arrAlias = explode('/', $strAlias);
+        
         $dc->activeRecord->alias = array_pop($arrAlias);
-
         parent::generateArticle($dc);
+        $dc->activeRecord->alias = $strAlias;
     }
 
     /**
