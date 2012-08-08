@@ -37,13 +37,13 @@ $GLOBALS['TL_HOOKS']['getPageIdFromUrl'][]      = array('RealUrl', 'findAlias');
 /**
  * Maintenance
  */
-$GLOBALS['TL_MAINTENANCE'][] = 'RealUrlMaintenance';
+// $GLOBALS['TL_MAINTENANCE'][] = 'RealUrlMaintenance';
 
 /**
  * CSS/JS files
  */
-$objInput = Input::getInstance();
-if ($objInput->get("do") == 'maintenance')
-{
-    $GLOBALS['TL_CSS'][] = 'system/modules/realurl/html/css/maintenance.css';
-}
+// $objInput = Input::getInstance();
+// if ($objInput->get("do") == 'maintenance')
+// {
+//     $GLOBALS['TL_CSS'][] = 'system/modules/realurl/html/css/maintenance.css';
+// }
