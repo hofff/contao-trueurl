@@ -42,35 +42,61 @@ class RealUrl extends Frontend
      */
     public function findAlias(array $arrFragments)
     {
-        // Remove empty strings
-        // Remove auto_item if found
-        // Reset keys
         $arrFiltered = array_values(array_filter($arrFragments, array(__CLASS__, 'fragmentFilter')));
-    
-        if (!$arrFiltered)
-        {
-            return $arrFragments;
+        
+        if(!$arrFiltered) {
+        	return $arrFragments;
         }
         
-        // Load the global alias list
-        $objAlias = $this->Database
-                ->prepare("SELECT * FROM tl_realurl_aliases WHERE alias IN('".implode("', '", $arrFragments)."')")
-                ->execute();
+        $arrFragments = $arrFiltered;
+        $arrParams = array();
+        do $arrParams[] = implode('/', $arrFiltered); while(array_shift($arrFiltered));
+        $intFragments = count($arrParams);
         
-        $arrKnownAliases = $objAlias->fetchEach("alias");
+        $arrParams[] = $this->Environment->host;
         
-        // Build alias 
-        // Append fragments until an url parameter is found or no fragments are left
-        for ($i = 1; $arrFiltered[$i] !== null && in_array($arrFiltered[$i], $arrKnownAliases); $i++);
-        array_splice($arrFiltered, 0, $i, implode('/', array_slice($arrFiltered, 0, $i)));
-
+        if($GLOBALS['TL_CONFIG']['addLanguageToUrl']) {
+        	$strLangCond = 'AND (p2.language = ? OR p2.fallback = 1)';
+        	$arrParams[] = $this->Input->get('language');
+        	$strLangOrder = ', p2.fallback = 1';
+        }
+        
+        if(!BE_USER_LOGGED_IN) {
+        	$intTime = time();
+        	$strPublishCond = '
+        	AND (p1.start = \'\' OR p1.start < ' . $intTime . ')
+        	AND (p1.stop = \'\' OR p1.stop > ' . $intTime . ')
+        	AND p1.published = 1
+        	AND (p2.start = \'\' OR p2.start < ' . $intTime . ')
+        	AND (p2.stop = \'\' OR p2.stop > ' . $intTime . ')
+        	AND p2.published = 1
+        	';
+        }
+        
+        $objAlias = Database::getInstance()->prepare(
+        	'SELECT	p1.id, p1.alias
+        	FROM	tl_page AS p1
+        	JOIN	tl_page AS p2 ON p2.id = p1.realurl_root
+        	WHERE	p1.alias IN (' . ltrim(str_repeat(',?', $intFragments), ',') . ')
+        	AND		(p2.dns = \'\' OR p2.dns = ?)
+        	AND		p1.type NOT IN (\'error_404\', \'error_403\')
+        	' . $strLangCond . '
+        	' . $strPublishCond . '
+        	ORDER BY p2.dns = \'\', p2.realurl_subdomains, LENGTH(p2.dns) DESC' . $strLangOrder . ', LENGTH(p1.alias) DESC, p2.sorting'
+        )->limit(1)->execute($arrParams);
+        
+        if($objAlias->numRows) {
+        	array_splice($arrFragments, 0, substr_count($objAlias->alias, '/') + 1, $objAlias->id);
+        } else {
+        	$arrFragments[0] = false;
+        }
+        
         // Add the second fragment as auto_item if the number of fragments is even
-        if ($GLOBALS['TL_CONFIG']['useAutoItem'] && count($arrFiltered) % 2 == 0)
-        {
-            array_insert($arrFiltered, 1, array('auto_item'));
+        if($GLOBALS['TL_CONFIG']['useAutoItem'] && count($arrFragments) % 2 == 0) {
+        	array_splice($arrFragments, 1, 0, 'auto_item');
         }
         
-        return $arrFiltered;
+        return $arrFragments;
     }
 
     public static function fragmentFilter($strFragment)
