@@ -1,6 +1,6 @@
 <?php
 
-class RealURL extends Controller {
+class TrueURLFrontend extends Controller {
 
     public function getPageIdFromUrl(array $arrFragments) {
         $arrFiltered = array_values(array_filter($arrFragments, array(__CLASS__, 'fragmentFilter')));
@@ -37,7 +37,7 @@ class RealURL extends Controller {
         $objAlias = Database::getInstance()->prepare(
         	'SELECT	p1.id, p1.alias
         	FROM	tl_page AS p1
-        	JOIN	tl_page AS p2 ON p2.id = p1.realurl_root
+        	JOIN	tl_page AS p2 ON p2.id = p1.bbit_turl_root
         	WHERE	p1.alias IN (' . ltrim(str_repeat(',?', $intFragments), ',') . ')
         	AND		(p2.dns = \'\' OR p2.dns = ?)
         	AND		p1.type NOT IN (\'error_404\', \'error_403\')

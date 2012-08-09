@@ -1,6 +1,6 @@
 <?php
 
-class RealURLBackend extends tl_page {
+class TrueURLBackend extends tl_page {
 
     public function addCustomRegexp($strRegexp, $varValue, Widget $objWidget) {
         if($strRegexp == 'realurl') {
@@ -25,7 +25,7 @@ class RealURLBackend extends tl_page {
 			$arrDescendants = $this->getChildRecords($objRoots->id, 'tl_page');
 			$arrDescendants[] = $objRoots->id;
 			$this->Database->prepare(
-				'UPDATE	tl_page SET realurl_root = ? WHERE id IN (' . implode(',', $arrDescendants) . ')'
+				'UPDATE	tl_page SET bbit_turl_root = ? WHERE id IN (' . implode(',', $arrDescendants) . ')'
 			)->execute($objRoots->id);
 		}
 		
@@ -41,7 +41,7 @@ class RealURLBackend extends tl_page {
 		$arrIDs = call_user_func_array('array_merge', $arrIDs);
 		
 		$this->Database->query(
-			'UPDATE	tl_page SET realurl_root = 0 WHERE id IN (' . implode(',', $arrIDs) . ')'
+			'UPDATE	tl_page SET bbit_turl_root = 0 WHERE id IN (' . implode(',', $arrIDs) . ')'
 		);
 	}
     
@@ -49,7 +49,7 @@ class RealURLBackend extends tl_page {
 		$objParent = $this->getPageDetails($arrSet['pid']);
 		$intRootID = $objParent->type == 'root' ? $objParent->id : $objParent->rootId;
 		$this->Database->prepare(
-			'UPDATE tl_page SET realurl_inherit = (SELECT realurl_defaultInherit FROM tl_page WHERE id = ?) WHERE id = ?'
+			'UPDATE tl_page SET bbit_turl_inherit = (SELECT bbit_turl_defaultInherit FROM tl_page WHERE id = ?) WHERE id = ?'
 		)->execute($intRootID, $intID);
 	}
 	
@@ -57,7 +57,7 @@ class RealURLBackend extends tl_page {
 		if($objDC->activeRecord) {
 			$strFragment = $objDC->activeRecord->alias;
 			strlen($strFragment) || $this->generateAlias('', $objDC);
-			if($objPage->type != 'root' && $objPage->realurl_inherit) {
+			if($objPage->type != 'root' && $objPage->bbit_turl_inherit) {
 				$strParentAlias = $this->getParentAlias($objDC->id);
 				$strFragment = self::unprefix($strFragment, $strParentAlias);
 			}
@@ -79,7 +79,7 @@ class RealURLBackend extends tl_page {
 	
 	public function repair() {
 		$objPage = $this->Database->query(
-			'SELECT id FROM tl_page WHERE type = \'root\' OR realurl_inherit = \'\''
+			'SELECT id FROM tl_page WHERE type = \'root\' OR bbit_turl_inherit = \'\''
 		);
 		while($objPage->next()) {
 			$this->update($objPage->id);
@@ -88,16 +88,16 @@ class RealURLBackend extends tl_page {
 	
 	public function update($intPageID, $strFragment = null) {
 		$objPage = $this->Database->prepare(
-			'SELECT 	id, pid, alias, type, realurl_inherit, realurl_fragment
+			'SELECT 	id, pid, alias, type, bbit_turl_inherit, bbit_turl_fragment
 			FROM		tl_page
 			WHERE		id = ?'
 		)->executeUncached($intPageID);
 		
-		$strFragment !== null || $strFragment = $objPage->realurl_fragment;
+		$strFragment !== null || $strFragment = $objPage->bbit_turl_fragment;
 		strlen($strFragment) || $strFragment = $this->makeAlias($intPageID);
 		$strAlias = $strFragment;
 		
-		if($objPage->type != 'root' && $objPage->realurl_inherit) {
+		if($objPage->type != 'root' && $objPage->bbit_turl_inherit) {
 			$strParentAlias = $this->getParentAlias($objDC->id);
 			strlen($strParentAlias) && $strAlias = $strParentAlias . '/' . $strFragment;
 		}
@@ -108,15 +108,15 @@ class RealURLBackend extends tl_page {
 
 	protected function updateDescendants($intPageID, $strParentAlias) {
 		$objChildren = $this->Database->prepare(
-			'SELECT	id, realurl_fragment
+			'SELECT	id, bbit_turl_fragment
 			FROM	tl_page
 			WHERE	pid = ?
 			AND		type != \'root\'
-			AND		realurl_inherit = 1'
+			AND		bbit_turl_inherit = 1'
 		)->execute($intPageID);
 		
 		while($objChildren->next()) {
-			$strFragment = $objChildren->realurl_fragment;
+			$strFragment = $objChildren->bbit_turl_fragment;
 			strlen($strFragment) || $strFragment = $this->makeAlias($objChildren->id);
 			$strAlias = $strParentAlias . '/' . $strFragment;
 			
@@ -127,7 +127,7 @@ class RealURLBackend extends tl_page {
 	
 	protected function storeAlias($intPageID, $strAlias, $strFragment) {
 		$this->Database->prepare(
-			'UPDATE tl_page SET alias = ?, realurl_fragment = ? WHERE id = ?'
+			'UPDATE tl_page SET alias = ?, bbit_turl_fragment = ? WHERE id = ?'
 		)->executeUncached($strAlias, $strFragment, $intPageID);
 	}
 	
