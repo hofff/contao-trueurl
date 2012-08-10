@@ -14,6 +14,9 @@ foreach($arrConfig['onsubmit_callback'] as &$arrCallback) {
 	}
 }
 
+$GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl'] = $GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'];
+$GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'] = array('TrueURLBackend', 'labelPage');
+
 $GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_regenerate'] = array(
 	'label'	=> &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_regenerate'],
 	'href'	=> 'key=bbit_turl_regenerate',

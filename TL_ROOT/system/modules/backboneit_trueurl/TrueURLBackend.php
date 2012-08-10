@@ -2,6 +2,64 @@
 
 class TrueURLBackend extends Backend {
 
+	public function loadDataContainer($strTable) {
+		if($strTable == 'tl_page') {
+			$GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl'] = $GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'];
+			$GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'] = array('TrueURLBackend', 'labelPage');
+		}
+	}
+	
+	public function labelPage($row, $label, DataContainer $dc=null, $imageAttribute='', $blnReturnImage=false, $blnProtected=false) {
+		$arrCallback = $GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl'];
+		$this->import($arrCallback[0]);
+		$label = $this->$arrCallback[0]->$arrCallback[1]($row, $label, $dc, $imageAttribute, $blnReturnImage, $blnProtected);
+		
+		if(!strlen($row['alias'])) {
+			$label .= sprintf(' <span style="color:#CC5555;">[%s]</span>',
+				$GLOBALS['TL_LANG']['tl_page']['errNoAlias']
+			);
+			
+		} elseif(!$row['bbit_turl_inherit']) {
+			$label .= sprintf(' <span style="color:#b3b3b3;">[%s]</span>',
+				$row['alias']
+			);
+			
+		} elseif(strlen($row['bbit_turl_fragment'])) {
+			$intFragment = strlen($row['bbit_turl_fragment']);
+			$strFragment = substr($row['alias'], -$intFragment);
+			if($strFragment != $row['bbit_turl_fragment']) {
+				$label .= sprintf(' <span style="color:#b3b3b3;">[%s]</span> <span style="color:#CC5555;">[%s]</span>',
+					$row['alias'],
+					$GLOBALS['TL_LANG']['tl_page']['errInvalidFragment']
+				);
+				
+			} else {
+				$strParentAlias = substr($row['alias'], 0, -$intFragment);
+				if(!strlen($strParentAlias)) {
+					$label .= sprintf(' <span style="color:#b3b3b3;">[%s<span style="color:#8AB858;">%s</span>]</span>',
+						$strParentAlias,
+						$strFragment
+					);
+					
+				} else {
+					$label .= sprintf(' <span style="color:#b3b3b3;">[<span style="color:#8AB858;">%s</span>]</span> <span style="color:#CC5555;">[%s]</span>',
+						$strFragment,
+						$GLOBALS['TL_LANG']['tl_page']['errInvalidParentAlias']
+					);
+				}
+			}
+			
+		} else {
+			$label .= sprintf(' <span style="color:#b3b3b3;">[%s]</span> <span style="color:#CC5555;">[%s]</span>',
+				$row['alias'],
+				$GLOBALS['TL_LANG']['tl_page']['errNoFragment']
+			);
+		}
+		
+		return $label;
+	}
+	
+	
     public function addCustomRegexp($strRegexp, $varValue, Widget $objWidget) {
         if($strRegexp == 'trueurl') {
             if(!preg_match('/^[\pN\pL \.\/_-]*$/u', $varValue)) {
