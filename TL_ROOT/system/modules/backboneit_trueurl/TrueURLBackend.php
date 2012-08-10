@@ -20,7 +20,7 @@ class TrueURLBackend extends Backend {
 			$blnState = 1;
 		}
 		return sprintf('<br/><br/><a href="%s" class="%s" title="%s"%s>%s</a> ',
-			$this->addToUrl($strHREF . '&state=' . $blnState),
+			$this->addToUrl($strHREF . '&amp;state=' . $blnState),
 			$strClass,
 			specialchars($strTitle),
 			$strAttributes,
@@ -48,13 +48,12 @@ class TrueURLBackend extends Backend {
 		) : '';
 	}
 	
-	public function buttonAutoInherit($strHREF, $strLabel, $strTitle, $strClass, $strAttributes, $strTable, $intRoot) {
-		return $this->User->isAdmin ? sprintf(' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
-			$this->addToUrl($strHREF),
-			$strClass,
+	public function buttonAutoInherit($arrRow, $strHREF, $strLabel, $strTitle, $strIcon, $strAttributes, $strTable, $arrRootIDs, $arrChildRecordIDs, $blnCircularReference, $strPrevious, $strNext) {
+		return $this->User->isAdmin ? sprintf('<a href="%s" title="%s"%s>%s</a> ',
+			$this->addToUrl($strHREF . '&amp;id=' . $arrRow['id']),
 			specialchars($strTitle),
 			$strAttributes,
-			$strLabel
+			$this->generateImage($strIcon, $strLabel)
 		) : '';
 	}
 	
@@ -158,7 +157,10 @@ class TrueURLBackend extends Backend {
 	public function onsubmitPage($objDC) {
 		if($objDC->activeRecord) {
 			$strFragment = $objDC->activeRecord->alias;
-			strlen($strFragment) || $this->tl_page->generateAlias('', $objDC);
+			if(!strlen($strFragment)) {
+				$tl_page = new tl_page();
+				$tl_page->generateAlias('', $objDC);
+			}
 			if($objDC->activeRecord->type != 'root' && $objDC->activeRecord->bbit_turl_inherit) {
 				$strParentAlias = $this->objTrueURL->getParentAlias($objDC->id);
 				$strFragment = TrueURL::unprefix($strFragment, $strParentAlias);
@@ -191,18 +193,16 @@ class TrueURLBackend extends Backend {
 		$arrAlias = explode('/', $strAlias);
 
 		$objDC->activeRecord->alias = array_pop($arrAlias);
-		$this->tl_page->generateArticle($objDC);
+		$tl_page = new tl_page();
+		$tl_page->generateArticle($objDC);
 		$objDC->activeRecord->alias = $strAlias;
 	}
-	
-	protected $tl_page;
 	
 	protected $objTrueURL;
 	
 	public function __construct() {
 		parent::__construct();
 		$this->import('BackendUser', 'User');
-		$this->tl_page = new tl_page();
 		$this->objTrueURL = new TrueURL();
 	}
 	

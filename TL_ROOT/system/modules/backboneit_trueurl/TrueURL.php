@@ -97,7 +97,7 @@ class TrueURL extends Controller {
 			'SELECT 	p1.id, p1.pid, p1.alias, p1.type, p1.bbit_turl_inherit, p1.bbit_turl_fragment,
 						p2.alias AS parentAlias
 			FROM		tl_page AS p1
-			JOIN		tl_page AS p2 ON p2.id = p1.pid
+			LEFT JOIN	tl_page AS p2 ON p2.id = p1.pid
 			WHERE		p1.id = ?'
 		)->executeUncached($intPageID);
 		
@@ -120,6 +120,10 @@ class TrueURL extends Controller {
 		} 
 		
 		$this->storeAlias($intPageID, $strAlias, $strFragment, $blnInherit);
+		
+		if($strAlias == $objPage->alias && !$blnAutoInherit) {
+			return true;
+		}
 		
 		$objChildren = $this->Database->prepare(
 			'SELECT	id, type, bbit_turl_inherit FROM tl_page WHERE pid = ?'
