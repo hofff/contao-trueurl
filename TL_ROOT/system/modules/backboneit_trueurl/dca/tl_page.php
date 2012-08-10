@@ -17,13 +17,26 @@ foreach($arrConfig['onsubmit_callback'] as &$arrCallback) {
 $GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl'] = $GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'];
 $GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'] = array('TrueURLBackend', 'labelPage');
 
+$GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_alias'] = array(
+	'label'	=> &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow'],
+	'href'	=> 'key=bbit_turl_alias',
+	'button_callback'=> array('TrueURLBackend', 'buttonAlias'),
+);
 $GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_regenerate'] = array(
 	'label'	=> &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_regenerate'],
 	'href'	=> 'key=bbit_turl_regenerate',
+	'button_callback'=> array('TrueURLBackend', 'buttonRegenerate'),
 );
 $GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_repair'] = array(
 	'label'	=> &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_repair'],
 	'href'	=> 'key=bbit_turl_repair',
+	'button_callback'=> array('TrueURLBackend', 'buttonRepair'),
+);
+$GLOBALS['TL_DCA']['tl_page']['list']['operations']['bbit_turl_autoInherit'] = array(
+	'label'	=> &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_autoInherit'],
+	'icon'	=> 'system/modules/backboneit_trueurl/html/images/page_white_wrench.png',
+	'href'	=> 'key=bbit_turl_autoInherit',
+	'button_callback'=> array('TrueURLBackend', 'buttonAutoInherit'),
 );
 
 foreach($GLOBALS['TL_DCA']['tl_page']['palettes'] as $strSelector => &$strPalette) if($strSelector != '__selector__') {
@@ -36,6 +49,7 @@ foreach($GLOBALS['TL_DCA']['tl_page']['palettes'] as $strSelector => &$strPalett
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['alias']['eval']['rgxp']		= 'trueurl';
 $GLOBALS['TL_DCA']['tl_page']['fields']['alias']['eval']['alwaysSave']	= true;
+array_unshift($GLOBALS['TL_DCA']['tl_page']['fields']['alias']['save_callback'], array('TrueURLBackend', 'saveAlias'));
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_defaultInherit'] = array(
 	'label'		=> &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_defaultInherit'],

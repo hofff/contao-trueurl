@@ -65,35 +65,34 @@ class TrueURL extends Controller {
 	 * 
 	 * If the page is not found, nothing is done.
 	 * 
-	 * 1. $strFragment given and non-empty string?
-	 * -yes-> Go to 3.
+	 * Fragment calculation:
+	 * 1. $strFragment given and non-empty?
+	 * -yes-> Use this as new page fragment
 	 * -no--> Go to 2.
 	 * 
-	 * 2. Is the existing fragment of the page non-empty?
-	 * -yes-> Set $strFragment to the existing fragment and go to 3.
-	 * -no--> Go to 2.1.
-	 * 
-	 * 2.1. Is the existing alias of the page non-empty?
-	 * -yes-> Set $strFragment to the existing alias and go to 2.1.1.
-	 * -no--> Go to 2.2.
-	 * 
-	 * 2.1.1. Is alias inheriting enabled for this page?
-	 * -yes-> Unprefix this pages fragment, with the alias from the parent page and go to 2.2.  
+	 * 2. Is the existing page fragment non-empty?
+	 * -yes-> Use this as new page fragment
 	 * -no--> Go to 3.
 	 * 
-	 * 2.2. Is the fragment still empty?
-	 * -yes-> Generate a fragment with makeAlias and go to 6.
-	 * -no--> Go to 3.
+	 * 3. Is the existing page alias non-empty?
+	 * -yes-> Go to 4.
+	 * -no--> Go to 6.
 	 * 
-	 * 3. Is alias inheriting enabled for this page?
-	 * -yes-> Prefix fragment with the alias of the parent page and use it as new pages alias
-	 * -no--> Use fragment as alias
+	 * 4. Is alias inheriting enabled for this page?
+	 * -yes-> Unprefix the existing page alias, with the parent page alias and go to 5.
+	 * -no--> Use the existing page alias as new page fragment
+	 * 
+	 * 5. Is the calculated fragment non-empty?
+	 * -yes-> Use it as new page fragment
+	 * -no--> Go to 6.
+	 *  
+	 * 6. Generate a fragment with makeAlias and use the result as new page fragment
 	 * 
 	 * @param integer $intPageID The page to be updated.
 	 * @param string $strFragment The fragment to be used.
 	 * @return boolean Whether the alias could be successfully updated.
 	 */
-	public function update($intPageID, $strFragment = null) {
+	public function update($intPageID, $strFragment = null, $blnAutoInherit = false) {
 		$objPage = $this->Database->prepare(
 			'SELECT 	p1.id, p1.pid, p1.alias, p1.type, p1.bbit_turl_inherit, p1.bbit_turl_fragment,
 						p2.alias AS parentAlias
@@ -106,15 +105,33 @@ class TrueURL extends Controller {
 			return false;
 		}
 		
-// 		$objPage->parentAlias = $this->getParentAlias($intPageID);
 		$strAlias = $strFragment = $this->prepareFragment($objPage, $strFragment);
+		$blnInherit = $objPage->bbit_turl_inherit;
 		
-		if($objPage->type != 'root' && $objPage->bbit_turl_inherit && strlen($objPage->parentAlias)) {
-			$strAlias = $strParentAlias . '/' . $strFragment;
+		if($objPage->type != 'root' && strlen($objPage->parentAlias)) {
+			if($blnAutoInherit && !$blnInherit) {
+				$strUnprefixed = self::unprefix($strFragment, $objPage->parentAlias);
+				$blnInherit = $strUnprefixed != $strFragment;
+				$strFragment = $strUnprefixed;
+			}
+			if($blnInherit) {
+				$strAlias = $objPage->parentAlias . '/' . $strFragment;
+			}
 		} 
 		
-		$this->storeAlias($intPageID, $strAlias, $strFragment);
-		$this->updateDescendants($intPageID, $strAlias);
+		$this->storeAlias($intPageID, $strAlias, $strFragment, $blnInherit);
+		
+		$objChildren = $this->Database->prepare(
+			'SELECT	id, type, bbit_turl_inherit FROM tl_page WHERE pid = ?'
+		)->executeUncached($intPageID);
+		
+		while($objChildren->next()) {
+			if($blnAutoInherit) {
+				$this->update($objChildren->id, null, true);
+			} elseif($objChildren->bbit_turl_inherit && $objChildren->type != 'root') {
+				$this->update($objChildren->id);
+			}
+		}
 		
 		return true;
 	}
@@ -140,30 +157,13 @@ class TrueURL extends Controller {
 		
 		return $this->makeAlias($objPage->id);
 	}
-
-	protected function updateDescendants($intPageID, $strParentAlias) {
-		$objChildren = $this->Database->prepare(
-			'SELECT	id, bbit_turl_fragment
-			FROM	tl_page
-			WHERE	pid = ?
-			AND		type != \'root\'
-			AND		bbit_turl_inherit = 1'
-		)->execute($intPageID);
-		
-		while($objChildren->next()) {
-			$strFragment = $objChildren->bbit_turl_fragment;
-			strlen($strFragment) || $strFragment = $this->makeAlias($objChildren->id);
-			$strAlias = $strParentAlias . '/' . $strFragment;
-			
-			$this->storeAlias($objChildren->id, $strAlias, $strFragment);
-			$this->updateDescendants($objChildren->id, $strAlias);
-		}
-	}
 	
-	protected function storeAlias($intPageID, $strAlias, $strFragment) {
+	protected function storeAlias($intPageID, $strAlias, $strFragment, $blnInherit = null) {
+		$arrSet = array('alias' => $strAlias, 'bbit_turl_fragment' => $strFragment);
+		$blnInherit === null || $arrSet['bbit_turl_inherit'] = $blnInherit ? 1 : '';
 		$this->Database->prepare(
-			'UPDATE tl_page SET alias = ?, bbit_turl_fragment = ? WHERE id = ?'
-		)->executeUncached($strAlias, $strFragment, $intPageID);
+			'UPDATE tl_page %s WHERE id = ?'
+		)->set($arrSet)->executeUncached($intPageID);
 	}
 	
 	public function getParentAlias($intPageID) {

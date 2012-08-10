@@ -8,11 +8,64 @@ class TrueURLBackend extends Backend {
 			$GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'] = array('TrueURLBackend', 'labelPage');
 		}
 	}
+
+	public function buttonAlias($strHREF, $strLabel, $strTitle, $strClass, $strAttributes, $strTable, $intRoot) {
+		if($this->Session->get('bbit_turl_alias')) {
+			$strLabel = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasHide'][0];
+			$strTitle = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasHide'][1];
+			$blnState = 0;
+		} else {
+			$strLabel = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow'][0];
+			$strTitle = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow'][1];
+			$blnState = 1;
+		}
+		return sprintf('<br/><br/><a href="%s" class="%s" title="%s"%s>%s</a> ',
+			$this->addToUrl($strHREF . '&state=' . $blnState),
+			$strClass,
+			specialchars($strTitle),
+			$strAttributes,
+			$strLabel
+		);
+	}
+
+	public function buttonRegenerate($strHREF, $strLabel, $strTitle, $strClass, $strAttributes, $strTable, $intRoot) {
+		return $this->User->isAdmin ? sprintf(' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
+			$this->addToUrl($strHREF),
+			$strClass,
+			specialchars($strTitle),
+			$strAttributes,
+			$strLabel
+		) : '';
+	}
+	
+	public function buttonRepair($strHREF, $strLabel, $strTitle, $strClass, $strAttributes, $strTable, $intRoot) {
+		return $this->User->isAdmin ? sprintf(' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
+			$this->addToUrl($strHREF),
+			$strClass,
+			specialchars($strTitle),
+			$strAttributes,
+			$strLabel
+		) : '';
+	}
+	
+	public function buttonAutoInherit($strHREF, $strLabel, $strTitle, $strClass, $strAttributes, $strTable, $intRoot) {
+		return $this->User->isAdmin ? sprintf(' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
+			$this->addToUrl($strHREF),
+			$strClass,
+			specialchars($strTitle),
+			$strAttributes,
+			$strLabel
+		) : '';
+	}
 	
 	public function labelPage($row, $label, DataContainer $dc=null, $imageAttribute='', $blnReturnImage=false, $blnProtected=false) {
 		$arrCallback = $GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl'];
 		$this->import($arrCallback[0]);
 		$label = $this->$arrCallback[0]->$arrCallback[1]($row, $label, $dc, $imageAttribute, $blnReturnImage, $blnProtected);
+		
+		if(!$this->Session->get('bbit_turl_alias')) {
+			return $label;
+		}
 		
 		if(!strlen($row['alias'])) {
 			$label .= sprintf(' <span style="color:#CC5555;">[%s]</span>',
@@ -20,7 +73,7 @@ class TrueURLBackend extends Backend {
 			);
 			
 		} elseif(!$row['bbit_turl_inherit']) {
-			$label .= sprintf(' <span style="color:#b3b3b3;">[%s]</span>',
+			$label .= sprintf(' <span style="color:#b3b3b3;">[<span style="color:#5C9AC9;">%s</span>]</span>',
 				$row['alias']
 			);
 			
@@ -34,15 +87,15 @@ class TrueURLBackend extends Backend {
 				);
 				
 			} else {
-				$strParentAlias = substr($row['alias'], 0, -$intFragment);
-				if(!strlen($strParentAlias)) {
-					$label .= sprintf(' <span style="color:#b3b3b3;">[%s<span style="color:#8AB858;">%s</span>]</span>',
+				$strParentAlias = trim(substr($row['alias'], 0, -$intFragment), '/');
+				if(strlen($strParentAlias)) {
+					$label .= sprintf(' <span style="color:#b3b3b3;">[%s/<span style="color:#5C9AC9;">%s</span>]</span>',
 						$strParentAlias,
 						$strFragment
 					);
 					
 				} else {
-					$label .= sprintf(' <span style="color:#b3b3b3;">[<span style="color:#8AB858;">%s</span>]</span> <span style="color:#CC5555;">[%s]</span>',
+					$label .= sprintf(' <span style="color:#b3b3b3;">[<span style="color:#5C9AC9;">%s</span>]</span> <span style="color:#CC5555;">[%s]</span>',
 						$strFragment,
 						$GLOBALS['TL_LANG']['tl_page']['errInvalidParentAlias']
 					);
@@ -70,6 +123,11 @@ class TrueURLBackend extends Backend {
         return false;
     }
 	
+	public function keyAlias() {
+		$this->Session->set('bbit_turl_alias', $this->Input->get('state') == 1);
+		$this->redirect($this->getReferer());
+	}
+	
 	public function keyRegenerate() {
 		$this->objTrueURL->regeneratePageRoots();
 		$this->redirect($this->getReferer());
@@ -78,6 +136,15 @@ class TrueURLBackend extends Backend {
 	public function keyRepair() {
 		$this->objTrueURL->repair();
 		$this->redirect($this->getReferer());
+	}
+	
+	public function keyAutoInherit() {
+		$this->objTrueURL->update($this->Input->get('id'), null, true);
+		$this->redirect($this->getReferer());
+	}
+	
+	public function saveAlias($strAlias) {
+		return trim($strAlias, ' /');
 	}
     
 	public function oncreatePage($strTable, $intID, $arrSet, $objDC) {
@@ -134,6 +201,7 @@ class TrueURLBackend extends Backend {
 	
 	public function __construct() {
 		parent::__construct();
+		$this->import('BackendUser', 'User');
 		$this->tl_page = new tl_page();
 		$this->objTrueURL = new TrueURL();
 	}
