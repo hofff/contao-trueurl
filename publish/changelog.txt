@@ -1,5 +1,11 @@
 h1. Changelog
 
+h2. 1.0.0 stable
+
+* 1 Fixed error with root page reference generation, when their are no pages
+without a root page (no "orphans" exists)
+* 1 Stable release
+
 h2. 1.0.0 rc1
 
 * 1 Initial release
