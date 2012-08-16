@@ -45,9 +45,11 @@ class TrueURL extends Controller {
 		}
 		$arrIDs = call_user_func_array('array_merge', $arrIDs);
 	
-		$this->Database->query(
-			'UPDATE	tl_page SET bbit_turl_root = 0 WHERE id IN (' . implode(',', $arrIDs) . ')'
-		);
+		if($arrIDs) {
+			$this->Database->query(
+				'UPDATE	tl_page SET bbit_turl_root = 0 WHERE id IN (' . implode(',', $arrIDs) . ')'
+			);
+		}
 	}
 	
 	public function repair() {
