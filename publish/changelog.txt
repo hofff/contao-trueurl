@@ -2,7 +2,8 @@ h1. Changelog
 
 h2. 1.0.0 stable
 
-* 1 Fixed error with root page reference generation, when their are no pages
+* 2 *Fix*: Fixed warnings class inheritance warnings
+* 1 *Fix*: Fixed error with root page reference generation, when their are no pages
 without a root page (no "orphans" exists)
 * 1 Stable release
 

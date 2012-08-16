@@ -2,7 +2,7 @@
 
 class TrueURLBackend extends Backend {
 
-	public function loadDataContainer($strTable) {
+	public function hookLoadDataContainer($strTable) {
 		if($strTable == 'tl_page') {
 			$GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl'] = $GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'];
 			$GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'] = array('TrueURLBackend', 'labelPage');
@@ -112,7 +112,7 @@ class TrueURLBackend extends Backend {
 	}
 	
 	
-    public function addCustomRegexp($strRegexp, $varValue, Widget $objWidget) {
+    public function hookAddCustomRegexp($strRegexp, $varValue, Widget $objWidget) {
         if($strRegexp == 'trueurl') {
             if(!preg_match('/^[\pN\pL \.\/_-]*$/u', $varValue)) {
                 $objWidget->addError(sprintf($GLOBALS['TL_LANG']['ERR']['alnum'], $objWidget->label));

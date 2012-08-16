@@ -2,7 +2,7 @@
 
 class TrueURLFrontend extends Controller {
 
-    public function getPageIdFromUrl(array $arrFragments) {
+    public function hookGetPageIdFromUrl(array $arrFragments) {
         $arrFiltered = array_values(array_filter($arrFragments, array(__CLASS__, 'fragmentFilter')));
         
         if(!$arrFiltered) {

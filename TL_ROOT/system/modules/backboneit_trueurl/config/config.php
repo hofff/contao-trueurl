@@ -5,6 +5,6 @@ $GLOBALS['BE_MOD']['design']['page']['bbit_turl_regenerate']	= array('TrueURLBac
 $GLOBALS['BE_MOD']['design']['page']['bbit_turl_repair']		= array('TrueURLBackend', 'keyRepair');
 $GLOBALS['BE_MOD']['design']['page']['bbit_turl_autoInherit']	= array('TrueURLBackend', 'keyAutoInherit');
 
-$GLOBALS['TL_HOOKS']['loadDataContainer'][]		= array('TrueURLBackend', 'loadDataContainer');
-$GLOBALS['TL_HOOKS']['addCustomRegexp'][]       = array('TrueURLBackend', 'addCustomRegexp');
-$GLOBALS['TL_HOOKS']['getPageIdFromUrl'][]      = array('TrueURLFrontend', 'getPageIdFromUrl');
+$GLOBALS['TL_HOOKS']['loadDataContainer'][]		= array('TrueURLBackend', 'hookLoadDataContainer');
+$GLOBALS['TL_HOOKS']['addCustomRegexp'][]       = array('TrueURLBackend', 'hookAddCustomRegexp');
+$GLOBALS['TL_HOOKS']['getPageIdFromUrl'][]      = array('TrueURLFrontend', 'hookGetPageIdFromUrl');
