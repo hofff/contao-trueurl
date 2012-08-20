@@ -57,7 +57,7 @@ class TrueURLBackend extends Backend {
 		) : '';
 	}
 	
-	private static $blnRecurse = false;
+	private $blnRecurse = false;
 	
 	public function labelPage($row, $label, DataContainer $dc=null, $imageAttribute='', $blnReturnImage=false, $blnProtected=false) {
 		$arrCallback = $this->blnRecurse
