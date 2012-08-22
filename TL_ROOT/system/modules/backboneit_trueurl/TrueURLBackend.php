@@ -218,7 +218,8 @@ class TrueURLBackend extends Backend {
 					'UPDATE	tl_page
 					SET		bbit_turl_fragment = SUBSTRING(bbit_turl_fragment, ?)
 					WHERE	bbit_turl_root = ?
-					AND		bbit_turl_fragment LIKE ?'
+					AND		bbit_turl_fragment LIKE ?
+					AND		bbit_turl_fragment = alias'
 				)->execute(strlen($strAlias) + 2, $objDC->id, $strAlias . '/%');
 			}
 		}
