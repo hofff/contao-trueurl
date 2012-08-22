@@ -7,4 +7,4 @@ $GLOBALS['BE_MOD']['design']['page']['bbit_turl_autoInherit']	= array('TrueURLBa
 
 $GLOBALS['TL_HOOKS']['loadDataContainer'][]		= array('TrueURLBackend', 'hookLoadDataContainer');
 $GLOBALS['TL_HOOKS']['addCustomRegexp'][]       = array('TrueURLBackend', 'hookAddCustomRegexp');
-$GLOBALS['TL_HOOKS']['getPageIdFromUrl'][]      = array('TrueURLFrontend', 'hookGetPageIdFromUrl');
+array_unshift($GLOBALS['TL_HOOKS']['getPageIdFromUrl'], array('TrueURLFrontend', 'hookGetPageIdFromUrl'));

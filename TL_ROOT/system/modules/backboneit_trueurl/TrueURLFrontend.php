@@ -11,7 +11,7 @@ class TrueURLFrontend extends Controller {
         
         $arrFragments = $arrFiltered;
         $arrParams = array();
-        do $arrParams[] = implode('/', $arrFiltered); while(array_shift($arrFiltered));
+        do $arrParams[] = implode('/', $arrFiltered); while(array_pop($arrFiltered));
         $intFragments = count($arrParams);
         
         $arrParams[] = $this->Environment->host;

@@ -60,18 +60,15 @@ class TrueURLBackend extends Backend {
 	private $blnRecurse = false;
 	
 	public function labelPage($row, $label, DataContainer $dc=null, $imageAttribute='', $blnReturnImage=false, $blnProtected=false) {
-		$arrCallback = $this->blnRecurse
-			? array('tl_page', 'addIcon')
-			: $GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl'];
-		
 		$blnWasRecurse = $this->blnRecurse;
-		$this->blnRecurse = true;
+		$arrCallback = $blnWasRecurse ? array('tl_page', 'addIcon') : $GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl'];
 		
+		$this->blnRecurse = true;
 		$this->import($arrCallback[0]);
 		$label = $this->$arrCallback[0]->$arrCallback[1]($row, $label, $dc, $imageAttribute, $blnReturnImage, $blnProtected);
+		$this->blnRecurse = false;
 		
 		if($blnWasRecurse) {
-			$this->blnRecurse = false;
 			return $label;
 		}
 		
@@ -79,51 +76,62 @@ class TrueURLBackend extends Backend {
 			return $label;
 		}
 		
-		if(!strlen($row['alias'])) {
-			$label .= sprintf(' <span style="color:#CC5555;">[%s]</span>',
-				$GLOBALS['TL_LANG']['tl_page']['errNoAlias']
-			);
-			
-		} elseif(!$row['bbit_turl_inherit']) {
-			$label .= sprintf(' <span style="color:#b3b3b3;">[<span style="color:#5C9AC9;">%s</span>]</span>',
-				$row['alias']
-			);
-			
-		} elseif(strlen($row['bbit_turl_fragment'])) {
-			$intFragment = strlen($row['bbit_turl_fragment']);
-			$strFragment = substr($row['alias'], -$intFragment);
-			if($strFragment != $row['bbit_turl_fragment']) {
-				$label .= sprintf(' <span style="color:#b3b3b3;">[%s]</span> <span style="color:#CC5555;">[%s]</span>',
-					$row['alias'],
-					$GLOBALS['TL_LANG']['tl_page']['errInvalidFragment']
-				);
-				
-			} else {
-				$strParentAlias = trim(substr($row['alias'], 0, -$intFragment), '/');
-				if(strlen($strParentAlias)) {
-					$label .= sprintf(' <span style="color:#b3b3b3;">[%s/<span style="color:#5C9AC9;">%s</span>]</span>',
-						$strParentAlias,
-						$strFragment
-					);
-					
-				} else {
-					$label .= sprintf(' <span style="color:#b3b3b3;">[<span style="color:#5C9AC9;">%s</span>]</span> <span style="color:#CC5555;">[%s]</span>',
-						$strFragment,
-						$GLOBALS['TL_LANG']['tl_page']['errInvalidParentAlias']
-					);
-				}
+		$arrAlias = $this->objTrueURL->splitAlias($row);
+		 
+		if(!$arrAlias) {
+			$label .= ' <span style="color:#CC5555;">[';
+			$label .= $GLOBALS['TL_LANG']['tl_page']['errNoAlias'];
+			$label .= ']</span>';
+			return $label;
+		}
+		
+		$label .= ' <span style="color:#b3b3b3;">[';
+		if($arrAlias['root']) {
+			$label .= '<span style="color:#0C0;">' . $arrAlias['root'] . '</span>';
+			$strConnector = '/';
+		}
+		if($arrAlias['parent']) {
+			$label .= $strConnector . $arrAlias['parent'];
+			$strConnector = '/';
+		}
+		if($arrAlias['fragment']) {
+			$label .= $strConnector . '<span style="color:#5C9AC9;">' . $arrAlias['fragment'] . '</span>';
+		}
+		$label .= ']</span>';
+		
+		if($row['type'] == 'root') {
+			$strTitle = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_rootInherit'][0] . ': ';
+			switch($row['bbit_turl_rootInherit']) {
+				default:
+				case 'normal': $label .= $this->makeImage('link.png', $strTitle . $GLOBALS['TL_LANG']['tl_page']['bbit_turl_rootInheritOptions']['normal']); break;
+				case 'always': $label .= $this->makeImage('link_add.png', $strTitle . $GLOBALS['TL_LANG']['tl_page']['bbit_turl_rootInheritOptions']['always']); break;
+				case 'never': $label .= $this->makeImage('link_delete.png', $strTitle . $GLOBALS['TL_LANG']['tl_page']['bbit_turl_rootInheritOptions']['never']); break;
 			}
 			
 		} else {
-			$label .= sprintf(' <span style="color:#b3b3b3;">[%s]</span> <span style="color:#CC5555;">[%s]</span>',
-				$row['alias'],
-				$GLOBALS['TL_LANG']['tl_page']['errNoFragment']
-			);
+			$row['bbit_turl_inherit'] && $label .= $this->makeImage('link.png', $GLOBALS['TL_LANG']['tl_page']['bbit_turl_inherit'][0]);
+			$row['bbit_turl_transparent'] && $label .= $this->makeImage('link_go.png', $GLOBALS['TL_LANG']['tl_page']['bbit_turl_transparent'][0]);
+			$row['bbit_turl_ignoreRoot'] && $label .= $this->makeImage('link_break.png', $GLOBALS['TL_LANG']['tl_page']['bbit_turl_ignoreRoot'][0]);
 		}
+		
+		if(!$arrAlias['err']) {
+			return $label;
+		}
+		
+		foreach($arrAlias['err'] as $strError => &$strLabel) {
+			$strLabel = $GLOBALS['TL_LANG']['tl_page'][$strError];
+		}
+		$label .= $this->makeImage('link_error.png', implode(' - ', $arrAlias['err']));
 		
 		return $label;
 	}
 	
+	protected function makeImage($strImage, $strTitle) {
+		return ' ' . $this->generateImage(
+			'system/modules/backboneit_trueurl/html/images/' . $strImage,
+			$strTitle, ' title="' . specialchars($strTitle) . '"'
+		);
+	}
 	
     public function hookAddCustomRegexp($strRegexp, $varValue, Widget $objWidget) {
         if($strRegexp == 'trueurl') {
@@ -158,6 +166,24 @@ class TrueURLBackend extends Backend {
 	public function saveAlias($strAlias) {
 		return trim($strAlias, ' /');
 	}
+	
+	public function loadRootInherit($varValue, $objDC) {
+		return $objDC->activeRecord->bbit_turl_rootInherit;
+	}
+	
+	protected $arrRootInherit = array();
+	
+	public function saveRootInherit($strNew, $objDC) {
+		if($objDC->activeRecord) {
+			$strOld = $objDC->activeRecord->bbit_turl_rootInherit
+				? $objDC->activeRecord->bbit_turl_rootInherit
+				: 'normal';
+			if($strOld != $strNew) {
+				$this->arrRootInherit[$objDC->id] = array($strOld, $strNew);
+			}
+		}
+		return null;
+	}
     
 	public function oncreatePage($strTable, $intID, $arrSet, $objDC) {
 		$objParent = $this->getPageDetails($arrSet['pid']);
@@ -168,18 +194,37 @@ class TrueURLBackend extends Backend {
 	}
 	
 	public function onsubmitPage($objDC) {
-		if($objDC->activeRecord) {
-			$strFragment = $objDC->activeRecord->alias;
-			if(!strlen($strFragment)) {
-				$tl_page = new tl_page();
-				$tl_page->generateAlias('', $objDC);
-			}
-			if($objDC->activeRecord->type != 'root' && $objDC->activeRecord->bbit_turl_inherit) {
-				$strParentAlias = $this->objTrueURL->getParentAlias($objDC->id);
-				$strFragment = TrueURL::unprefix($strFragment, $strParentAlias);
-			}
-			$this->objTrueURL->update($objDC->id, $strFragment);
+		if(!$objDC->activeRecord) {
+			return;
 		}
+		
+		$strAlias = $objDC->activeRecord->alias;
+		if(!strlen($strAlias)) {
+			$tl_page = new tl_page();
+			$strAlias = $tl_page->generateAlias('', $objDC);
+		}
+		
+		if(isset($this->arrRootInherit[$objDC->id])) {
+			list($strOld, $strNew) = $this->arrRootInherit[$objDC->id];
+			unset($this->arrRootInherit[$objDC->id]);
+			
+			if($objDC->activeRecord->type == 'root' && $strNew == 'always') {
+				$this->Database->prepare(
+					'UPDATE	tl_page
+					SET		bbit_turl_rootInherit = ?
+					WHERE	id = ?'
+				)->execute($strNew, $objDC->id);
+				$this->Database->prepare(
+					'UPDATE	tl_page
+					SET		bbit_turl_fragment = SUBSTRING(bbit_turl_fragment, ?)
+					WHERE	bbit_turl_root = ?
+					AND		bbit_turl_fragment LIKE ?'
+				)->execute(strlen($strAlias) + 2, $objDC->id, $strAlias . '/%');
+			}
+		}
+		
+		$strFragment = $this->objTrueURL->extractFragment($objDC->id, $strAlias);
+		$this->objTrueURL->update($objDC->id, $strFragment);
 	}
 	
 	public function oncopyPage($intID) {
