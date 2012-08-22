@@ -168,8 +168,8 @@ class TrueURL extends Controller {
 	
 	protected function doUpdate($intPageID, $objRoot, $strParentAlias, $blnAutoInherit) {
 		$objPage = $this->Database->prepare(
-			'SELECT 	id, pid, alias, type,
-						bbit_turl_inherit, bbit_turl_fragment, bbit_turl_ignoreRoot,
+			'SELECT 	id, pid, alias, type, bbit_turl_fragment,
+						bbit_turl_inherit, bbit_turl_transparent, bbit_turl_ignoreRoot,
 						bbit_turl_rootInherit
 			FROM		tl_page
 			WHERE		id = ?'
@@ -220,6 +220,7 @@ class TrueURL extends Controller {
 			$strPrefix = $blnInherit ? trim($strRootAlias . '/' . $strParentAlias, '/') : $strRootAlias;
 			$strAlias = trim($strPrefix . '/' . $strFragment, '/');
 			
+				
 			if(!$objPage->bbit_turl_transparent) {
 				$strParentAlias = $blnInherit ? trim($strParentAlias . '/' . $strFragment, '/') : $strFragment;
 			}
@@ -227,20 +228,15 @@ class TrueURL extends Controller {
 			
 		$this->storeAlias($intPageID, $strAlias, $strFragment, $blnInherit);
 		
-		$blnUpdateAllChildren = $blnAutoInherit || $objRoot->bbit_turl_rootInherit == 'always';
-		
-		if(!$blnUpdateAllChildren && $strFragment == $objPage->bbit_turl_fragment && $strAlias == $objPage->alias) {
-			return true;
+		if(!$blnAutoInherit && $objRoot->bbit_turl_rootInherit != 'always') {
+			$strOnlyInherit = ' AND bbit_turl_inherit = \'1\'';
 		}
-		
 		$objChildren = $this->Database->prepare(
-			'SELECT	id, type, bbit_turl_inherit FROM tl_page WHERE pid = ?'
+			'SELECT	id FROM tl_page WHERE pid = ? AND type != \'root\'' . $strOnlyInherit
 		)->executeUncached($intPageID);
 		
 		while($objChildren->next()) {
-			if($objChildren->type != 'root' && ($blnUpdateAllChildren || $objChildren->bbit_turl_inherit)) {
-				$this->doUpdate($objChildren->id, $objRoot, $strParentAlias, $blnAutoInherit);
-			}
+			$this->doUpdate($objChildren->id, $objRoot, $strParentAlias, $blnAutoInherit);
 		}
 		
 		return true;
