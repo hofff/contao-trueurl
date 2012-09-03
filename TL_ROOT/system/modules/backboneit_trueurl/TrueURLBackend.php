@@ -186,11 +186,22 @@ class TrueURLBackend extends Backend {
 	}
     
 	public function oncreatePage($strTable, $intID, $arrSet, $objDC) {
+		if(!$arrSet['pid']) {
+			return;
+		}
+		
 		$objParent = $this->getPageDetails($arrSet['pid']);
 		$intRootID = $objParent->type == 'root' ? $objParent->id : $objParent->rootId;
-		$this->Database->prepare(
-			'UPDATE tl_page SET bbit_turl_root = ?, bbit_turl_inherit = (SELECT bbit_turl_defaultInherit FROM tl_page WHERE id = ?) WHERE id = ?'
-		)->execute($intRootID, $intRootID, $intID);
+		
+		if($intRootID) {
+			$this->Database->prepare(
+				'UPDATE tl_page SET bbit_turl_root = ?, bbit_turl_inherit = (SELECT bbit_turl_defaultInherit FROM tl_page WHERE id = ?) WHERE id = ?'
+			)->execute($intRootID, $intRootID, $intID);
+		} else {
+			$this->Database->prepare(
+				'UPDATE tl_page SET bbit_turl_root = 0 WHERE id = ?'
+			)->execute($intID);
+		}
 	}
 	
 	public function onsubmitPage($objDC) {
