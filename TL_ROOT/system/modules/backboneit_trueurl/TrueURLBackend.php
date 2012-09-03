@@ -195,9 +195,12 @@ class TrueURLBackend extends Backend {
 		$intRootID = $objParent->type == 'root' ? $objParent->id : $objParent->rootId;
 		
 		if($intRootID) {
+			$blnDefaultInherit = $this->Database->prepare(
+				'SELECT bbit_turl_defaultInherit FROM tl_page WHERE id = ?'
+			)->execute($intRootID)->bbit_turl_defaultInherit;
 			$this->Database->prepare(
-				'UPDATE tl_page SET bbit_turl_root = ?, bbit_turl_inherit = (SELECT bbit_turl_defaultInherit FROM tl_page WHERE id = ?) WHERE id = ?'
-			)->execute($intRootID, $intRootID, $intID);
+				'UPDATE tl_page SET bbit_turl_root = ?, bbit_turl_inherit = ? WHERE id = ?'
+			)->execute($intRootID, $blnDefaultInherit, $intID);
 		} else {
 			$this->Database->prepare(
 				'UPDATE tl_page SET bbit_turl_root = 0 WHERE id = ?'
