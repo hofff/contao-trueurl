@@ -54,7 +54,6 @@ array_unshift($GLOBALS['TL_DCA']['tl_page']['fields']['alias']['save_callback'],
 $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_rootInheritProxy'] = array(
 	'label'		=> &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_rootInherit'],
 	'inputType'	=> 'select',
-	'default'	=> 'normal',
 	'options'	=> array('normal', 'always', 'never'),
 	'reference' => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_rootInheritOptions'],
 	'eval'		=> array(

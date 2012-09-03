@@ -168,7 +168,8 @@ class TrueURLBackend extends Backend {
 	}
 	
 	public function loadRootInherit($varValue, $objDC) {
-		return $objDC->activeRecord->bbit_turl_rootInherit;
+		$varValue = $objDC->activeRecord->bbit_turl_rootInherit;
+		return $varValue ? $varValue : 'normal';
 	}
 	
 	protected $arrRootInherit = array();
