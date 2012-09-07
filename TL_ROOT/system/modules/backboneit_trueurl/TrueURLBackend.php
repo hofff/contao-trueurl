@@ -57,16 +57,16 @@ class TrueURLBackend extends Backend {
 		) : '';
 	}
 	
-	private $blnRecurse = false;
+	private static $blnRecurse = false;
 	
 	public function labelPage($row, $label, DataContainer $dc=null, $imageAttribute='', $blnReturnImage=false, $blnProtected=false) {
-		$blnWasRecurse = $this->blnRecurse;
+		$blnWasRecurse = self::$blnRecurse;
 		$arrCallback = $blnWasRecurse ? array('tl_page', 'addIcon') : $GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl'];
 		
-		$this->blnRecurse = true;
+		self::$blnRecurse = true;
 		$this->import($arrCallback[0]);
 		$label = $this->$arrCallback[0]->$arrCallback[1]($row, $label, $dc, $imageAttribute, $blnReturnImage, $blnProtected);
-		$this->blnRecurse = false;
+		self::$blnRecurse = false;
 		
 		if($blnWasRecurse) {
 			return $label;
