@@ -19,7 +19,8 @@ class TrueURLBackend extends Backend {
 			$strTitle = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow'][1];
 			$blnState = 1;
 		}
-		return sprintf('<br/><br/><a href="%s" class="%s" title="%s"%s>%s</a> ',
+		return sprintf('%s<a href="%s" class="%s" title="%s"%s>%s</a> ',
+			$this->User->isAdmin ? '<br/><br/>' : ' &#160; :: &#160; ',
 			$this->addToUrl($strHREF . '&amp;state=' . $blnState),
 			$strClass,
 			specialchars($strTitle),
