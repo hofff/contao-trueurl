@@ -52,15 +52,6 @@ class TrueURL extends Controller {
 		}
 	}
 	
-	public function repair() {
-		$objPage = $this->Database->query(
-			'SELECT id FROM tl_page WHERE type = \'root\' OR bbit_turl_inherit = \'\''
-		);
-		while($objPage->next()) {
-			$this->update($objPage->id);
-		}
-	}
-	
 	/**
 	 * Extracts the alias fragment from given alias according to the alias
 	 * inheritance settings that apply to the page with given ID.
@@ -88,7 +79,7 @@ class TrueURL extends Controller {
 			WHERE		id = ?'
 		)->executeUncached($intPageID);
 		
-		if(!$objPage->numRows) {
+		if(!$objPage->numRows || $objPage->type == 'root') {
 			return $strFragment;
 		}
 		
@@ -98,9 +89,9 @@ class TrueURL extends Controller {
 			switch($objRoot->bbit_turl_rootInherit) {
 				default:
 				case 'normal':
-					if($objPage->pid != $objRoot->id) {
-						break;
-					}
+					$objPage->pid == $objRoot->id && $strParentAlias = $objRoot->alias;
+					break;
+						
 				case 'always':
 					$strFragment = self::unprefix($strFragment, $objRoot->alias);
 					break;
@@ -110,12 +101,23 @@ class TrueURL extends Controller {
 			}
 		}
 		
-		if($objPage->type != 'root' && $objPage->bbit_turl_inherit) {
-			$strParentAlias = $this->getParentAlias($intPageID, $objRoot);
+		if($objPage->bbit_turl_inherit) {
+			$strParentAlias || $strParentAlias = $this->getParentAlias($intPageID, $objRoot);
 			$strFragment = self::unprefix($strFragment, $strParentAlias);
 		}
 		
 		return $strFragment;
+	}
+	
+	public function repair() {
+		$objPage = $this->Database->query(
+			'SELECT id FROM tl_page WHERE type = \'root\''
+		);
+		while($objPage->next()) {
+			$objRoot = $this->getRootPage($objPage->id);
+			$strParentAlias = $this->getParentAlias($objPage->id, $objRoot);
+			return $this->doUpdate($objPage->id, $objRoot, $strParentAlias, true, false);
+		}
 	}
 	
 	/**
@@ -152,9 +154,6 @@ class TrueURL extends Controller {
 	 * @return boolean Whether the alias could be successfully updated.
 	 */
 	public function update($intPageID, $strFragment = null, $blnAutoInherit = false) {
-		$objRoot = $this->getRootPage($intPageID);
-		$strParentAlias = $this->getParentAlias($intPageID, $objRoot);
-		
 		if($strFragment !== null) {
 			$strFragment = strval($strFragment);
 			if(!strlen($strFragment)) {
@@ -163,10 +162,13 @@ class TrueURL extends Controller {
 			$this->storeAlias($intPageID, $strFragment, $strFragment);
 		}
 		
-		return $this->doUpdate($intPageID, $objRoot, $strParentAlias, $blnAutoInherit);
+		$objRoot = $this->getRootPage($intPageID);
+		$strParentAlias = $this->getParentAlias($intPageID, $objRoot);
+		$blnUpdateAll = $objRoot && $objRoot->id == $intPageID;
+		return $this->doUpdate($intPageID, $objRoot, $strParentAlias, $blnUpdateAll, $blnAutoInherit);
 	}
 	
-	protected function doUpdate($intPageID, $objRoot, $strParentAlias, $blnAutoInherit) {
+	protected function doUpdate($intPageID, $objRoot, $strParentAlias, $blnUpdateAll, $blnAutoInherit) {
 		$objPage = $this->Database->prepare(
 			'SELECT 	id, pid, alias, type, bbit_turl_fragment,
 						bbit_turl_inherit, bbit_turl_transparent, bbit_turl_ignoreRoot,
@@ -193,13 +195,11 @@ class TrueURL extends Controller {
 			// updating a normal page:
 			$blnInherit = $objPage->bbit_turl_inherit;
 			
-			if(!$objPage->bbit_turl_ignoreRoot) {
+			if($objRoot && !$objPage->bbit_turl_ignoreRoot) {
 				switch($objRoot->bbit_turl_rootInherit) {
 					default:
 					case 'normal':
-						if($objPage->pid == $objRoot->id) {
-							$strParentAlias = $objRoot->alias;
-						}
+						$objPage->pid == $objRoot->id && $strParentAlias = $objRoot->alias;
 						break;
 						
 					case 'always':
@@ -228,7 +228,7 @@ class TrueURL extends Controller {
 			
 		$this->storeAlias($intPageID, $strAlias, $strFragment, $blnInherit);
 		
-		if(!$blnAutoInherit && $objRoot->bbit_turl_rootInherit != 'always') {
+		if(!$blnUpdateAll && !$blnAutoInherit && $objRoot && $objRoot->bbit_turl_rootInherit != 'always') {
 			$strOnlyInherit = ' AND bbit_turl_inherit = \'1\'';
 		}
 		$objChildren = $this->Database->prepare(
@@ -236,7 +236,7 @@ class TrueURL extends Controller {
 		)->executeUncached($intPageID);
 		
 		while($objChildren->next()) {
-			$this->doUpdate($objChildren->id, $objRoot, $strParentAlias, $blnAutoInherit);
+			$this->doUpdate($objChildren->id, $objRoot, $strParentAlias, $blnUpdateAll, $blnAutoInherit);
 		}
 		
 		return true;
@@ -251,15 +251,15 @@ class TrueURL extends Controller {
 		
 		// create fragment from existing alias
 		$strFragment = $objPage->alias;
-		// remove parent alias, if inheriting is enabled
+		// remove root alias, if obeyed, according to inherit settings
 		if($objRoot && !$objPage->bbit_turl_ignoreRoot) {
 			switch($objRoot->bbit_turl_rootInherit) {
 				default:
-				case 'normal':
-					if($objPage->pid != $objRoot->id) {
-						break;
-					}
-				case 'always':
+				case 'normal': // if root page is direct parent, use its alias as parent alias 
+					$objPage->pid == $objRoot->id && $strParentAlias = $objRoot->alias;
+					break;
+					
+				case 'always': // always unprefix
 					$strFragment = self::unprefix($strFragment, $objRoot->alias);
 					break;
 					
@@ -267,6 +267,7 @@ class TrueURL extends Controller {
 					break;
 			}
 		}
+		// remove parent alias, if inheriting is enabled
 		if($objPage->bbit_turl_inherit) {
 			$strFragment = self::unprefix($strFragment, $strParentAlias);
 		}
@@ -294,9 +295,8 @@ class TrueURL extends Controller {
 	 * @return string
 	 */
 	public function getParentAlias($intPageID, $objRoot = null) {
-		if(!$objRoot) {
-			$objRoot = $this->getRootPage($intPageID);
-		}
+		$objRoot || $objRoot = $this->getRootPage($intPageID);
+		
 		do {
 			$objParent = $this->Database->prepare(
 				'SELECT	p2.id, p2.alias, p2.bbit_turl_transparent
@@ -305,8 +305,12 @@ class TrueURL extends Controller {
 				WHERE	p1.id = ?
 				AND		p2.type != \'root\''
 			)->executeUncached($intPageID);
+			
 			$intPageID = $objParent->id;
-		} while($objParent->numRows && $objParent->bbit_turl_transparent);
+			if(!$objParent->numRows || !$intPageID) {
+				return '';
+			}
+		} while($objParent->bbit_turl_transparent);
 		
 		$strAlias = strval($objParent->alias);
 		

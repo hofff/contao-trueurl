@@ -176,14 +176,49 @@ class TrueURLBackend extends Backend {
 	
 	public function saveRootInherit($strNew, $objDC) {
 		if($objDC->activeRecord) {
-			$strOld = $objDC->activeRecord->bbit_turl_rootInherit
-				? $objDC->activeRecord->bbit_turl_rootInherit
-				: 'normal';
+			$strOld = $objDC->activeRecord->bbit_turl_rootInherit;
+			$strOld || $strOld = 'normal';
 			if($strOld != $strNew) {
 				$this->arrRootInherit[$objDC->id] = array($strOld, $strNew);
 			}
 		}
 		return null;
+	}
+	
+	protected function updateRootInherit($objDC) {
+		if(!isset($this->arrRootInherit[$objDC->id])) {
+			return;
+		}
+		
+		if($objDC->activeRecord->type != 'root') {
+			unset($this->arrRootInherit[$objDC->id]);
+			return;
+		}
+		
+		list($strOld, $strNew) = $this->arrRootInherit[$objDC->id];
+		unset($this->arrRootInherit[$objDC->id]);
+		
+		$this->Database->prepare(
+			'UPDATE	tl_page
+			SET		bbit_turl_rootInherit = ?
+			WHERE	id = ?'
+		)->execute($strNew, $objDC->id);
+				
+		if($strNew != 'always') {
+			return;
+		}
+		
+		// remove the root alias from fragments of all pages,
+		// where the alias consists only of the fragment
+		// and that do not ignore the root alias
+		$this->Database->prepare(
+			'UPDATE	tl_page
+			SET		bbit_turl_fragment = SUBSTRING(bbit_turl_fragment, ?)
+			WHERE	bbit_turl_root = ?
+			AND		bbit_turl_fragment LIKE ?
+			AND		bbit_turl_fragment = alias
+			AND		bbit_turl_ignoreRoot = \'\''
+		)->execute(strlen($strAlias) + 2, $objDC->id, $strAlias . '/%');
 	}
     
 	public function oncreatePage($strTable, $intID, $arrSet, $objDC) {
@@ -201,6 +236,7 @@ class TrueURLBackend extends Backend {
 			$this->Database->prepare(
 				'UPDATE tl_page SET bbit_turl_root = ?, bbit_turl_inherit = ? WHERE id = ?'
 			)->execute($intRootID, $blnDefaultInherit, $intID);
+			
 		} else {
 			$this->Database->prepare(
 				'UPDATE tl_page SET bbit_turl_root = 0 WHERE id = ?'
@@ -219,43 +255,25 @@ class TrueURLBackend extends Backend {
 			$strAlias = $tl_page->generateAlias('', $objDC);
 		}
 		
-		if(isset($this->arrRootInherit[$objDC->id])) {
-			list($strOld, $strNew) = $this->arrRootInherit[$objDC->id];
-			unset($this->arrRootInherit[$objDC->id]);
-			
-			if($objDC->activeRecord->type == 'root' && $strNew == 'always') {
-				$this->Database->prepare(
-					'UPDATE	tl_page
-					SET		bbit_turl_rootInherit = ?
-					WHERE	id = ?'
-				)->execute($strNew, $objDC->id);
-				$this->Database->prepare(
-					'UPDATE	tl_page
-					SET		bbit_turl_fragment = SUBSTRING(bbit_turl_fragment, ?)
-					WHERE	bbit_turl_root = ?
-					AND		bbit_turl_fragment LIKE ?
-					AND		bbit_turl_fragment = alias'
-				)->execute(strlen($strAlias) + 2, $objDC->id, $strAlias . '/%');
-			}
-		}
+		$this->updateRootInherit($objDC);
 		
 		$strFragment = $this->objTrueURL->extractFragment($objDC->id, $strAlias);
 		$this->objTrueURL->update($objDC->id, $strFragment);
 	}
 	
 	public function oncopyPage($intID) {
-		$this->objTrueURL->update($intID);
 		$this->objTrueURL->regeneratePageRoots($intID);
+		$this->objTrueURL->update($intID);
 	}
 	
 	public function oncutPage($objDC) {
-		$this->objTrueURL->update($objDC->id);
 		$this->objTrueURL->regeneratePageRoots($objDC->id);
+		$this->objTrueURL->update($objDC->id);
 	}
 	
 	public function onrestorePage($intID) {
-		$this->objTrueURL->update($intID);
 		$this->objTrueURL->regeneratePageRoots($intID);
+		$this->objTrueURL->update($intID);
 	}
 
 	public function generateArticle($objDC) {
