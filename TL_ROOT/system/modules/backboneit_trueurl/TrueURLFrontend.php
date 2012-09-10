@@ -1,6 +1,6 @@
 <?php
 
-class TrueURLFrontend extends Controller {
+class TrueURLFrontend extends Frontend {
 
     public function hookGetPageIdFromUrl(array $arrFragments) {
         $arrFiltered = array_values(array_filter($arrFragments, array(__CLASS__, 'fragmentFilter')));
@@ -11,7 +11,10 @@ class TrueURLFrontend extends Controller {
         
         $arrFragments = $arrFiltered;
         $arrParams = array();
-        do $arrParams[] = implode('/', $arrFiltered); while(array_pop($arrFiltered));
+        do {
+        	$arrParams[] = implode('/', $arrFiltered);
+        	array_pop($arrFiltered);
+        } while($arrFiltered);
         $intFragments = count($arrParams);
         
         $arrParams[] = $this->Environment->host;
@@ -50,6 +53,14 @@ class TrueURLFrontend extends Controller {
         	array_splice($arrFragments, 0, substr_count($objAlias->alias, '/') + 1, $objAlias->id);
         } else {
         	$arrFragments[0] = false;
+        	
+        	// this can not be handled by index.php since $arrFragments will be urldecoded,
+        	// which turns false into "", which is replaced with null, that is causing a
+        	// root page lookup
+        	$this->import('FrontendUser', 'User');
+        	$this->User->authenticate();
+        	$objHandler = new $GLOBALS['TL_PTY']['error_404']();
+        	$objHandler->generate($arrParams[0]);
         }
         
         // Add the second fragment as auto_item if the number of fragments is even
