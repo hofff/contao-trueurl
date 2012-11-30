@@ -134,15 +134,15 @@ class TrueURLBackend extends Backend {
 		);
 	}
 	
-    public function hookAddCustomRegexp($strRegexp, $varValue, Widget $objWidget) {
-        if($strRegexp == 'trueurl') {
-            if(!preg_match('/^[\pN\pL \.\/_-]*$/u', $varValue)) {
-                $objWidget->addError(sprintf($GLOBALS['TL_LANG']['ERR']['alnum'], $objWidget->label));
-            }
-            return true;
-        }
-        return false;
-    }
+	public function hookAddCustomRegexp($strRegexp, $varValue, Widget $objWidget) {
+		if($strRegexp == 'trueurl') {
+			if(!preg_match('/^[\pN\pL \.\/_-]*$/u', $varValue)) {
+				$objWidget->addError(sprintf($GLOBALS['TL_LANG']['ERR']['alnum'], $objWidget->label));
+			}
+			return true;
+		}
+		return false;
+	}
 	
 	public function keyAlias() {
 		$this->Session->set('bbit_turl_alias', $this->Input->get('state') == 1);
@@ -221,7 +221,7 @@ class TrueURLBackend extends Backend {
 			AND		bbit_turl_ignoreRoot = \'\''
 		)->execute(strlen($strAlias) + 2, $objDC->id, $strAlias . '/%');
 	}
-    
+
 	public function oncreatePage($strTable, $intID, $arrSet, $objDC) {
 		if(!$arrSet['pid']) {
 			return;
