@@ -51,6 +51,7 @@ class TrueURLFrontend extends Frontend {
 		
 		if($objAlias->numRows) {
 			array_splice($arrFragments, 0, substr_count($objAlias->alias, '/') + 1, $objAlias->id);
+			$GLOBALS['BBIT']['TURL']['fragments'] = array_slice($arrFragments, 1);
 		} else {
 			$arrFragments[0] = false;
 			
