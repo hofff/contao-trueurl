@@ -30,6 +30,9 @@ $GLOBALS['TL_LANG']['tl_page']['bbit_turl_transparent']
 $GLOBALS['TL_LANG']['tl_page']['bbit_turl_ignoreRoot']
 	= array('Ignore root page alias', 'The root page alias is not automatically added as a prefix, no matter what settings are configured in the root page.');
 
+$GLOBALS['TL_LANG']['tl_page']['bbit_turl_break']
+	= 'Do not inherit parent page alias';
+
 $GLOBALS['TL_LANG']['tl_page']['errNoAlias']
 	= 'Alias missing!';
 $GLOBALS['TL_LANG']['tl_page']['errNoFragment']

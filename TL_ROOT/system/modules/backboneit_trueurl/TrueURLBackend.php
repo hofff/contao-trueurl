@@ -98,7 +98,7 @@ class TrueURLBackend extends Backend {
 		}
 		
 		if($intMode == 1) {
-			$label .= ' ';
+			$label .= '<br />';
 		} elseif(preg_match('@<a[^>]*><img[^>]*></a>@', $label, $arrMatch)) {
 			$label = $arrMatch[0] . ' ';
 		} else {
@@ -129,19 +129,30 @@ class TrueURLBackend extends Backend {
 			}
 			
 		} else {
-			$row['bbit_turl_inherit'] && $label .= $this->makeImage('link.png', $GLOBALS['TL_LANG']['tl_page']['bbit_turl_inherit'][0]);
-			$row['bbit_turl_transparent'] && $label .= $this->makeImage('link_go.png', $GLOBALS['TL_LANG']['tl_page']['bbit_turl_transparent'][0]);
-			$row['bbit_turl_ignoreRoot'] && $label .= $this->makeImage('link_break.png', $GLOBALS['TL_LANG']['tl_page']['bbit_turl_ignoreRoot'][0]);
+			$row['bbit_turl_ignoreRoot'] && $label .= $this->makeImage('link_delete.png', $GLOBALS['TL_LANG']['tl_page']['bbit_turl_ignoreRoot'][0]);
+			
+			if($row['bbit_turl_inherit']) {
+				$image = 'link';
+				$title = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_inherit'][0];
+			} else {
+				$image = 'link_break';
+				$title = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_break'];
+			}
+			if($row['bbit_turl_transparent']) {
+				$arrAlias['err'] || $image .= '_go';
+				$title .= "\n" . $GLOBALS['TL_LANG']['tl_page']['bbit_turl_transparent'][0];
+			}
 		}
 		
-		if(!$arrAlias['err']) {
-			return $label;
+		if($arrAlias['err']) {
+			$image .= '_error';
+			foreach($arrAlias['err'] as $strError => &$strLabel) {
+				$strLabel = $GLOBALS['TL_LANG']['tl_page'][$strError];
+			}
+			$title .= "\n" . implode("\n", $arrAlias['err']);
 		}
 		
-		foreach($arrAlias['err'] as $strError => &$strLabel) {
-			$strLabel = $GLOBALS['TL_LANG']['tl_page'][$strError];
-		}
-		$label .= $this->makeImage('link_error.png', implode(' - ', $arrAlias['err']));
+		$label .= $this->makeImage($image . '.png', $title);
 		
 		return $label;
 	}

@@ -30,6 +30,9 @@ $GLOBALS['TL_LANG']['tl_page']['bbit_turl_transparent']
 $GLOBALS['TL_LANG']['tl_page']['bbit_turl_ignoreRoot']
 	= array('Alias des Startpunkts ignorieren', 'Der Alias der Startpunktseite wird nicht automatisch hinzugefügt, unabhängig von den Einstellungen in der Startpunktseite.');
 
+$GLOBALS['TL_LANG']['tl_page']['bbit_turl_break']
+	= 'Alias nicht von Elternseite erben';
+
 $GLOBALS['TL_LANG']['tl_page']['errNoAlias']
 	= 'Alias fehlt!';
 $GLOBALS['TL_LANG']['tl_page']['errNoFragment']
