@@ -60,7 +60,7 @@ class TrueURLBackend extends Backend {
 	}
 	
 	public function buttonAutoInherit($arrRow, $strHREF, $strLabel, $strTitle, $strIcon, $strAttributes, $strTable, $arrRootIDs, $arrChildRecordIDs, $blnCircularReference, $strPrevious, $strNext) {
-		return $this->User->isAdmin ? sprintf('<a href="%s" title="%s"%s>%s</a> ',
+		return $this->User->isAdmin && $this->Input->get('act') != 'paste' ? sprintf('<a href="%s" title="%s"%s>%s</a> ',
 			$this->addToUrl($strHREF . '&amp;id=' . $arrRow['id']),
 			specialchars($strTitle),
 			$strAttributes,
