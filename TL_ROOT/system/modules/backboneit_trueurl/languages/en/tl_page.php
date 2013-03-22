@@ -2,6 +2,8 @@
 
 $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow']
 	= array('Show page alias', 'Shows the alias of the pages within the listing overview.');
+$GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasOnly']
+	= array('Show page alias only', 'Shows just the alias of the pages within listing overview.');
 $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasHide']
 	= array('Hide page alias', 'Hides the alias of the pages from the listing overview.');
 $GLOBALS['TL_LANG']['tl_page']['bbit_turl_regenerate']

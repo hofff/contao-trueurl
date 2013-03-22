@@ -10,18 +10,28 @@ class TrueURLBackend extends Backend {
 	}
 
 	public function buttonAlias($strHREF, $strLabel, $strTitle, $strClass, $strAttributes, $strTable, $intRoot) {
-		if($this->Session->get('bbit_turl_alias')) {
-			$strLabel = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasHide'][0];
-			$strTitle = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasHide'][1];
-			$blnState = 0;
-		} else {
-			$strLabel = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow'][0];
-			$strTitle = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow'][1];
-			$blnState = 1;
+		switch($this->Session->get('bbit_turl_alias')) {
+			default:
+				$strLabel = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow'][0];
+				$strTitle = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow'][1];
+				$intMode = 1;
+				break;
+				
+			case 1:
+				$strLabel = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasOnly'][0];
+				$strTitle = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasOnly'][1];
+				$intMode = 2;
+				break;
+				
+			case 2:
+				$strLabel = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasHide'][0];
+				$strTitle = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasHide'][1];
+				$intMode = 0;
+				break;
 		}
 		return sprintf('%s<a href="%s" class="%s" title="%s"%s>%s</a> ',
 			$this->User->isAdmin ? '<br/><br/>' : ' &#160; :: &#160; ',
-			$this->addToUrl($strHREF . '&amp;state=' . $blnState),
+			$this->addToUrl($strHREF . '&amp;bbit_turl_alias=' . $intMode),
 			$strClass,
 			specialchars($strTitle),
 			$strAttributes,
@@ -73,12 +83,13 @@ class TrueURLBackend extends Backend {
 			return $label;
 		}
 		
-		if(!$this->Session->get('bbit_turl_alias')) {
+		$intMode = $this->Session->get('bbit_turl_alias');
+		if(!$intMode) {
 			return $label;
 		}
 		
 		$arrAlias = $this->objTrueURL->splitAlias($row);
-		 
+		
 		if(!$arrAlias) {
 			$label .= ' <span style="color:#CC5555;">[';
 			$label .= $GLOBALS['TL_LANG']['tl_page']['errNoAlias'];
@@ -86,7 +97,15 @@ class TrueURLBackend extends Backend {
 			return $label;
 		}
 		
-		$label .= ' <span style="color:#b3b3b3;">[';
+		if($intMode == 1) {
+			$label .= ' ';
+		} elseif(preg_match('@<a[^>]*><img[^>]*></a>@', $label, $arrMatch)) {
+			$label = $arrMatch[0] . ' ';
+		} else {
+			$label = '';
+		}
+		
+		$label .= '<span style="color:#b3b3b3;">[';
 		if($arrAlias['root']) {
 			$label .= '<span style="color:#0C0;">' . $arrAlias['root'] . '</span>';
 			$strConnector = '/';
@@ -145,7 +164,7 @@ class TrueURLBackend extends Backend {
 	}
 	
 	public function keyAlias() {
-		$this->Session->set('bbit_turl_alias', $this->Input->get('state') == 1);
+		$this->Session->set('bbit_turl_alias', max(0, min(2, intval($this->Input->get('bbit_turl_alias')))));
 		$this->redirect($this->getReferer());
 	}
 	

@@ -2,6 +2,8 @@
 
 $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow']
 	= array('Seitenalias zeigen', 'Den Alias der Seiten in der Übersicht anzeigen.');
+$GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasOnly']
+	= array('Nur Seitenalias zeigen', 'Ausschließlich den Alias der Seiten in der Übersicht anzeigen.');
 $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasHide']
 	= array('Seitenalias verstecken', 'Den Alias der Seiten in der Übersicht verstecken.');
 $GLOBALS['TL_LANG']['tl_page']['bbit_turl_regenerate']
