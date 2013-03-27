@@ -22,5 +22,9 @@ CREATE TABLE `tl_page` (
   
   `bbit_turl_fragment` varbinary(128) NOT NULL default '',
   `bbit_turl_root` int(10) unsigned NOT NULL default '0',
+  
+  `bbit_turl_requestPattern` varchar(1022) NOT NULL default '',
+  `bbit_turl_capturedParams` varchar(1022) NOT NULL default '',
+  `bbit_turl_matchRequired` char(1) NOT NULL default '',
 
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

@@ -39,7 +39,10 @@ EOT;
 
 		$strWildcards = rtrim(str_repeat('?,', $intFragments), ',');
 		$strQuery = <<<EOT
-SELECT	p1.id, p1.alias
+SELECT	p1.id, p1.alias,
+		p1.bbit_turl_requestPattern,
+		p1.bbit_turl_capturedParams,
+		p1.bbit_turl_matchRequired
 FROM	tl_page AS p1
 JOIN	tl_page AS p2 ON p2.id = p1.bbit_turl_root
 WHERE	p1.alias IN ($strWildcards)
@@ -54,6 +57,33 @@ EOT;
 		if($objAlias->numRows) {
 			array_splice($arrFragments, 0, substr_count($objAlias->alias, '/') + 1, $objAlias->id);
 			$GLOBALS['BBIT']['TURL']['fragments'] = array_slice($arrFragments, 1);
+
+			foreach(array_map('trim', explode(',', $objAlias->bbit_turl_capturedParams)) as $strParam) {
+				$blnSkipEmpty = $strParam[0] == '?';
+				$blnSkipEmpty && $strParam = substr($strParam, 1);
+				$blnSkip = !strlen($strParam);
+				$arrCaptured[] = array(urldecode($strParam), $blnSkip, $blnSkipEmpty);
+				$blnSkip || $blnCaptures = true;
+			}
+
+			if($objAlias->bbit_turl_matchRequired || $blnCaptures) {
+				$strRequest = implode('/', $GLOBALS['BBIT']['TURL']['fragments']);
+				$strPattern = $objAlias->bbit_turl_requestPattern;
+				strlen($strPattern) || $strPattern = '@^$@';
+
+				if(preg_match($strPattern, $strRequest, $arrMatches)) {
+					foreach($arrCaptured as $i => $arrParam) if(!$arrParam[1]) {
+						$strValue = $arrMatches[$i + 1];
+						if(!$arrParam[2] || strlen($strValue)) {
+							$this->Input->setGet($arrParam[0], $strValue);
+						}
+					}
+				} elseif($objAlias->bbit_turl_matchRequired) {
+					$arrFragments[0] = false;
+					$this->exit404($arrParams[0]);
+				}
+			}
+
 		} else {
 			$arrFragments[0] = false;
 
