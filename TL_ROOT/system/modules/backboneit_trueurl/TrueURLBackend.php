@@ -236,7 +236,8 @@ WHERE	id = ?
 EOT;
 		$this->Database->prepare($strQuery)->execute($strNew, $objDC->id);
 
-		if($strNew != 'always') {
+		$strAlias = $objDC->activeRecord->alias;
+		if($strNew != 'always' || !strlen($strAlias)) {
 			return;
 		}
 
