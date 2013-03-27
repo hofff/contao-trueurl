@@ -60,10 +60,7 @@ EOT;
 			// this can not be handled by index.php since $arrFragments will be urldecoded,
 			// which turns false into "", which is replaced with null, that is causing a
 			// root page lookup
-			$this->import('FrontendUser', 'User');
-			$this->User->authenticate();
-			$objHandler = new $GLOBALS['TL_PTY']['error_404']();
-			$objHandler->generate($arrParams[0]);
+			$this->exit404($arrParams[0]);
 		}
 
 		// Add the second fragment as auto_item if the number of fragments is even
@@ -72,6 +69,13 @@ EOT;
 		}
 
 		return $arrFragments;
+	}
+
+	protected function exit404($strRequest) {
+		$this->import('FrontendUser', 'User');
+		$this->User->authenticate();
+		$objHandler = new $GLOBALS['TL_PTY']['error_404']();
+		$objHandler->generate($strRequest);
 	}
 
 	public static function fragmentFilter($strFragment) {
