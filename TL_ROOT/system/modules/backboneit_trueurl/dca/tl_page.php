@@ -41,9 +41,9 @@ $GLOBALS['TL_DCA']['tl_page']['list']['operations']['bbit_turl_autoInherit'] = a
 
 foreach($GLOBALS['TL_DCA']['tl_page']['palettes'] as $strSelector => &$strPalette) if($strSelector != '__selector__') {
 	if($strSelector == 'root') {
-		$strPalette = str_replace(',type', ',type,bbit_turl_rootInheritProxy,bbit_turl_defaultInherit,bbit_turl_childrenInherit', $strPalette);
+		$strPalette = str_replace(',type', ',type,bbit_turl_rootInheritProxy,bbit_turl_defaultInherit', $strPalette);
 	} else {
-		$strPalette = str_replace(',type', ',type,bbit_turl_inherit,bbit_turl_transparent,bbit_turl_ignoreRoot,bbit_turl_childrenInherit', $strPalette);
+		$strPalette = str_replace(',type', ',type,bbit_turl_inherit,bbit_turl_transparent,bbit_turl_ignoreRoot', $strPalette);
 	}
 }
 
@@ -99,21 +99,3 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_ignoreRoot'] = array(
 		'tl_class'	=> 'clr w50 cbx',
 	),
 );
-
-/*
-$GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_childrenInherit'] = array(
-	'label'		 => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_childrenInherit'],
-	'inputType'	 => 'checkbox',
-	'options_callback' => array('TrueURLBackend', 'getChildrenInheritOptions'),
-	'eval' => array(
-		'multiple'	=> true,
-		'tl_class'	=> 'clr'
-	),
-	'load_callback' => array(
-		array('TrueURLBackend', 'loadChildrenInherit')
-	),
-	'save_callback' => array(
-		array('TrueURLBackend', 'saveChildrenInherit')
-	),
-);
-*/
