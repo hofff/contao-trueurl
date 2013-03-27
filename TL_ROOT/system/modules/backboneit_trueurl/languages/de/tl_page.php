@@ -12,7 +12,7 @@ $GLOBALS['TL_LANG']['tl_page']['bbit_turl_repair']
 	= array('Seitenalias reparieren', 'Überprüft alle Seitenaliase und repariert diese, wenn nötig. Außerdem werden leere Aliase automatisch befüllt.');
 $GLOBALS['TL_LANG']['tl_page']['bbit_turl_autoInherit']
 	= array('Automatische Vererbung des Seitenalias prüfen und aktivieren', 'Aktiviert die automatische Vererbung des Seitenalias für diese und alle Unterseiten, wenn der jeweilige Seitenalias mit der Elternseite beginnt.');
-	
+
 $GLOBALS['TL_LANG']['tl_page']['bbit_turl_rootInherit']
 	= array('Vererbung des Startpunkt-Alias', 'Gibt an, wie der Alias dieser Startpunktseite innerhalb der Alias-Vererbung verwendet wird.');
 $GLOBALS['TL_LANG']['tl_page']['bbit_turl_rootInheritOptions'] = array(
