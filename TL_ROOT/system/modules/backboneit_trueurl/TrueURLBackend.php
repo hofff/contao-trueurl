@@ -229,11 +229,12 @@ class TrueURLBackend extends Backend {
 		list($strOld, $strNew) = $this->arrRootInherit[$objDC->id];
 		unset($this->arrRootInherit[$objDC->id]);
 		
-		$this->Database->prepare(
-			'UPDATE	tl_page
-			SET		bbit_turl_rootInherit = ?
-			WHERE	id = ?'
-		)->execute($strNew, $objDC->id);
+		$strQuery = <<<EOT
+UPDATE	tl_page
+SET		bbit_turl_rootInherit = ?
+WHERE	id = ?
+EOT;
+		$this->Database->prepare($strQuery)->execute($strNew, $objDC->id);
 				
 		if($strNew != 'always') {
 			return;
@@ -242,14 +243,15 @@ class TrueURLBackend extends Backend {
 		// remove the root alias from fragments of all pages,
 		// where the alias consists only of the fragment
 		// and that do not ignore the root alias
-		$this->Database->prepare(
-			'UPDATE	tl_page
-			SET		bbit_turl_fragment = SUBSTRING(bbit_turl_fragment, ?)
-			WHERE	bbit_turl_root = ?
-			AND		bbit_turl_fragment LIKE ?
-			AND		bbit_turl_fragment = alias
-			AND		bbit_turl_ignoreRoot = \'\''
-		)->execute(strlen($strAlias) + 2, $objDC->id, $strAlias . '/%');
+		$strQuery = <<<EOT
+UPDATE	tl_page
+SET		bbit_turl_fragment = SUBSTRING(bbit_turl_fragment, ?)
+WHERE	bbit_turl_root = ?
+AND		bbit_turl_fragment LIKE ?
+AND		bbit_turl_fragment = alias
+AND		bbit_turl_ignoreRoot = ''
+EOT;
+		$this->Database->prepare($strQuery)->execute(strlen($strAlias) + 2, $objDC->id, $strAlias . '/%');
 	}
 
 	public function oncreatePage($strTable, $intID, $arrSet, $objDC) {
@@ -261,17 +263,27 @@ class TrueURLBackend extends Backend {
 		$intRootID = $objParent->type == 'root' ? $objParent->id : $objParent->rootId;
 		
 		if($intRootID) {
-			$blnDefaultInherit = $this->Database->prepare(
-				'SELECT bbit_turl_defaultInherit FROM tl_page WHERE id = ?'
-			)->execute($intRootID)->bbit_turl_defaultInherit;
-			$this->Database->prepare(
-				'UPDATE tl_page SET bbit_turl_root = ?, bbit_turl_inherit = ? WHERE id = ?'
-			)->execute($intRootID, $blnDefaultInherit, $intID);
+			$strQuery = <<<EOT
+SELECT	bbit_turl_defaultInherit
+FROM	tl_page
+WHERE	id = ?
+EOT;
+			$blnDefaultInherit = $this->Database->prepare($strQuery)->execute($intRootID)->bbit_turl_defaultInherit;
+			$strQuery = <<<EOT
+UPDATE	tl_page
+SET		bbit_turl_root = ?,
+		bbit_turl_inherit = ?
+WHERE	id = ?
+EOT;
+			$this->Database->prepare($strQuery)->execute($intRootID, $blnDefaultInherit, $intID);
 			
 		} else {
-			$this->Database->prepare(
-				'UPDATE tl_page SET bbit_turl_root = 0 WHERE id = ?'
-			)->execute($intID);
+			$strQuery = <<<EOT
+UPDATE	tl_page
+SET		bbit_turl_root = 0
+WHERE	id = ?
+EOT;
+			$this->Database->prepare($strQuery)->execute($intID);
 		}
 	}
 	

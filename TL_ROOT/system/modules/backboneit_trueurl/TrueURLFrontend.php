@@ -27,27 +27,29 @@ class TrueURLFrontend extends Frontend {
 		
 		if(!BE_USER_LOGGED_IN) {
 			$intTime = time();
-			$strPublishCond = '
-			AND (p1.start = \'\' OR p1.start < ' . $intTime . ')
-			AND (p1.stop = \'\' OR p1.stop > ' . $intTime . ')
-			AND p1.published = 1
-			AND (p2.start = \'\' OR p2.start < ' . $intTime . ')
-			AND (p2.stop = \'\' OR p2.stop > ' . $intTime . ')
-			AND p2.published = 1
-			';
+			$strPublishCond = <<<EOT
+AND (p1.start = '' OR p1.start < $intTime)
+AND (p1.stop = '' OR p1.stop > $intTime)
+AND p1.published = 1
+AND (p2.start = '' OR p2.start < $intTime)
+AND (p2.stop = '' OR p2.stop > $intTime)
+AND p2.published = 1
+EOT;
 		}
 		
-		$objAlias = Database::getInstance()->prepare(
-			'SELECT	p1.id, p1.alias
-			FROM	tl_page AS p1
-			JOIN	tl_page AS p2 ON p2.id = p1.bbit_turl_root
-			WHERE	p1.alias IN (' . rtrim(str_repeat('?,', $intFragments), ',') . ')
-			AND		(p2.dns = \'\' OR p2.dns = ?)
-			AND		p1.type NOT IN (\'error_404\', \'error_403\')
-			' . $strLangCond . '
-			' . $strPublishCond . '
-			ORDER BY p2.dns = \'\'' . $strLangOrder . ', LENGTH(p1.alias) DESC, p2.sorting'
-		)->limit(1)->execute($arrParams);
+		$strWildcards = rtrim(str_repeat('?,', $intFragments), ',');
+		$strQuery = <<<EOT
+SELECT	p1.id, p1.alias
+FROM	tl_page AS p1
+JOIN	tl_page AS p2 ON p2.id = p1.bbit_turl_root
+WHERE	p1.alias IN ($strWildcards)
+AND		(p2.dns = '' OR p2.dns = ?)
+AND		p1.type NOT IN ('error_404', 'error_403')
+$strLangCond
+$strPublishCond
+ORDER BY p2.dns = ''$strLangOrder, LENGTH(p1.alias) DESC, p2.sorting
+EOT;
+		$objAlias = Database::getInstance()->prepare($strQuery)->limit(1)->execute($arrParams);
 		
 		if($objAlias->numRows) {
 			array_splice($arrFragments, 0, substr_count($objAlias->alias, '/') + 1, $objAlias->id);

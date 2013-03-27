@@ -13,9 +13,12 @@ class TrueURL extends Controller {
 			}
 				
 		} else {
-			$arrRoots = $this->Database->query(
-				'SELECT id FROM tl_page WHERE type = \'root\''
-			)->fetchEach('id');
+			$strQuery = <<<EOT
+SELECT	id
+FROM	tl_page
+WHERE	type = 'root'
+EOT;
+			$arrRoots = $this->Database->query($strQuery)->fetchEach('id');
 			$arrRoots = array_combine($arrRoots, $arrRoots);
 		}
 	
@@ -25,9 +28,13 @@ class TrueURL extends Controller {
 			$arrDescendants = $this->getChildRecords($arrPageIDs, 'tl_page');
 			$arrDescendants = array_merge($arrDescendants, $arrPageIDs);
 				
-			$this->Database->prepare(
-				'UPDATE	tl_page SET bbit_turl_root = ? WHERE id IN (' . implode(',', $arrDescendants) . ')'
-			)->execute($intRootID);
+			$strDescendants = implode(',', $arrDescendants);
+			$strQuery = <<<EOT
+UPDATE	tl_page
+SET		bbit_turl_root = ?
+WHERE	id IN ($strDescendants)
+EOT;
+			$this->Database->prepare($strQuery)->execute($intRootID);
 		}
 	
 		if(!$blnOrphans) {
@@ -38,17 +45,26 @@ class TrueURL extends Controller {
 		$arrIDs = array();
 		$arrPIDs = array(0);
 		while($arrPIDs) {
-			$arrPIDs = $this->Database->query(
-				'SELECT id FROM tl_page WHERE pid IN (' . implode(',', $arrPIDs) . ') AND type != \'root\''
-			)->fetchEach('id');
+			$strPIDs = implode(',', $arrPIDs);
+			$strQuery = <<<EOT
+SELECT	id
+FROM	tl_page
+WHERE	pid IN ($strPIDs)
+AND		type != 'root'
+EOT;
+			$arrPIDs = $this->Database->query($strQuery)->fetchEach('id');
 			$arrIDs[] = $arrPIDs;
 		}
 		$arrIDs = call_user_func_array('array_merge', $arrIDs);
 	
 		if($arrIDs) {
-			$this->Database->query(
-				'UPDATE	tl_page SET bbit_turl_root = 0 WHERE id IN (' . implode(',', $arrIDs) . ')'
-			);
+			$strIDs = implode(',', $arrIDs);
+			$strQuery = <<<EOT
+UPDATE	tl_page
+SET		bbit_turl_root = 0
+WHERE	id IN ($strIDs)
+EOT;
+			$this->Database->query($strQuery);
 		}
 	}
 	
@@ -73,11 +89,12 @@ class TrueURL extends Controller {
 			throw new InvalidArgumentException('Argument #2 must be a non-empty string');
 		}
 		
-		$objPage = $this->Database->prepare(
-			'SELECT 	id, pid, type, bbit_turl_inherit, bbit_turl_ignoreRoot
-			FROM		tl_page
-			WHERE		id = ?'
-		)->executeUncached($intPageID);
+		$strQuery = <<<EOT
+SELECT 	id, pid, type, bbit_turl_inherit, bbit_turl_ignoreRoot
+FROM	tl_page
+WHERE	id = ?
+EOT;
+		$objPage = $this->Database->prepare($strQuery)->executeUncached($intPageID);
 		
 		if(!$objPage->numRows || $objPage->type == 'root') {
 			return $strFragment;
@@ -110,9 +127,12 @@ class TrueURL extends Controller {
 	}
 	
 	public function repair() {
-		$objPage = $this->Database->query(
-			'SELECT id FROM tl_page WHERE type = \'root\''
-		);
+		$strQuery = <<<EOT
+SELECT	id
+FROM	tl_page
+WHERE	type = 'root'
+EOT;
+		$objPage = $this->Database->query($strQuery);
 		while($objPage->next()) {
 			$objRoot = $this->getRootPage($objPage->id);
 			$strParentAlias = $this->getParentAlias($objPage->id, $objRoot);
@@ -169,13 +189,17 @@ class TrueURL extends Controller {
 	}
 	
 	protected function doUpdate($intPageID, $objRoot, $strParentAlias, $blnUpdateAll, $blnAutoInherit) {
-		$objPage = $this->Database->prepare(
-			'SELECT 	id, pid, alias, type, bbit_turl_fragment,
-						bbit_turl_inherit, bbit_turl_transparent, bbit_turl_ignoreRoot,
-						bbit_turl_rootInherit
-			FROM		tl_page
-			WHERE		id = ?'
-		)->executeUncached($intPageID);
+		$strQuery = <<<EOT
+SELECT 	id, pid, alias, type,
+		bbit_turl_fragment,
+		bbit_turl_inherit,
+		bbit_turl_transparent,
+		bbit_turl_ignoreRoot,
+		bbit_turl_rootInherit
+FROM	tl_page
+WHERE	id = ?
+EOT;
+		$objPage = $this->Database->prepare($strQuery)->executeUncached($intPageID);
 		
 		if(!$objPage->numRows) {
 			return false;
@@ -229,11 +253,16 @@ class TrueURL extends Controller {
 		$this->storeAlias($intPageID, $strAlias, $strFragment, $blnInherit);
 		
 		if(!$blnUpdateAll && !$blnAutoInherit && $objRoot && $objRoot->bbit_turl_rootInherit != 'always') {
-			$strOnlyInherit = ' AND bbit_turl_inherit = \'1\'';
+			$strOnlyInherit = 'AND bbit_turl_inherit = \'1\'';
 		}
-		$objChildren = $this->Database->prepare(
-			'SELECT	id FROM tl_page WHERE pid = ? AND type != \'root\'' . $strOnlyInherit
-		)->executeUncached($intPageID);
+		$strQuery = <<<EOT
+SELECT	id
+FROM	tl_page
+WHERE	pid = ?
+AND		type != 'root'
+$strOnlyInherit
+EOT;
+		$objChildren = $this->Database->prepare($strQuery)->executeUncached($intPageID);
 		
 		while($objChildren->next()) {
 			$this->doUpdate($objChildren->id, $objRoot, $strParentAlias, $blnUpdateAll, $blnAutoInherit);
@@ -281,9 +310,12 @@ class TrueURL extends Controller {
 	protected function storeAlias($intPageID, $strAlias, $strFragment, $blnInherit = null) {
 		$arrSet = array('alias' => $strAlias, 'bbit_turl_fragment' => $strFragment);
 		$blnInherit === null || $arrSet['bbit_turl_inherit'] = $blnInherit ? 1 : '';
-		$this->Database->prepare(
-			'UPDATE tl_page %s WHERE id = ?'
-		)->set($arrSet)->executeUncached($intPageID);
+		$strQuery = <<<EOT
+UPDATE	tl_page
+%s
+WHERE	id = ?
+EOT;
+		$this->Database->prepare($strQuery)->set($arrSet)->executeUncached($intPageID);
 	}
 	
 	/**
@@ -298,13 +330,14 @@ class TrueURL extends Controller {
 		$objRoot || $objRoot = $this->getRootPage($intPageID);
 		
 		do {
-			$objParent = $this->Database->prepare(
-				'SELECT	p2.id, p2.alias, p2.bbit_turl_transparent
-				FROM	tl_page AS p1
-				JOIN	tl_page AS p2 ON p2.id = p1.pid
-				WHERE	p1.id = ?
-				AND		p2.type != \'root\''
-			)->executeUncached($intPageID);
+			$strQuery = <<<EOT
+SELECT	p2.id, p2.alias, p2.bbit_turl_transparent
+FROM	tl_page AS p1
+JOIN	tl_page AS p2 ON p2.id = p1.pid
+WHERE	p1.id = ?
+AND		p2.type != 'root'
+EOT;
+			$objParent = $this->Database->prepare($strQuery)->executeUncached($intPageID);
 			
 			$intPageID = $objParent->id;
 			if(!$objParent->numRows || !$intPageID) {
@@ -342,12 +375,13 @@ class TrueURL extends Controller {
 	 */
 	public function getRootPage($intPageID, $blnCached = false) {
 		$strMethod = $blnCached ? 'execute' : 'executeUncached';
-		$objRoot = $this->Database->prepare(
-			'SELECT	rt.id, rt.type, rt.alias, rt.bbit_turl_rootInherit
-			FROM	tl_page AS p
-			JOIN	tl_page AS rt ON rt.id = p.bbit_turl_root
-			WHERE	p.id = ?'
-		)->$strMethod($intPageID);
+		$strQuery = <<<EOT
+SELECT	rt.id, rt.type, rt.alias, rt.bbit_turl_rootInherit
+FROM	tl_page AS p
+JOIN	tl_page AS rt ON rt.id = p.bbit_turl_root
+WHERE	p.id = ?
+EOT;
+		$objRoot = $this->Database->prepare($strQuery)->$strMethod($intPageID);
 		
 		if($objRoot->numRows && $objRoot->type == 'root') {
 			return $objRoot;
@@ -363,9 +397,12 @@ class TrueURL extends Controller {
 		}
 		
 		$this->regeneratePageRoots($intRootID);
-		$objRoot = $this->Database->prepare(
-			'SELECT id, alias, bbit_turl_rootInherit FROM tl_page WHERE id = ?'
-		)->executeUncached($intRootID);
+		$strQuery = <<<EOT
+SELECT	id, alias, bbit_turl_rootInherit
+FROM	tl_page
+WHERE	id = ?
+EOT;
+		$objRoot = $this->Database->prepare($strQuery)->executeUncached($intRootID);
 		
 		return $objRoot;
 	}
@@ -386,9 +423,13 @@ class TrueURL extends Controller {
 		
 		$strAlias = standardize($objPage->title);
 		
-		$objAlias = $this->Database->prepare(
-			'SELECT id FROM tl_page WHERE id != ? AND alias = ?'
-		)->executeUncached($intPageID, $strAlias);
+		$strQuery = <<<EOT
+SELECT	id
+FROM	tl_page
+WHERE	id != ?
+AND		alias = ?
+EOT;
+		$objAlias = $this->Database->prepare($strQuery)->executeUncached($intPageID, $strAlias);
 
 		if($objAlias->numRows) {
 			$strAlias .= '-' . $intPageID;
