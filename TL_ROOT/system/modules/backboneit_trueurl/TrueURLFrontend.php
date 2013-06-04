@@ -8,14 +8,16 @@ class TrueURLFrontend extends Frontend {
 		if(!$arrFiltered) {
 			return $arrFragments;
 		}
-
 		$arrFragments = $arrFiltered;
-		$arrParams = array();
+
+		$arrParams = $GLOBALS['BBIT']['TURL']['unrouteable'];
+		$strUnrouteableWildcards = rtrim(str_repeat('?,', count($arrParams)), ',');
+
 		do {
 			$arrParams[] = implode('/', $arrFiltered);
 			array_pop($arrFiltered);
 		} while($arrFiltered);
-		$intFragments = count($arrParams);
+		$strAliasWildcards = rtrim(str_repeat('?,', count($arrFragments)), ',');
 
 		$arrParams[] = $this->Environment->host;
 
@@ -37,7 +39,6 @@ AND p2.published = 1
 EOT;
 		}
 
-		$strWildcards = rtrim(str_repeat('?,', $intFragments), ',');
 		$strQuery = <<<EOT
 SELECT	p1.id, p1.alias,
 		p1.bbit_turl_requestPattern,
@@ -45,9 +46,9 @@ SELECT	p1.id, p1.alias,
 		p1.bbit_turl_matchRequired
 FROM	tl_page AS p1
 JOIN	tl_page AS p2 ON p2.id = p1.bbit_turl_root
-WHERE	p1.alias IN ($strWildcards)
+WHERE	p1.type NOT IN ($strUnrouteableWildcards)
+AND		p1.alias IN ($strAliasWildcards)
 AND		(p2.dns = '' OR p2.dns = ?)
-AND		p1.type NOT IN ('error_404', 'error_403')
 $strLangCond
 $strPublishCond
 ORDER BY p2.dns = ''$strLangOrder, LENGTH(p1.alias) DESC, p2.sorting

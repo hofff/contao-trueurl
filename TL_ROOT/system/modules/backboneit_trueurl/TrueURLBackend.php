@@ -83,6 +83,10 @@ class TrueURLBackend extends Backend {
 			return $label;
 		}
 
+		if(in_array($row['type'], $GLOBALS['BBIT']['TURL']['unrouteable'])) {
+			return $label;
+		}
+
 		$intMode = $this->Session->get('bbit_turl_alias');
 		if(!$intMode) {
 			return $label;
