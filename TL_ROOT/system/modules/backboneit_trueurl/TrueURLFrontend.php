@@ -22,76 +22,96 @@ class TrueURLFrontend extends Frontend {
 		$arrParams[] = $this->Environment->host;
 
 		if($GLOBALS['TL_CONFIG']['addLanguageToUrl']) {
-			$strLangCond = 'AND (p2.language = ? OR p2.fallback = 1)';
+			$strLangCond = 'AND (root.language = ? OR root.fallback = 1)';
 			$arrParams[] = $this->Input->get('language');
-			$strLangOrder = ', p2.fallback = 1';
+			$strLangOrder = ', root.fallback = 1';
 		}
 
 		if(!BE_USER_LOGGED_IN) {
 			$intTime = time();
-			$strPublishCond = <<<EOT
-AND (p1.start = '' OR p1.start < $intTime)
-AND (p1.stop = '' OR p1.stop > $intTime)
-AND p1.published = 1
-AND (p2.start = '' OR p2.start < $intTime)
-AND (p2.stop = '' OR p2.stop > $intTime)
-AND p2.published = 1
+			$strPagePublishCond = <<<EOT
+AND (page1.start = '' OR page1.start < $intTime)
+AND (page1.stop = '' OR page1.stop > $intTime)
+AND (page1.published = 1)
+EOT;
+			$strRootPublishCond = <<<EOT
+AND (root.start = '' OR root.start < $intTime)
+AND (root.stop = '' OR root.stop > $intTime)
+AND root.published = 1
 EOT;
 		}
 
 		$strQuery = <<<EOT
-SELECT	p1.id, p1.alias,
-		p1.bbit_turl_requestPattern,
-		p1.bbit_turl_capturedParams,
-		p1.bbit_turl_matchRequired
-FROM	tl_page AS p1
-JOIN	tl_page AS p2 ON p2.id = p1.bbit_turl_root
-WHERE	p1.type NOT IN ($strUnrouteableWildcards)
-AND		p1.alias IN ($strAliasWildcards)
-AND		(p2.dns = '' OR p2.dns = ?)
+SELECT	root.id AS root, page.*
+FROM	tl_page AS root
+LEFT JOIN (
+
+	SELECT	page1.id,
+			page1.alias,
+			page1.bbit_turl_root,
+			page1.bbit_turl_requestPattern,
+			page1.bbit_turl_capturedParams,
+			page1.bbit_turl_matchRequired
+	FROM	tl_page AS page1
+	WHERE	page1.type NOT IN ($strUnrouteableWildcards)
+	AND		page1.alias IN ($strAliasWildcards)
+	$strPagePublishCond
+
+) AS page ON page.bbit_turl_root = root.id
+
+WHERE	(root.type = 'root')
+AND		(root.dns = '' OR root.dns = ?)
 $strLangCond
-$strPublishCond
-ORDER BY p2.dns = ''$strLangOrder, LENGTH(p1.alias) DESC, p2.sorting
+$strRootPublishCond
+
+ORDER BY page.id IS NULL, root.dns = ''$strLangOrder, LENGTH(page.alias) DESC, root.sorting
 EOT;
 		$objAlias = Database::getInstance()->prepare($strQuery)->limit(1)->execute($arrParams);
 
-		if($objAlias->numRows) {
-			array_splice($arrFragments, 0, substr_count($objAlias->alias, '/') + 1, $objAlias->id);
-			$GLOBALS['BBIT']['TURL']['fragments'] = array_slice($arrFragments, 1);
-
-			foreach(array_map('trim', explode(',', $objAlias->bbit_turl_capturedParams)) as $strParam) {
-				$blnSkipEmpty = $strParam[0] == '?';
-				$blnSkipEmpty && $strParam = substr($strParam, 1);
-				$blnSkip = !strlen($strParam);
-				$arrCaptured[] = array(urldecode($strParam), $blnSkip, $blnSkipEmpty);
-				$blnSkip || $blnCaptures = true;
-			}
-
-			if($objAlias->bbit_turl_matchRequired || $blnCaptures) {
-				$strRequest = implode('/', $GLOBALS['BBIT']['TURL']['fragments']);
-				$strPattern = $objAlias->bbit_turl_requestPattern;
-				strlen($strPattern) || $strPattern = '@^$@';
-
-				if(preg_match($strPattern, $strRequest, $arrMatches)) {
-					foreach($arrCaptured as $i => $arrParam) if(!$arrParam[1]) {
-						$strValue = $arrMatches[$i + 1];
-						if(!$arrParam[2] || strlen($strValue)) {
-							$this->Input->setGet($arrParam[0], $strValue);
-						}
-					}
-				} elseif($objAlias->bbit_turl_matchRequired) {
-					$arrFragments[0] = false;
-					$this->exit404($arrParams[0]);
-				}
-			}
-
-		} else {
-			$arrFragments[0] = false;
+		if(!$objAlias->numRows) {
+			$arrFragments = array(false);
 
 			// this can not be handled by index.php since $arrFragments will be urldecoded,
 			// which turns false into "", which is replaced with null, that is causing a
 			// root page lookup
 			$this->exit404($arrParams[0]);
+			return $arrFragments;
+
+		} elseif($objAlias->id) {
+			array_splice($arrFragments, 0, substr_count($objAlias->alias, '/') + 1, $objAlias->id);
+
+		} else {
+			$objHandler = new $GLOBALS['TL_PTY']['root']();
+			$objAlias = $this->getPageDetails($objHandler->generate($objAlias->root, true));
+			array_unshift($arrFragments, $objAlias->id);
+		}
+
+		$GLOBALS['BBIT']['TURL']['fragments'] = array_slice($arrFragments, 1);
+
+		foreach(array_map('trim', explode(',', $objAlias->bbit_turl_capturedParams)) as $strParam) {
+			$blnSkipEmpty = $strParam[0] == '?';
+			$blnSkipEmpty && $strParam = substr($strParam, 1);
+			$blnSkip = !strlen($strParam);
+			$arrCaptured[] = array(urldecode($strParam), $blnSkip, $blnSkipEmpty);
+			$blnSkip || $blnCaptures = true;
+		}
+
+		if($objAlias->bbit_turl_matchRequired || $blnCaptures) {
+			$strRequest = implode('/', $GLOBALS['BBIT']['TURL']['fragments']);
+			$strPattern = $objAlias->bbit_turl_requestPattern;
+			strlen($strPattern) || $strPattern = '@^$@';
+
+			if(preg_match($strPattern, $strRequest, $arrMatches)) {
+				foreach($arrCaptured as $i => $arrParam) if(!$arrParam[1]) {
+					$strValue = $arrMatches[$i + 1];
+					if(!$arrParam[2] || strlen($strValue)) {
+						$this->Input->setGet($arrParam[0], $strValue);
+					}
+				}
+			} elseif($objAlias->bbit_turl_matchRequired) {
+				$arrFragments[0] = false;
+				$this->exit404($arrParams[0]);
+			}
 		}
 
 		// Add the second fragment as auto_item if the number of fragments is even
