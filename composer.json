@@ -19,8 +19,8 @@
 		"source": "https://github.com/backbone87/contao-trueurl"
 	},
 	"require": {
-		"php": ">=5.2",
-		"contao/core": ">=2.11,<=3.0"
+		"php": ">=5.3",
+		"contao/core": ">=3.2-dev,<4"
 	},
 	"replace": {
 		"contao-legacy/backboneit_trueurl": "*"
@@ -30,6 +30,10 @@
 			"sources": {
 				"TL_ROOT/system/modules/backboneit_trueurl": "system/modules/backboneit_trueurl"
 			}
+		},
+		"branch-alias": {
+			"dev-master": "1.x-dev",
+			"dev-development": "2.x-dev"
 		}
 	}
 }
