@@ -105,7 +105,7 @@ EOT;
 				foreach($arrCaptured as $i => $arrParam) if(!$arrParam[1]) {
 					$strValue = $arrMatches[$i + 1];
 					if(!$arrParam[2] || strlen($strValue)) {
-						$this->Input->setGet($arrParam[0], $strValue);
+						$this->Input->setGet($arrParam[0], urldecode($strValue));
 					}
 				}
 			} elseif($objAlias->bbit_turl_matchRequired) {
