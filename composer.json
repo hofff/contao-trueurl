@@ -1,37 +1,42 @@
 {
-	"name": "backboneit/contao-trueurl",
-	"description": "Folderlike page alias' with different editing tools and an improved frontend page selection algorithmn.",
-	"keywords": [ "folderurl", "alias", "page", "path", "url", "contao" ],
-	"type": "contao-module",
-	"license": "LGPL-3.0+",
-	"authors": [
-		{
-			"name": "Oliver Hoff",
-			"email": "oliver@hofff.com",
-			"homepage": "http://hofff.com/",
-			"role": "Developer"
+	"name" : "hofff/contao-trueurl",
+	"description" : "Folderlike page alias' with different editing tools and an improved frontend page selection algorithmn.",
+	"keywords" : [
+		"folderurl",
+		"alias",
+		"page",
+		"path",
+		"url",
+		"contao"
+	],
+	"type" : "contao-module",
+	"license" : "LGPL-3.0+",
+	"authors" : [{
+			"name" : "Oliver Hoff",
+			"email" : "oliver@hofff.com",
+			"homepage" : "https://hofff.com/",
+			"role" : "Developer"
 		}
 	],
-	"support": {
-		"issues": "https://github.com/backbone87/contao-trueurl/issues",
-		"forum": "https://community.contao.org/de/showthread.php?33071-backboneit_trueurl-TrueURL-Ordner%E4hnliche-Aliase",
-		"irc": "irc://irc.freenode.org/contao.dev",
-		"source": "https://github.com/backbone87/contao-trueurl"
+	"support" : {
+		"issues" : "https://github.com/backbone87/contao-trueurl/issues",
+		"forum" : "https://community.contao.org/de/showthread.php?33071-backboneit_trueurl-TrueURL-Ordner%E4hnliche-Aliase",
+		"irc" : "irc://irc.freenode.org/contao.dev",
+		"source" : "https://github.com/backbone87/contao-trueurl"
 	},
-	"require": {
-		"php": ">=5.3",
-		"contao/core": ">=3.2-dev,<4"
+	"require" : {
+		"php" : ">=5.3",
+		"contao/core" : ">=3.2-dev,<4"
 	},
-	"replace": {
-		"contao-legacy/backboneit_trueurl": "self.version"
+	"replace" : {
+		"backboneit/contao-trueurl" : "self.version",
+		"contao-legacy/backboneit_trueurl" : "self.version"
 	},
-	"extra": {
-		"contao": {
-			"sources": {
-				"TL_ROOT/system/modules/backboneit_trueurl": "system/modules/backboneit_trueurl"
+	"extra" : {
+		"contao" : {
+			"sources" : {
+				"TL_ROOT/system/modules/backboneit_trueurl" : "system/modules/backboneit_trueurl"
 			}
-		},
-		"branch-alias": {
 		}
 	}
 }
