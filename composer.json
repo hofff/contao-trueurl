@@ -23,7 +23,7 @@
 		"contao/core": ">=3.2-dev,<4"
 	},
 	"replace": {
-		"contao-legacy/backboneit_trueurl": "*"
+		"contao-legacy/backboneit_trueurl": "self.version"
 	},
 	"extra": {
 		"contao": {
