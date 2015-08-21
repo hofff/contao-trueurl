@@ -78,7 +78,7 @@ EOT;
 			return $arrFragments;
 
 		} elseif($objAlias->id) {
-			array_splice($arrFragments, 0, substr_count($objAlias->alias, '/') + 1, $objAlias->id);
+			array_splice($arrFragments, 0, substr_count($objAlias->alias, '/') + 1, $objAlias->alias);
 
 		} else {
 			$objHandler = new $GLOBALS['TL_PTY']['root']();
