@@ -112,6 +112,10 @@ EOT;
 				$arrFragments[0] = false;
 				$this->exit404($arrParams[0]);
 			}
+
+			if($objAlias->bbit_turl_matchRequired) {
+				$arrFragments = array_slice($arrFragments, 0, 2 - (count($arrFragments) % 2));
+			}
 		}
 
 		// Add the second fragment as auto_item if the number of fragments is even
