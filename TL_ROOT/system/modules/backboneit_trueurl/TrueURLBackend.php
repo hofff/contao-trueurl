@@ -76,7 +76,7 @@ class TrueURLBackend extends Backend {
 
 		self::$blnRecurse = true;
 		$this->import($arrCallback[0]);
-		$label = $this->$arrCallback[0]->$arrCallback[1]($row, $label, $dc, $imageAttribute, $blnReturnImage, $blnProtected);
+		$label = $this->{$arrCallback[0]}->{$arrCallback[1]}($row, $label, $dc, $imageAttribute, $blnReturnImage, $blnProtected);
 		self::$blnRecurse = false;
 
 		if($blnWasRecurse) {
