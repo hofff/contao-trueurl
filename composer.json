@@ -26,8 +26,8 @@
 	},
 	"require" : {
 		"php" : "^5.3 || ^7.0",
-		"contao/core" : "^3.2",
-		"contao-community-alliance/composer-plugin" : "^2.0"
+		"contao/core-bundle" : "^3.2 || ^4.3",
+		"contao-community-alliance/composer-plugin" : "^2.0 || ^3.0"
 	},
 	"replace" : {
 		"backboneit/contao-trueurl" : "self.version",
