@@ -129,7 +129,11 @@ EOT;
 	protected function exit404($strRequest) {
 		$this->import('FrontendUser', 'User');
 		$this->User->authenticate();
+		/** @var \Contao\PageError404 $objHandler */
 		$objHandler = new $GLOBALS['TL_PTY']['error_404']();
+		if (version_compare(VERSION, '4.0', '>=')) {
+			throw new \Contao\CoreBundle\Exception\ResponseException($objHandler->getResponse());
+		}
 		$objHandler->generate($strRequest);
 	}
 
