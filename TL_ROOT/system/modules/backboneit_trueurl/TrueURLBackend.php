@@ -1,5 +1,7 @@
 <?php
 
+use Contao\System;
+
 class TrueURLBackend extends Backend {
 
 	public function hookLoadDataContainer($strTable) {
@@ -75,8 +77,10 @@ class TrueURLBackend extends Backend {
 		$arrCallback = $blnWasRecurse ? array('tl_page', 'addIcon') : $GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl'];
 
 		self::$blnRecurse = true;
-		$this->import($arrCallback[0]);
-		$label = $this->{$arrCallback[0]}->{$arrCallback[1]}($row, $label, $dc, $imageAttribute, $blnReturnImage, $blnProtected);
+		if (is_array($arrCallback)) {
+			$arrCallback[0] = System::importStatic($arrCallback[0]);
+		}
+		$label = call_user_func($arrCallback, $row, $label, $dc, $imageAttribute, $blnReturnImage, $blnProtected);
 		self::$blnRecurse = false;
 
 		if($blnWasRecurse) {
