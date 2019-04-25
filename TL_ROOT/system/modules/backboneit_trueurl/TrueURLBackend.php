@@ -3,6 +3,7 @@
 use Contao\System;
 
 class TrueURLBackend extends Backend {
+    private $folderUrlConfig;
 
 	public function hookLoadDataContainer($strTable) {
 		if($strTable == 'tl_page') {
@@ -203,7 +204,15 @@ class TrueURLBackend extends Backend {
 	}
 
 	public function saveAlias($strAlias) {
+		$this->folderUrlConfig = \Contao\Config::get('folderUrl');
+		\Contao\Config::set('folderUrl', false);
+
 		return trim($strAlias, ' /');
+	}
+
+	public function resetFolderUrlConfig($strAlias) {
+		\Contao\Config::set('folderUrl', $this->folderUrlConfig);
+		return $strAlias;
 	}
 
 	public function loadRootInherit($varValue, $objDC) {

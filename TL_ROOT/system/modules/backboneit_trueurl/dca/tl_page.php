@@ -51,6 +51,7 @@ foreach($GLOBALS['TL_DCA']['tl_page']['palettes'] as $strSelector => &$strPalett
 $GLOBALS['TL_DCA']['tl_page']['fields']['alias']['eval']['rgxp']		= 'trueurl';
 $GLOBALS['TL_DCA']['tl_page']['fields']['alias']['eval']['alwaysSave']	= true;
 array_unshift($GLOBALS['TL_DCA']['tl_page']['fields']['alias']['save_callback'], array('TrueURLBackend', 'saveAlias'));
+$GLOBALS['TL_DCA']['tl_page']['fields']['alias']['save_callback'][] = array('TrueURLBackend', 'resetFolderUrlConfig');
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_rootInheritProxy'] = array(
 	'label'		=> &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_rootInherit'],
