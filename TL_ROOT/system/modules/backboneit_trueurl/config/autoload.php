@@ -18,5 +18,4 @@ ClassLoader::addClasses(array
 (
 	'TrueURL'         => 'system/modules/backboneit_trueurl/TrueURL.php',
 	'TrueURLBackend'  => 'system/modules/backboneit_trueurl/TrueURLBackend.php',
-	'TrueURLFrontend' => 'system/modules/backboneit_trueurl/TrueURLFrontend.php',
 ));

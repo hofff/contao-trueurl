@@ -30,13 +30,6 @@ $GLOBALS['TL_LANG']['tl_page']['bbit_turl_transparent']
 $GLOBALS['TL_LANG']['tl_page']['bbit_turl_ignoreRoot']
 	= array('Alias des Startpunkts ignorieren', 'Der Alias der Startpunktseite wird nicht automatisch hinzugefügt, unabhängig von den Einstellungen in der Startpunktseite.');
 
-$GLOBALS['TL_LANG']['tl_page']['bbit_turl_requestPattern']
-	= array('Regulärer Ausdruck (PREG) für Anfragepfad', 'Ein kompletter PREG mit Modifikatoren. Zum Beispiel: "@^(|[^/]+)$@" für Übereinstimmungen für kein oder ein zusätzliches Fragment im Anfragepfad. Wenn freigelassen dann gilt implizit "@^$@" (keine weiteren Fragmente).');
-$GLOBALS['TL_LANG']['tl_page']['bbit_turl_capturedParams']
-	= array('Referenzen im Ausdruck auf GET Parameter abbilden', 'Eine komma-separierte Liste von Parameternamen unter denen die Referenzen in die GET Parameter übertragen werden. Zum Beispiel: "year,month,alias" für Ausdruck "@^(\d{4})/(\d{2})/([^/]+)$@". Um zu verhindern das ein Parameter mit einem leeren Wert überschrieben wird, kann dem Parameternamen ein "?" vorangestellt werden.');
-$GLOBALS['TL_LANG']['tl_page']['bbit_turl_matchRequired']
-	= array('Mit "Seite nicht gefunden" Antworten bei nicht Übereinstimmung', 'Wenn der Ausdruck nicht mit dem Anfragepfad übereinstimmt, wird eine "Seite nicht gefunden" Antwort (HTTP-Code: 404 Page not found) gesendet. Ansonsten wird die Seite normal dargestellt auch wenn der reguläre Ausdruck nicht übereinstimmt.');
-
 $GLOBALS['TL_LANG']['tl_page']['bbit_turl_break']
 	= 'Alias nicht von Elternseite erben';
 

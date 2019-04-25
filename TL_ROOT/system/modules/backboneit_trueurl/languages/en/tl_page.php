@@ -30,13 +30,6 @@ $GLOBALS['TL_LANG']['tl_page']['bbit_turl_transparent']
 $GLOBALS['TL_LANG']['tl_page']['bbit_turl_ignoreRoot']
 	= array('Ignore root page alias', 'The root page alias is not automatically added as a prefix, no matter what settings are configured in the root page.');
 
-$GLOBALS['TL_LANG']['tl_page']['bbit_turl_requestPattern']
-	= array('Regular expression (PREG) to match for requested path', 'A complete PREG with modificators, e.g. "@^|[^/]+$@" to match none or one additional fragment within the request path. If left empty, "@^$@" (no additional fragments) will be used.');
-$GLOBALS['TL_LANG']['tl_page']['bbit_turl_capturedParams']
-	= array('Map backreferences within the expression to GET parameters', 'A comma-separated list of parameter names for the backreferences that will be mapped to GET parameters, e.g. "year,month,alias" for expression "@^(\d{4})/(\d{2})/([^/]+)$@". Prefix a parameter name with a "?" to avoid GET parameter override with empty captures.');
-$GLOBALS['TL_LANG']['tl_page']['bbit_turl_matchRequired']
-	= array('Send "Page not found" response on mismatch', 'If the expression does not match the request pfad, a "Page not found" response (HTTP-Code: 404 Page not found) will be sent. Otherwise the page is rendered normal, even when the regular expression did not match.');
-
 $GLOBALS['TL_LANG']['tl_page']['bbit_turl_break']
 	= 'Do not inherit parent page alias';
 

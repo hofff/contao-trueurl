@@ -44,7 +44,6 @@ foreach($GLOBALS['TL_DCA']['tl_page']['palettes'] as $strSelector => &$strPalett
 		$strPalette = str_replace(',type', ',type,bbit_turl_rootInheritProxy,bbit_turl_defaultInherit', $strPalette);
 	} else {
 		$strPalette = str_replace(',type', ',type,bbit_turl_inherit,bbit_turl_transparent,bbit_turl_ignoreRoot', $strPalette);
-		$strPalette = str_replace(',guests', ',guests,bbit_turl_requestPattern,bbit_turl_capturedParams,bbit_turl_matchRequired', $strPalette);
 	}
 }
 
@@ -99,33 +98,5 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_ignoreRoot'] = array(
 	'inputType'	=> 'checkbox',
 	'eval'		=> array(
 		'tl_class'	=> 'clr w50 cbx',
-	),
-);
-
-$GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_requestPattern'] = array(
-	'label'		=> &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_requestPattern'],
-	'inputType'	=> 'text',
-	'eval'		=> array(
-		'maxlength'	=> '1022',
-		'decodeEntities'=> true,
-		'tl_class'	=> 'clr long',
-	),
-);
-
-$GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_capturedParams'] = array(
-	'label'		=> &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_capturedParams'],
-	'inputType'	=> 'text',
-	'eval'		=> array(
-		'maxlength'	=> '1022',
-		'decodeEntities'=> true,
-		'tl_class'	=> 'clr long',
-	),
-);
-
-$GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_matchRequired'] = array(
-	'label'		=> &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_matchRequired'],
-	'inputType'	=> 'checkbox',
-	'eval'		=> array(
-		'tl_class'	=> 'clr',
 	),
 );

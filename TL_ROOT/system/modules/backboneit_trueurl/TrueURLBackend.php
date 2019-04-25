@@ -318,8 +318,10 @@ EOT;
 
 		$this->updateRootInherit($objDC);
 
-		$strFragment = $this->objTrueURL->extractFragment($objDC->id, $strAlias);
-		$this->objTrueURL->update($objDC->id, $strFragment);
+		if (strlen($strAlias)) {
+			$strFragment = $this->objTrueURL->extractFragment($objDC->id, $strAlias);
+			$this->objTrueURL->update($objDC->id, $strFragment);
+		}
 	}
 
 	public function oncopyPage($intID) {
