@@ -10,7 +10,7 @@
 		"contao"
 	],
 	"type" : "contao-module",
-	"license" : "LGPL-3.0+",
+	"license" : "LGPL-3.0-or-later",
 	"authors" : [{
 			"name" : "Oliver Hoff",
 			"email" : "oliver@hofff.com",
@@ -25,9 +25,9 @@
 		"source" : "https://github.com/backbone87/contao-trueurl"
 	},
 	"require" : {
-		"php" : "^5.3 || ^7.0",
-		"contao/core-bundle" : "^3.2 || ^4.3",
-		"contao-community-alliance/composer-plugin" : "^2.0 || ^3.0"
+		"php" : "^5.6 || ^7.0",
+		"contao/core-bundle" : "^4.4",
+		"contao-community-alliance/composer-plugin" : "^3.0"
 	},
 	"replace" : {
 		"backboneit/contao-trueurl" : "self.version",
