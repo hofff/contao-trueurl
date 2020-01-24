@@ -40,7 +40,7 @@ $GLOBALS['TL_DCA']['tl_page']['list']['operations']['bbit_turl_autoInherit'] = a
 );
 
 foreach($GLOBALS['TL_DCA']['tl_page']['palettes'] as $strSelector => &$strPalette) if($strSelector != '__selector__') {
-	if($strSelector == 'root') {
+	if($strSelector === 'root' || $strSelector === 'rootfallback') {
 		$strPalette = str_replace(',type', ',type,bbit_turl_rootInheritProxy,bbit_turl_defaultInherit', $strPalette);
 	} else {
 		$strPalette = str_replace(',type', ',type,bbit_turl_inherit,bbit_turl_transparent,bbit_turl_ignoreRoot', $strPalette);
