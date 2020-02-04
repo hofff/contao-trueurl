@@ -1,7 +1,7 @@
 {
-	"name" : "hofff/contao-trueurl",
-	"description" : "Folderlike page alias' with different editing tools and an improved frontend page selection algorithmn.",
-	"keywords" : [
+	"name": "hofff/contao-trueurl",
+	"description": "Folderlike page alias' with different editing tools and an improved frontend page selection algorithmn.",
+	"keywords": [
 		"folderurl",
 		"alias",
 		"page",
@@ -9,34 +9,45 @@
 		"url",
 		"contao"
 	],
-	"type" : "contao-module",
-	"license" : "LGPL-3.0-or-later",
-	"authors" : [{
-			"name" : "Oliver Hoff",
-			"email" : "oliver@hofff.com",
-			"homepage" : "https://hofff.com/",
-			"role" : "Developer"
+	"type": "contao-module",
+	"license": "LGPL-3.0-or-later",
+	"authors": [
+		{
+			"name": "Nicky Hoff",
+			"email": "nick@hofff.com",
+			"homepage": "https://www.hofff.com/",
+			"role": "Maintainer"
+		},
+		{
+			"name": "David Molineus",
+			"email": "david@hofff.com",
+			"homepage": "https://www.hofff.com/",
+			"role": "Developer"
+		},
+		{
+			"name": "Oliver Hoff",
+			"email": "oliver@hofff.com",
+			"homepage": "https://www.hofff.com/",
+			"role": "Developer"
 		}
 	],
-	"support" : {
-		"issues" : "https://github.com/backbone87/contao-trueurl/issues",
-		"forum" : "https://community.contao.org/de/showthread.php?33071-backboneit_trueurl-TrueURL-Ordner%E4hnliche-Aliase",
-		"irc" : "irc://irc.freenode.org/contao.dev",
-		"source" : "https://github.com/backbone87/contao-trueurl"
+	"support": {
+		"issues": "https://github.com/hofff/contao-trueurl/issues",
+		"source": "https://github.com/hofff/contao-trueurl"
 	},
-	"require" : {
-		"php" : "^5.6 || ^7.0",
-		"contao/core-bundle" : "^4.4",
-		"contao-community-alliance/composer-plugin" : "^3.0"
+	"require": {
+		"php": "^5.6 || ^7.0",
+		"contao/core-bundle": "^4.4",
+		"contao-community-alliance/composer-plugin": "^3.0"
 	},
-	"replace" : {
-		"backboneit/contao-trueurl" : "self.version",
-		"contao-legacy/backboneit_trueurl" : "self.version"
+	"replace": {
+		"backboneit/contao-trueurl": "self.version",
+		"contao-legacy/backboneit_trueurl": "self.version"
 	},
 	"extra" : {
 		"contao" : {
 			"sources" : {
-				"TL_ROOT/system/modules/backboneit_trueurl" : "system/modules/backboneit_trueurl"
+				"TL_ROOT/system/modules/backboneit_trueurl": "system/modules/backboneit_trueurl"
 			}
 		}
 	}
