@@ -1,8 +1,14 @@
 <?php
 
+use Contao\Backend;
+use Contao\BackendUser;
+use Contao\Database;
+use Contao\Input;
+use Contao\Session;
 use Contao\System;
 
-class TrueURLBackend extends Backend {
+class TrueURLBackend
+{
     private $folderUrlConfig;
 
 	public function hookLoadDataContainer($strTable) {
@@ -13,7 +19,7 @@ class TrueURLBackend extends Backend {
 	}
 
 	public function buttonAlias($strHREF, $strLabel, $strTitle, $strClass, $strAttributes, $strTable, $intRoot) {
-		switch($this->Session->get('bbit_turl_alias')) {
+		switch(Session::getInstance()->get('bbit_turl_alias')) {
 			default:
 				$strLabel = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow'][0];
 				$strTitle = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow'][1];
@@ -33,8 +39,8 @@ class TrueURLBackend extends Backend {
 				break;
 		}
 		return sprintf('%s<a href="%s" class="%s" title="%s"%s>%s</a> ',
-			$this->User->isAdmin ? '<br/><br/>' : ' &#160; :: &#160; ',
-			$this->addToUrl($strHREF . '&amp;bbit_turl_alias=' . $intMode),
+			BackendUser::getInstance()->isAdmin ? '<br/><br/>' : ' &#160; :: &#160; ',
+			Backend::addToUrl($strHREF . '&amp;bbit_turl_alias=' . $intMode),
 			$strClass,
 			specialchars($strTitle),
 			$strAttributes,
@@ -43,8 +49,8 @@ class TrueURLBackend extends Backend {
 	}
 
 	public function buttonRegenerate($strHREF, $strLabel, $strTitle, $strClass, $strAttributes, $strTable, $intRoot) {
-		return $this->User->isAdmin ? sprintf(' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
-			$this->addToUrl($strHREF),
+		return BackendUser::getInstance()->isAdmin ? sprintf(' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
+            Backend::addToUrl($strHREF),
 			$strClass,
 			specialchars($strTitle),
 			$strAttributes,
@@ -53,8 +59,8 @@ class TrueURLBackend extends Backend {
 	}
 
 	public function buttonRepair($strHREF, $strLabel, $strTitle, $strClass, $strAttributes, $strTable, $intRoot) {
-		return $this->User->isAdmin ? sprintf(' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
-			$this->addToUrl($strHREF),
+		return BackendUser::getInstance()->isAdmin ? sprintf(' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
+			Backend::addToUrl($strHREF),
 			$strClass,
 			specialchars($strTitle),
 			$strAttributes,
@@ -63,11 +69,11 @@ class TrueURLBackend extends Backend {
 	}
 
 	public function buttonAutoInherit($arrRow, $strHREF, $strLabel, $strTitle, $strIcon, $strAttributes, $strTable, $arrRootIDs, $arrChildRecordIDs, $blnCircularReference, $strPrevious, $strNext) {
-		return $this->User->isAdmin && $this->Input->get('act') != 'paste' ? sprintf('<a href="%s" title="%s"%s>%s</a> ',
-			$this->addToUrl($strHREF . '&amp;id=' . $arrRow['id']),
+		return BackendUser::getInstance()->isAdmin && Input::get('act') != 'paste' ? sprintf('<a href="%s" title="%s"%s>%s</a> ',
+            Backend::addToUrl($strHREF . '&amp;id=' . $arrRow['id']),
 			specialchars($strTitle),
 			$strAttributes,
-			$this->generateImage($strIcon, $strLabel)
+            Backend::generateImage($strIcon, $strLabel)
 		) : '';
 	}
 
@@ -92,7 +98,7 @@ class TrueURLBackend extends Backend {
 			return $label;
 		}
 
-		$intMode = $this->Session->get('bbit_turl_alias');
+		$intMode = Session::getInstance()->get('bbit_turl_alias');
 		if(!$intMode) {
 			return $label;
 		}
@@ -167,7 +173,7 @@ class TrueURLBackend extends Backend {
 	}
 
 	protected function makeImage($strImage, $strTitle) {
-		return ' ' . $this->generateImage(
+		return ' ' . Backend::generateImage(
 			'system/modules/backboneit_trueurl/html/images/' . $strImage,
 			$strTitle, ' title="' . specialchars($strTitle) . '"'
 		);
@@ -184,23 +190,23 @@ class TrueURLBackend extends Backend {
 	}
 
 	public function keyAlias() {
-		$this->Session->set('bbit_turl_alias', max(0, min(2, intval($this->Input->get('bbit_turl_alias')))));
-		$this->redirect($this->getReferer());
+		Session::getInstance()->set('bbit_turl_alias', max(0, min(2, intval(Input::get('bbit_turl_alias')))));
+		Backend::redirect(Backend::getReferer());
 	}
 
 	public function keyRegenerate() {
 		$this->objTrueURL->regeneratePageRoots();
-		$this->redirect($this->getReferer());
+        Backend::redirect(Backend::getReferer());
 	}
 
 	public function keyRepair() {
 		$this->objTrueURL->repair();
-		$this->redirect($this->getReferer());
+        Backend::redirect(Backend::getReferer());
 	}
 
 	public function keyAutoInherit() {
-		$this->objTrueURL->update($this->Input->get('id'), null, true);
-		$this->redirect($this->getReferer());
+		$this->objTrueURL->update(Input::get('id'), null, true);
+        Backend::redirect(Backend::getReferer());
 	}
 
 	public function saveAlias($strAlias) {
@@ -251,7 +257,7 @@ UPDATE	tl_page
 SET		bbit_turl_rootInherit = ?
 WHERE	id = ?
 EOT;
-		$this->Database->prepare($strQuery)->execute($strNew, $objDC->id);
+		Database::getInstance()->prepare($strQuery)->execute($strNew, $objDC->id);
 
 		$strAlias = $objDC->activeRecord->alias;
 		if($strNew != 'always' || !strlen($strAlias)) {
@@ -269,7 +275,7 @@ AND		bbit_turl_fragment LIKE ?
 AND		bbit_turl_fragment = alias
 AND		bbit_turl_ignoreRoot = ''
 EOT;
-		$this->Database->prepare($strQuery)->execute(strlen($strAlias) + 2, $objDC->id, $strAlias . '/%');
+        Database::getInstance()->prepare($strQuery)->execute(strlen($strAlias) + 2, $objDC->id, $strAlias . '/%');
 	}
 
 	public function oncreatePage($strTable, $intID, $arrSet, $objDC) {
@@ -277,7 +283,7 @@ EOT;
 			return;
 		}
 
-		$objParent = $this->getPageDetails($arrSet['pid']);
+		$objParent = Backend::getPageDetails($arrSet['pid']);
 		$intRootID = $objParent->type == 'root' ? $objParent->id : $objParent->rootId;
 
 		if($intRootID) {
@@ -286,14 +292,14 @@ SELECT	bbit_turl_defaultInherit
 FROM	tl_page
 WHERE	id = ?
 EOT;
-			$blnDefaultInherit = $this->Database->prepare($strQuery)->execute($intRootID)->bbit_turl_defaultInherit;
+			$blnDefaultInherit = Database::getInstance()->prepare($strQuery)->execute($intRootID)->bbit_turl_defaultInherit;
 			$strQuery = <<<EOT
 UPDATE	tl_page
 SET		bbit_turl_root = ?,
 		bbit_turl_inherit = ?
 WHERE	id = ?
 EOT;
-			$this->Database->prepare($strQuery)->execute($intRootID, $blnDefaultInherit, $intID);
+			Database::getInstance()->prepare($strQuery)->execute($intRootID, $blnDefaultInherit, $intID);
 
 		} else {
 			$strQuery = <<<EOT
@@ -301,7 +307,7 @@ UPDATE	tl_page
 SET		bbit_turl_root = 0
 WHERE	id = ?
 EOT;
-			$this->Database->prepare($strQuery)->execute($intID);
+			Database::getInstance()->prepare($strQuery)->execute($intID);
 		}
 	}
 
@@ -356,9 +362,6 @@ EOT;
 	protected $objTrueURL;
 
 	public function __construct() {
-		parent::__construct();
-		$this->import('BackendUser', 'User');
 		$this->objTrueURL = new TrueURL();
 	}
-
 }
