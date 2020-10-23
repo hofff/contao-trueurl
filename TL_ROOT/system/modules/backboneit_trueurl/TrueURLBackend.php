@@ -18,6 +18,43 @@ class TrueURLBackend
 		}
 	}
 
+	public function onLoad() {
+		foreach($GLOBALS['TL_DCA']['tl_page']['palettes'] as $strSelector => &$strPalette) {
+			if($strSelector === '__selector__') {
+				continue;
+			}
+
+			if($strSelector === 'root' || $strSelector === 'rootfallback') {
+				$strPalette = str_replace(',type', ',type,bbit_turl_rootInheritProxy,bbit_turl_defaultInherit', $strPalette);
+			} else {
+				$strPalette = str_replace(',type', ',type,bbit_turl_inherit,bbit_turl_transparent,bbit_turl_ignoreRoot', $strPalette);
+			}
+		}
+
+		$arrConfig = &$GLOBALS['TL_DCA']['tl_page']['config'];
+		foreach(array('oncreate', 'onsubmit', 'onrestore', 'oncopy', 'oncut') as $strCallback) {
+			$strKey = $strCallback . '_callback';
+			$arrConfig[$strKey] = (array) $arrConfig[$strKey];
+			array_unshift($arrConfig[$strKey], array('TrueURLBackend', $strCallback . 'Page'));
+		}
+
+		foreach($arrConfig['onsubmit_callback'] as &$arrCallback) {
+			if (! is_array($arrCallback)) {
+				continue;
+			}
+			if ($arrCallback === ['tl_page', 'generateArticle']) {
+				$arrCallback[0] = 'TrueURLBackend';
+				break;
+			}
+			if ($arrCallback === ['Contao\CoreBundle\EventListener\DataContainer\ContentCompositionListener', 'generateArticleForPage']) {
+				$arrCallback[0] = 'TrueURLBackend';
+				$arrCallback[1] = 'generateArticle';
+			}
+		}
+
+		array_unshift($GLOBALS['TL_DCA']['tl_page']['fields']['alias']['save_callback'], array('TrueURLBackend', 'saveAlias'));
+	}
+
 	public function buttonAlias($strHREF, $strLabel, $strTitle, $strClass, $strAttributes, $strTable, $intRoot) {
 		switch(Session::getInstance()->get('bbit_turl_alias')) {
 			default:

@@ -1,19 +1,6 @@
 <?php
 
-$arrConfig = &$GLOBALS['TL_DCA']['tl_page']['config'];
-foreach(array('oncreate', 'onsubmit', 'onrestore', 'oncopy', 'oncut') as $strCallback) {
-	$strKey = $strCallback . '_callback';
-	$arrConfig[$strKey] = (array) $arrConfig[$strKey];
-	array_unshift($arrConfig[$strKey], array('TrueURLBackend', $strCallback . 'Page'));
-}
-
-foreach($arrConfig['onsubmit_callback'] as &$arrCallback) {
-	if($arrCallback[1] == 'generateArticle') {
-		$arrCallback[0] = 'TrueURLBackend';
-		break;
-	}
-}
-
+$GLOBALS['TL_DCA']['tl_page']['config']['onload_callback'][] = array('TrueURLBackend', 'onLoad');
 $GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl'] = $GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'];
 $GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'] = array('TrueURLBackend', 'labelPage');
 
@@ -39,17 +26,8 @@ $GLOBALS['TL_DCA']['tl_page']['list']['operations']['bbit_turl_autoInherit'] = a
 	'button_callback'=> array('TrueURLBackend', 'buttonAutoInherit'),
 );
 
-foreach($GLOBALS['TL_DCA']['tl_page']['palettes'] as $strSelector => &$strPalette) if($strSelector != '__selector__') {
-	if($strSelector === 'root' || $strSelector === 'rootfallback') {
-		$strPalette = str_replace(',type', ',type,bbit_turl_rootInheritProxy,bbit_turl_defaultInherit', $strPalette);
-	} else {
-		$strPalette = str_replace(',type', ',type,bbit_turl_inherit,bbit_turl_transparent,bbit_turl_ignoreRoot', $strPalette);
-	}
-}
-
 $GLOBALS['TL_DCA']['tl_page']['fields']['alias']['eval']['rgxp']		= 'trueurl';
 $GLOBALS['TL_DCA']['tl_page']['fields']['alias']['eval']['alwaysSave']	= true;
-array_unshift($GLOBALS['TL_DCA']['tl_page']['fields']['alias']['save_callback'], array('TrueURLBackend', 'saveAlias'));
 $GLOBALS['TL_DCA']['tl_page']['fields']['alias']['save_callback'][] = array('TrueURLBackend', 'resetFolderUrlConfig');
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_rootInheritProxy'] = array(
