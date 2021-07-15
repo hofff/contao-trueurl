@@ -2,8 +2,10 @@
 
 use Contao\Backend;
 use Contao\BackendUser;
+use Contao\Config;
 use Contao\Database;
 use Contao\Input;
+use Contao\PageModel;
 use Contao\Session;
 use Contao\System;
 
@@ -247,14 +249,16 @@ class TrueURLBackend
 	}
 
 	public function saveAlias($strAlias) {
-		$this->folderUrlConfig = \Contao\Config::get('folderUrl');
-		\Contao\Config::set('folderUrl', false);
+		$this->folderUrlConfig = Config::get('folderUrl');
+		Config::set('folderUrl', false);
+		$GLOBALS['TL_HOOKS']['loadPageDetails'][self::class] = [self::class, 'setPageDetails'];
 
 		return trim($strAlias, ' /');
 	}
 
 	public function resetFolderUrlConfig($strAlias) {
-		\Contao\Config::set('folderUrl', $this->folderUrlConfig);
+		Config::set('folderUrl', $this->folderUrlConfig);
+		unset($GLOBALS['TL_HOOKS']['loadPageDetails'][self::class]);
 		return $strAlias;
 	}
 
@@ -355,8 +359,10 @@ EOT;
 
 		$strAlias = $objDC->activeRecord->alias;
 		if(!strlen($strAlias)) {
+			$this->saveAlias($strAlias);
 			$tl_page = new tl_page();
 			$strAlias = $tl_page->generateAlias('', $objDC);
+			$this->resetFolderUrlConfig($strAlias);
 		}
 
 		$this->updateRootInherit($objDC);
@@ -394,6 +400,11 @@ EOT;
 		$tl_page = new tl_page();
 		$tl_page->generateArticle($objDC);
 		$objDC->activeRecord->alias = $strAlias;
+	}
+
+	public static function setPageDetails(array $parents, PageModel $pageModel)
+	{
+		$pageModel->useFolderUrl = false;
 	}
 
 	protected $objTrueURL;
