@@ -11,6 +11,7 @@
         <service id="Hofff\Contao\TrueUrl\EventListener\Dca\PageDcaListener" public="true">
             <argument type="service" id="contao.framework"/>
             <argument type="service" id="assets.packages"/>
+            <argument>%hofff_contao_true_url.unrouteable_page_types%</argument>
         </service>
 
         <!-- Hook listeners -->
