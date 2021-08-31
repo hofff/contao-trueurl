@@ -42,6 +42,7 @@
     "symfony/config": "^4.4||^9.0",
     "symfony/dependency-injection": "^4.4||^9.0",
     "symfony/http-kernel": "^4.4||^9.0",
+    "symfony/routing": "^4.4||^9.0",
     "symfony/translation-contracts": "^1.1.6|^2"
   },
   "require-dev": {

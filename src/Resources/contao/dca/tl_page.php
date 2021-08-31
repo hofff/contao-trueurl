@@ -1,5 +1,6 @@
 <?php
 
+use Contao\System;
 use Doctrine\DBAL\Types\Types;
 
 $GLOBALS['TL_DCA']['tl_page']['config']['onload_callback'][]     = ['TrueURLBackend', 'onLoad'];
@@ -8,23 +9,23 @@ $GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'] = ['TrueURLBack
 
 $GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_alias']      = [
     'label'           => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow'],
-    'href'            => 'key=bbit_turl_alias',
+    'route'           => 'hofff_contao_true_url_alias',
     'button_callback' => ['TrueURLBackend', 'buttonAlias'],
 ];
 $GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_regenerate'] = [
     'label'           => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_regenerate'],
-    'href'            => 'key=bbit_turl_regenerate',
+    'route'           => 'hofff_contao_true_url_regenerate',
     'button_callback' => ['TrueURLBackend', 'buttonRegenerate'],
 ];
 $GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_repair']     = [
     'label'           => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_repair'],
-    'href'            => 'key=bbit_turl_repair',
+    'route'           => 'hofff_contao_true_url_repair',
     'button_callback' => ['TrueURLBackend', 'buttonRepair'],
 ];
 $GLOBALS['TL_DCA']['tl_page']['list']['operations']['bbit_turl_autoInherit']       = [
     'label'           => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_autoInherit'],
-    'icon'            => \Contao\System::getContainer()->get('assets.packages')->getUrl('@HofffContaoTrueUrlBundle/images/page_link.php'),
-    'href'            => 'key=bbit_turl_autoInherit',
+    'icon'            => System::getContainer()->get('assets.packages')->getUrl('@HofffContaoTrueUrlBundle/images/page_link.php'),
+    'route'           => 'hofff_contao_true_url_auto_inherit',
     'button_callback' => ['TrueURLBackend', 'buttonAutoInherit'],
 ];
 

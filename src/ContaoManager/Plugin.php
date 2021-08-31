@@ -9,10 +9,14 @@ use Contao\ManagerPlugin\Bundle\BundlePluginInterface;
 use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
 use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
 use Contao\ManagerPlugin\Config\ConfigPluginInterface;
+use Contao\ManagerPlugin\Routing\RoutingPluginInterface;
 use Hofff\Contao\TrueUrl\HofffContaoTrueUrlBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;
+use Symfony\Component\Config\Loader\LoaderResolverInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Routing\RouteCollection;
 
-final class Plugin implements BundlePluginInterface, ConfigPluginInterface
+final class Plugin implements BundlePluginInterface, ConfigPluginInterface, RoutingPluginInterface
 {
     public function getBundles(ParserInterface $parser): array
     {
@@ -26,5 +30,15 @@ final class Plugin implements BundlePluginInterface, ConfigPluginInterface
     public function registerContainerConfiguration(LoaderInterface $loader, array $managerConfig): void
     {
         $loader->load(__DIR__ . '/../Resources/config/config.yaml');
+    }
+
+    public function getRouteCollection(LoaderResolverInterface $resolver, KernelInterface $kernel): ?RouteCollection
+    {
+        $loader = $resolver->resolve(__DIR__ . '/../Resources/config/routes.xml');
+        if (! $loader) {
+            return null;
+        }
+
+        return $loader->load(__DIR__ . '/../Resources/config/routes.xml');
     }
 }

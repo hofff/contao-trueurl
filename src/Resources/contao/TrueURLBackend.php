@@ -109,26 +109,6 @@ class TrueURLBackend
 		) : '';
 	}
 
-	public function keyAlias() {
-		Session::getInstance()->set('bbit_turl_alias', max(0, min(2, intval(Input::get('bbit_turl_alias')))));
-		Backend::redirect(Backend::getReferer());
-	}
-
-	public function keyRegenerate() {
-		$this->objTrueURL->regeneratePageRoots();
-        Backend::redirect(Backend::getReferer());
-	}
-
-	public function keyRepair() {
-		$this->objTrueURL->repair();
-        Backend::redirect(Backend::getReferer());
-	}
-
-	public function keyAutoInherit() {
-		$this->objTrueURL->update(Input::get('id'), null, true);
-        Backend::redirect(Backend::getReferer());
-	}
-
 	public function saveAlias($strAlias) {
 		$this->folderUrlConfig = Config::get('folderUrl');
 		Config::set('folderUrl', false);

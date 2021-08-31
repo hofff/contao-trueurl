@@ -7,5 +7,9 @@
     <services>
         <defaults autowire="false" autoconfigure="false" public="false"/>
 
+        <service id="Hofff\Contao\TrueUrl\Controller\BackendController" public="true">
+            <argument type="service" id="session"/>
+            <argument type="service" id="contao.framework"/>
+        </service>
     </services>
 </container>
