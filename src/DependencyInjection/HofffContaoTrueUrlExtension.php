@@ -18,6 +18,9 @@ final class HofffContaoTrueUrlExtension extends Extension
             new FileLocator(__DIR__ . '/../Resources/config')
         );
 
+        $config = $this->processConfiguration(new Configuration(), $configs);
+        $container->setParameter('hofff_contao_true_url.unrouteable_page_types', $config['unrouteable_page_types']);
+
         $loader->load('listeners.xml');
         $loader->load('services.xml');
     }

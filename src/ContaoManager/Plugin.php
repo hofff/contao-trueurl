@@ -8,9 +8,11 @@ use Contao\CoreBundle\ContaoCoreBundle;
 use Contao\ManagerPlugin\Bundle\BundlePluginInterface;
 use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
 use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
+use Contao\ManagerPlugin\Config\ConfigPluginInterface;
 use Hofff\Contao\TrueUrl\HofffContaoTrueUrlBundle;
+use Symfony\Component\Config\Loader\LoaderInterface;
 
-final class Plugin implements BundlePluginInterface
+final class Plugin implements BundlePluginInterface, ConfigPluginInterface
 {
     public function getBundles(ParserInterface $parser): array
     {
@@ -19,5 +21,10 @@ final class Plugin implements BundlePluginInterface
                 ->setLoadAfter([ContaoCoreBundle::class])
                 ->setReplace(['backboneit_trueurl'])
         ];
+    }
+
+    public function registerContainerConfiguration(LoaderInterface $loader, array $managerConfig): void
+    {
+        $loader->load(__DIR__ . '/../Resources/config/config.yaml');
     }
 }

@@ -1,0 +1,6 @@
+hofff_contao_truel_url:
+  unrouteable_page_types:
+    - 'error_401'
+    - 'error_403'
+    - 'error_404'
+    - 'folder'

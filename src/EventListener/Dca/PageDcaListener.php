@@ -20,10 +20,15 @@ final class PageDcaListener
 
     private Packages $packages;
 
-    public function __construct(ContaoFramework $framework, Packages $packages)
+    /** @var list<string> */
+    private array $unrouteablePageTypes;
+
+    /** @param list<string> $unrouteablePageTypes */
+    public function __construct(ContaoFramework $framework, Packages $packages, array $unrouteablePageTypes)
     {
-        $this->framework = $framework;
-        $this->packages  = $packages;
+        $this->framework            = $framework;
+        $this->packages             = $packages;
+        $this->unrouteablePageTypes = $unrouteablePageTypes;
     }
 
     public function labelPage(
@@ -59,7 +64,7 @@ final class PageDcaListener
             return $label;
         }
 
-        if (in_array($row['type'], $GLOBALS['BBIT']['TURL']['unrouteable'])) {
+        if (in_array($row['type'], $this->unrouteablePageTypes, true)) {
             return $label;
         }
 
