@@ -4,13 +4,20 @@ declare(strict_types=1);
 
 namespace Hofff\Contao\TrueUrl\EventListener\Dca;
 
+use Contao\Backend;
 use Contao\CoreBundle\Framework\ContaoFramework;
+use Contao\CoreBundle\ServiceAnnotation\Callback;
 use Contao\DataContainer;
 use Contao\Image;
+use Contao\Input;
 use Contao\Session;
 use Contao\StringUtil;
 use Contao\System;
 use Symfony\Component\Asset\Packages;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Security\Core\Security;
+use Symfony\Contracts\Translation\TranslatorInterface;
+use TrueURL;
 
 final class PageDcaListener
 {
@@ -20,14 +27,28 @@ final class PageDcaListener
 
     private Packages $packages;
 
+    private TranslatorInterface $translator;
+
+    private SessionInterface $session;
+
+    private Security $security;
+
     /** @var list<string> */
     private array $unrouteablePageTypes;
 
     /** @param list<string> $unrouteablePageTypes */
-    public function __construct(ContaoFramework $framework, Packages $packages, array $unrouteablePageTypes)
-    {
+    public function __construct(
+        ContaoFramework $framework,
+        Packages $packages,
+        TranslatorInterface $translator,
+        SessionInterface $session,
+        Security $security,
+        array $unrouteablePageTypes
+    ) {
         $this->framework            = $framework;
         $this->packages             = $packages;
+        $this->translator           = $translator;
+        $this->session              = $session;
         $this->unrouteablePageTypes = $unrouteablePageTypes;
     }
 
@@ -73,11 +94,11 @@ final class PageDcaListener
             return $label;
         }
 
-        $arrAlias = $this->objTrueURL->splitAlias($row);
+        $arrAlias = $this->trueUrl()->splitAlias($row);
 
         if (!$arrAlias) {
             $label .= ' <span style="color:#CC5555;">[';
-            $label .= $GLOBALS['TL_LANG']['tl_page']['errNoAlias'];
+            $label .= $this->translate('errNoAlias');
             $label .= ']</span>';
 
             return $label;
@@ -105,7 +126,7 @@ final class PageDcaListener
         }
         $label .= ']</span>';
 
-        if ($row['type'] == 'root') {
+        if ($row['type'] === 'root') {
             $strTitle = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_rootInherit'][0] . ': ';
             switch ($row['bbit_turl_rootInherit']) {
                 default:
@@ -160,12 +181,111 @@ final class PageDcaListener
         return $label;
     }
 
+    /**
+     * @Callback(table="tl_page", target="list.global_operations.bbit_turl_alias.button")
+     */
+    public function buttonAlias($strHREF, $label, $title, $strClass, $strAttributes, $strTable, $intRoot): string
+    {
+        switch(Session::getInstance()->get('bbit_turl_alias')) {
+            case 1:
+                $translationKey = 'bbit_turl_aliasOnly';
+                $intMode = 2;
+                break;
 
-    protected function makeImage(string $image, string $title): string
+            case 2:
+                $translationKey = 'bbit_turl_aliasHide';
+                $intMode = 0;
+                break;
+
+            default:
+                $translationKey = 'bbit_turl_aliasShow';
+                $intMode = 1;
+                break;
+        }
+
+        $label = $this->translate($translationKey . '.0');
+        $title = $this->translate($translationKey . '.1');
+
+        return sprintf('%s<a href="%s" class="%s" title="%s"%s>%s</a> ',
+            $this->isAdmin()  ? '<br/><br/>' : ' &#160; :: &#160; ',
+            Backend::addToUrl($strHREF . '&amp;bbit_turl_alias=' . $intMode),
+            $strClass,
+            StringUtil::specialchars($title),
+            $strAttributes,
+            $label
+        );
+    }
+
+    /**
+     * @Callback(table="tl_page", target="list.global_operations.bbit_turl_regenerate.button")
+     */
+    public function buttonRegenerate($strHREF, $strLabel, $strTitle, $strClass, $strAttributes): string
+    {
+        return $this->isAdmin()  ? sprintf(' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
+            Backend::addToUrl($strHREF),
+            $strClass,
+            StringUtil::specialchars($strTitle),
+            $strAttributes,
+            $strLabel
+        ) : '';
+    }
+
+    /**
+     * @Callback(table="tl_page", target="list.global_operations.bbit_turl_repair.button")
+     */
+    public function buttonRepair($strHREF, $strLabel, $strTitle, $strClass, $strAttributes): string
+    {
+        return $this->isAdmin() ? sprintf(' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
+            Backend::addToUrl($strHREF),
+            $strClass,
+            StringUtil::specialchars($strTitle),
+            $strAttributes,
+            $strLabel
+        ) : '';
+    }
+
+    /**
+     * @Callback(table="tl_page", target="list.global_operations.bbit_turl_autoInherit.button")
+     */
+    public function buttonAutoInherit($arrRow, $strHREF, $strLabel, $strTitle, $strIcon, $strAttributes): string
+    {
+        return $this->isAdmin() && Input::get('act') !== 'paste' ? sprintf('<a href="%s" title="%s"%s>%s</a> ',
+            Backend::addToUrl($strHREF . '&amp;id=' . $arrRow['id']),
+            StringUtil::specialchars($strTitle),
+            $strAttributes,
+            Image::getHtml($strIcon, $strLabel)
+        ) : '';
+    }
+
+    private function makeImage(string $image, string $title): string
     {
         return ' ' . Image::getHtml(
-            $this->packages->getUrl('HofffContaoTrueUrlBundle/images/' . $image),
+            $this->packages->getUrl('@HofffContaoTrueUrlBundle/images/' . $image),
             $title, ' title="' . StringUtil::specialchars($title) . '"'
         );
+    }
+
+    // TODO: Replace with DI when TrueURL is rewritten
+    private function trueUrl(): TrueURL
+    {
+        static $trueUrl;
+
+        if ($trueUrl === null) {
+            $this->framework->initialize();
+
+            $trueUrl = new TrueURL();
+        }
+
+        return $trueUrl;
+    }
+
+    private function translate(string $key, array $params = []): string
+    {
+        return $this->translator->trans('tl_page.' . $key, $params, 'contao_tl_page');
+    }
+
+    private function isAdmin(): bool
+    {
+        return $this->security->isGranted('ROLE_ADMIN');
     }
 }

@@ -1,13 +1,8 @@
 <?php
 
 use Contao\Backend;
-use Contao\BackendUser;
 use Contao\Config;
 use Contao\Database;
-use Contao\Input;
-use Contao\PageModel;
-use Contao\Session;
-use Contao\System;
 use Hofff\Contao\TrueUrl\EventListener\Hook\PageDetailsListener;
 
 class TrueURLBackend
@@ -26,6 +21,7 @@ class TrueURLBackend
 				$strPalette = str_replace(',type', ',type,bbit_turl_inherit,bbit_turl_transparent,bbit_turl_ignoreRoot', $strPalette);
 			}
 		}
+        unset($strPalette);
 
 		$arrConfig = &$GLOBALS['TL_DCA']['tl_page']['config'];
 		foreach(array('oncreate', 'onsubmit', 'onrestore', 'oncopy', 'oncut') as $strCallback) {
@@ -47,67 +43,9 @@ class TrueURLBackend
 				$arrCallback[1] = 'generateArticle';
 			}
 		}
+        unset($arrCallback);
 
 		array_unshift($GLOBALS['TL_DCA']['tl_page']['fields']['alias']['save_callback'], array('TrueURLBackend', 'saveAlias'));
-	}
-
-	public function buttonAlias($strHREF, $strLabel, $strTitle, $strClass, $strAttributes, $strTable, $intRoot) {
-		switch(Session::getInstance()->get('bbit_turl_alias')) {
-			default:
-				$strLabel = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow'][0];
-				$strTitle = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow'][1];
-				$intMode = 1;
-				break;
-
-			case 1:
-				$strLabel = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasOnly'][0];
-				$strTitle = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasOnly'][1];
-				$intMode = 2;
-				break;
-
-			case 2:
-				$strLabel = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasHide'][0];
-				$strTitle = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasHide'][1];
-				$intMode = 0;
-				break;
-		}
-		return sprintf('%s<a href="%s" class="%s" title="%s"%s>%s</a> ',
-			BackendUser::getInstance()->isAdmin ? '<br/><br/>' : ' &#160; :: &#160; ',
-			Backend::addToUrl($strHREF . '&amp;bbit_turl_alias=' . $intMode),
-			$strClass,
-			specialchars($strTitle),
-			$strAttributes,
-			$strLabel
-		);
-	}
-
-	public function buttonRegenerate($strHREF, $strLabel, $strTitle, $strClass, $strAttributes, $strTable, $intRoot) {
-		return BackendUser::getInstance()->isAdmin ? sprintf(' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
-            Backend::addToUrl($strHREF),
-			$strClass,
-			specialchars($strTitle),
-			$strAttributes,
-			$strLabel
-		) : '';
-	}
-
-	public function buttonRepair($strHREF, $strLabel, $strTitle, $strClass, $strAttributes, $strTable, $intRoot) {
-		return BackendUser::getInstance()->isAdmin ? sprintf(' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
-			Backend::addToUrl($strHREF),
-			$strClass,
-			specialchars($strTitle),
-			$strAttributes,
-			$strLabel
-		) : '';
-	}
-
-	public function buttonAutoInherit($arrRow, $strHREF, $strLabel, $strTitle, $strIcon, $strAttributes, $strTable, $arrRootIDs, $arrChildRecordIDs, $blnCircularReference, $strPrevious, $strNext) {
-		return BackendUser::getInstance()->isAdmin && Input::get('act') != 'paste' ? sprintf('<a href="%s" title="%s"%s>%s</a> ',
-            Backend::addToUrl($strHREF . '&amp;id=' . $arrRow['id']),
-			specialchars($strTitle),
-			$strAttributes,
-            Backend::generateImage($strIcon, $strLabel)
-		) : '';
 	}
 
 	public function saveAlias($strAlias) {
@@ -262,11 +200,6 @@ EOT;
 		$tl_page = new tl_page();
 		$tl_page->generateArticle($objDC);
 		$objDC->activeRecord->alias = $strAlias;
-	}
-
-	public static function setPageDetails(array $parents, PageModel $pageModel)
-	{
-		$pageModel->useFolderUrl = false;
 	}
 
 	protected $objTrueURL;
