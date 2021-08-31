@@ -2,19 +2,34 @@
 
 namespace Hofff\Contao\TrueUrl;
 
-use Controller;
+use Contao\CoreBundle\Framework\ContaoFramework;
+use Contao\Database;
+use Contao\PageModel;
+use Contao\StringUtil;
+use Doctrine\DBAL\Connection;
+use InvalidArgumentException;
 
-use function standardize;
-
-class TrueURL extends Controller
+final class TrueURL
 {
-    public function regeneratePageRoots($arrPageIDs = null, $blnOrphans = true)
+    private Connection $connection;
+
+    private ContaoFramework $framework;
+
+    public function __construct(Connection $connection, ContaoFramework $framework)
     {
+        $this->connection = $connection;
+        $this->framework  = $framework;
+    }
+
+    public function regeneratePageRoots($arrPageIDs = null, $blnOrphans = true): void
+    {
+        $this->framework->initialize();
+
         if ($arrPageIDs !== null) {
             $arrPageIDs = array_unique(array_map('intval', array_filter((array) $arrPageIDs, 'is_numeric')));
             $arrRoots   = [];
             foreach ($arrPageIDs as $intPageID) {
-                $objPage              = $this->getPageDetails($intPageID);
+                $objPage              = PageModel::findWithDetails($intPageID);
                 $intRoot              = $objPage->type == 'root' ? $objPage->id : intval($objPage->rootId);
                 $arrRoots[$intRoot][] = $objPage->id;
             }
@@ -24,14 +39,14 @@ SELECT	id
 FROM	tl_page
 WHERE	type = 'root'
 EOT;
-            $arrRoots = $this->Database->query($strQuery)->fetchEach('id');
+            $arrRoots = Database::getInstance()->query($strQuery)->fetchEach('id');
             $arrRoots = array_combine($arrRoots, $arrRoots);
         }
 
         foreach ($arrRoots as $intRootID => $arrPageIDs) {
             $arrPageIDs = (array) $arrPageIDs;
 
-            $arrDescendants = $this->getChildRecords($arrPageIDs, 'tl_page');
+            $arrDescendants = Database::getInstance()->getChildRecords($arrPageIDs, 'tl_page');
             $arrDescendants = array_merge($arrDescendants, $arrPageIDs);
 
             $strDescendants = implode(',', $arrDescendants);
@@ -40,7 +55,7 @@ UPDATE	tl_page
 SET		bbit_turl_root = ?
 WHERE	id IN ($strDescendants)
 EOT;
-            $this->Database->prepare($strQuery)->execute($intRootID);
+            Database::getInstance()->prepare($strQuery)->execute($intRootID);
         }
 
         if (!$blnOrphans) {
@@ -58,10 +73,10 @@ FROM	tl_page
 WHERE	pid IN ($strPIDs)
 AND		type != 'root'
 EOT;
-            $arrPIDs  = $this->Database->query($strQuery)->fetchEach('id');
+            $arrPIDs  = Database::getInstance()->query($strQuery)->fetchEach('id');
             $arrIDs[] = $arrPIDs;
         }
-        $arrIDs = call_user_func_array('array_merge', $arrIDs);
+        $arrIDs = array_merge(...$arrIDs);
 
         if ($arrIDs) {
             $strIDs   = implode(',', $arrIDs);
@@ -70,7 +85,7 @@ UPDATE	tl_page
 SET		bbit_turl_root = 0
 WHERE	id IN ($strIDs)
 EOT;
-            $this->Database->query($strQuery);
+            Database::getInstance()->query($strQuery);
         }
     }
 
@@ -92,6 +107,8 @@ EOT;
      */
     public function extractFragment($intPageID, $strAlias)
     {
+        $this->framework->initialize();
+
         $strFragment = strval($strAlias);
         if (!strlen($strFragment)) {
             throw new InvalidArgumentException('Argument #2 must be a non-empty string');
@@ -102,7 +119,7 @@ SELECT 	id, pid, type, bbit_turl_inherit, bbit_turl_ignoreRoot
 FROM	tl_page
 WHERE	id = ?
 EOT;
-        $objPage  = $this->Database->prepare($strQuery)->executeUncached($intPageID);
+        $objPage  = Database::getInstance()->prepare($strQuery)->executeUncached($intPageID);
 
         if (!$objPage->numRows || $objPage->type == 'root') {
             return $strFragment;
@@ -136,12 +153,14 @@ EOT;
 
     public function repair()
     {
+        $this->framework->initialize();
+
         $strQuery = <<<EOT
 SELECT	id
 FROM	tl_page
 WHERE	type = 'root'
 EOT;
-        $objPage  = $this->Database->query($strQuery);
+        $objPage  = Database::getInstance()->query($strQuery);
         while ($objPage->next()) {
             $objRoot        = $this->getRootPage($objPage->id);
             $strParentAlias = $this->getParentAlias($objPage->id, $objRoot);
@@ -203,6 +222,8 @@ EOT;
 
     protected function doUpdate($intPageID, $objRoot, $strParentAlias, $blnUpdateAll, $blnAutoInherit)
     {
+        $this->framework->initialize();
+
         $strQuery = <<<EOT
 SELECT 	id, pid, alias, type,
 		bbit_turl_fragment,
@@ -213,7 +234,7 @@ SELECT 	id, pid, alias, type,
 FROM	tl_page
 WHERE	id = ?
 EOT;
-        $objPage  = $this->Database->prepare($strQuery)->executeUncached($intPageID);
+        $objPage  = Database::getInstance()->prepare($strQuery)->executeUncached($intPageID);
 
         if (!$objPage->numRows) {
             return false;
@@ -275,7 +296,7 @@ WHERE	pid = ?
 AND		type != 'root'
 $strOnlyInherit
 EOT;
-        $objChildren = $this->Database->prepare($strQuery)->executeUncached($intPageID);
+        $objChildren = Database::getInstance()->prepare($strQuery)->executeUncached($intPageID);
 
         while ($objChildren->next()) {
             $this->doUpdate($objChildren->id, $objRoot, $strParentAlias, $blnUpdateAll, $blnAutoInherit);
@@ -323,6 +344,8 @@ EOT;
 
     protected function storeAlias($intPageID, $strAlias, $strFragment, $blnInherit = null)
     {
+        $this->framework->initialize();
+
         $arrSet = ['alias' => $strAlias, 'bbit_turl_fragment' => $strFragment];
         $blnInherit === null || $arrSet['bbit_turl_inherit'] = $blnInherit ? 1 : '';
         $strQuery = <<<EOT
@@ -330,7 +353,7 @@ UPDATE	tl_page
 %s
 WHERE	id = ?
 EOT;
-        $this->Database->prepare($strQuery)->set($arrSet)->executeUncached($intPageID);
+        Database::getInstance()->prepare($strQuery)->set($arrSet)->executeUncached($intPageID);
     }
 
     /**
@@ -344,6 +367,8 @@ EOT;
      */
     public function getParentAlias($intPageID, $objRoot = null)
     {
+        $this->framework->initialize();
+
         $objRoot || $objRoot = $this->getRootPage($intPageID);
 
         do {
@@ -354,7 +379,7 @@ JOIN	tl_page AS p2 ON p2.id = p1.pid
 WHERE	p1.id = ?
 AND		p2.type != 'root'
 EOT;
-            $objParent = $this->Database->prepare($strQuery)->executeUncached($intPageID);
+            $objParent = Database::getInstance()->prepare($strQuery)->executeUncached($intPageID);
 
             $intPageID = $objParent->id;
             if (!$objParent->numRows || !$intPageID) {
@@ -362,7 +387,7 @@ EOT;
             }
         } while ($objParent->bbit_turl_transparent);
 
-        $strAlias = strval($objParent->alias);
+        $strAlias = (string) $objParent->alias;
 
         if ($objRoot && !$objParent->bbit_turl_ignoreRoot) {
             switch ($objRoot->bbit_turl_rootInherit) {
@@ -383,8 +408,8 @@ EOT;
     /**
      * Get the root page of the given page id, if it has one.
      * This function uses the direct root reference. If the target is not a root
-     * page or does not exists, the root page is retrieved via
-     * Controller::getPageDetails() and the root page references within that
+     * page or does not exist, the root page is retrieved via
+     * PageModel::findWithDetails() and the root page references within that
      * root page are repaired.
      *
      * @param int $intPageID
@@ -393,6 +418,8 @@ EOT;
      */
     public function getRootPage($intPageID, $blnCached = false)
     {
+        $this->framework->initialize();
+
         $strMethod = $blnCached ? 'execute' : 'executeUncached';
         $strQuery  = <<<EOT
 SELECT	rt.id, rt.type, rt.alias, rt.bbit_turl_rootInherit
@@ -400,7 +427,7 @@ FROM	tl_page AS p
 JOIN	tl_page AS rt ON rt.id = p.bbit_turl_root
 WHERE	p.id = ?
 EOT;
-        $objRoot   = $this->Database->prepare($strQuery)->$strMethod($intPageID);
+        $objRoot   = Database::getInstance()->prepare($strQuery)->$strMethod($intPageID);
 
         if ($objRoot->numRows && $objRoot->type == 'root') {
             return $objRoot;
@@ -421,7 +448,7 @@ SELECT	id, alias, bbit_turl_rootInherit
 FROM	tl_page
 WHERE	id = ?
 EOT;
-        $objRoot  = $this->Database->prepare($strQuery)->executeUncached($intRootID);
+        $objRoot  = Database::getInstance()->prepare($strQuery)->executeUncached($intRootID);
 
         return $objRoot;
     }
@@ -436,13 +463,15 @@ EOT;
      */
     public function makeAlias($intPageID)
     {
-        $objPage = $this->getPageDetails($intPageID);
+        $this->framework->initialize();
+
+        $objPage = PageModel::findWithDetails($intPageID);
 
         if (!$objPage) {
             return 'page-' . $intPageID;
         }
 
-        $strAlias = standardize($objPage->title);
+        $strAlias = StringUtil::standardize($objPage->title);
 
         $strQuery = <<<EOT
 SELECT	id
@@ -450,7 +479,7 @@ FROM	tl_page
 WHERE	id != ?
 AND		alias = ?
 EOT;
-        $objAlias = $this->Database->prepare($strQuery)->executeUncached($intPageID, $strAlias);
+        $objAlias = Database::getInstance()->prepare($strQuery)->executeUncached($intPageID, $strAlias);
 
         if ($objAlias->numRows) {
             $strAlias .= '-' . $intPageID;
@@ -545,11 +574,5 @@ EOT;
         $intLength = strlen($strPrefix);
 
         return !$intLength || strncmp($strAlias, $strPrefix . '/', $intLength + 1) == 0;
-    }
-
-    public function __construct()
-    {
-        parent::__construct();
-        $this->import('Database');
     }
 }

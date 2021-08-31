@@ -10,6 +10,12 @@
         <service id="Hofff\Contao\TrueUrl\Controller\BackendController" public="true">
             <argument type="service" id="session"/>
             <argument type="service" id="contao.framework"/>
+            <argument type="service" id="Hofff\Contao\TrueUrl\TrueURL"/>
+        </service>
+
+        <service id="Hofff\Contao\TrueUrl\TrueURL" public="true">
+            <argument type="service" id="database_connection"/>
+            <argument type="service" id="contao.framework"/>
         </service>
     </services>
 </container>

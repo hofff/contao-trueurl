@@ -33,8 +33,10 @@ final class PageDcaListener
 
     private Security $security;
 
+    private TrueURL $trueUrl;
+
     /** @var list<string> */
-    private array $unrouteablePageTypes;
+    private array   $unrouteablePageTypes;
 
     /** @param list<string> $unrouteablePageTypes */
     public function __construct(
@@ -43,6 +45,7 @@ final class PageDcaListener
         TranslatorInterface $translator,
         SessionInterface $session,
         Security $security,
+        TrueURL $trueURL,
         array $unrouteablePageTypes
     ) {
         $this->framework            = $framework;
@@ -51,6 +54,7 @@ final class PageDcaListener
         $this->session              = $session;
         $this->security             = $security;
         $this->unrouteablePageTypes = $unrouteablePageTypes;
+        $this->trueURL              = $trueURL;
     }
 
     public function labelPage(
@@ -95,7 +99,7 @@ final class PageDcaListener
             return $label;
         }
 
-        $arrAlias = $this->trueUrl()->splitAlias($row);
+        $arrAlias = $this->trueUrl->splitAlias($row);
 
         if (!$arrAlias) {
             $label .= ' <span style="color:#CC5555;">[';
@@ -269,20 +273,6 @@ final class PageDcaListener
                 $title,
                 ' title="' . StringUtil::specialchars($title) . '"'
             );
-    }
-
-    // TODO: Replace with DI when TrueURL is rewritten
-    private function trueUrl(): TrueURL
-    {
-        static $trueUrl;
-
-        if ($trueUrl === null) {
-            $this->framework->initialize();
-
-            $trueUrl = new TrueURL();
-        }
-
-        return $trueUrl;
     }
 
     private function translate(string $key, array $params = []): string

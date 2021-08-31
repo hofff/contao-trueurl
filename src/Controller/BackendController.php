@@ -25,10 +25,13 @@ final class BackendController
 
     private ContaoFramework $framework;
 
-    public function __construct(SessionInterface $session, ContaoFramework $framework)
+    private TrueURL $trueUrl;
+
+    public function __construct(SessionInterface $session, ContaoFramework $framework, TrueURL $trueUrl)
     {
         $this->session   = $session;
         $this->framework = $framework;
+        $this->trueUrl   = $trueUrl;
     }
 
     /**
@@ -56,7 +59,7 @@ final class BackendController
      */
     public function regenerateAction(): Response
     {
-        $this->trueUrl()->regeneratePageRoots();
+        $this->trueUrl->regeneratePageRoots();
 
         return $this->redirectToRefererResponse();
     }
@@ -70,7 +73,7 @@ final class BackendController
      */
     public function repairAction(): Response
     {
-        $this->trueUrl()->repair();
+        $this->trueUrl->repair();
 
         return $this->redirectToRefererResponse();
     }
@@ -84,7 +87,7 @@ final class BackendController
      */
     public function autoInheritAction(Request $request): Response
     {
-        $this->trueUrl()->update($request->query->getInt('id'), null, true);
+        $this->trueUrl->update($request->query->getInt('id'), null, true);
 
         return $this->redirectToRefererResponse();
     }
@@ -97,19 +100,5 @@ final class BackendController
             $this->framework->getAdapter(Backend::class)->getReferer(),
             Response::HTTP_SEE_OTHER
         );
-    }
-
-    // TODO: Replace with DI when TrueURL is rewritten
-    private function trueUrl(): TrueURL
-    {
-        static $trueUrl;
-
-        if ($trueUrl === null) {
-            $this->framework->initialize();
-
-            $trueUrl = new TrueURL();
-        }
-
-        return $trueUrl;
     }
 }
