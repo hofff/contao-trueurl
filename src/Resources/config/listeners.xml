@@ -21,5 +21,8 @@
 
         <service id="Hofff\Contao\TrueUrl\EventListener\Hook\LoadDataContainerListener" public="true">
         </service>
+
+        <service id="Hofff\Contao\TrueUrl\EventListener\Hook\PageDetailsListener" public="true">
+        </service>
     </services>
 </container>

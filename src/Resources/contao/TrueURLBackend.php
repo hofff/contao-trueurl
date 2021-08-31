@@ -8,6 +8,7 @@ use Contao\Input;
 use Contao\PageModel;
 use Contao\Session;
 use Contao\System;
+use Hofff\Contao\TrueUrl\EventListener\Hook\PageDetailsListener;
 
 class TrueURLBackend
 {
@@ -112,14 +113,14 @@ class TrueURLBackend
 	public function saveAlias($strAlias) {
 		$this->folderUrlConfig = Config::get('folderUrl');
 		Config::set('folderUrl', false);
-		$GLOBALS['TL_HOOKS']['loadPageDetails'][self::class] = [self::class, 'setPageDetails'];
+		$GLOBALS['TL_HOOKS']['loadPageDetails'][PageDetailsListener::class] = [PageDetailsListener::class, '__invoke'];
 
 		return trim($strAlias, ' /');
 	}
 
 	public function resetFolderUrlConfig($strAlias) {
 		Config::set('folderUrl', $this->folderUrlConfig);
-		unset($GLOBALS['TL_HOOKS']['loadPageDetails'][self::class]);
+		unset($GLOBALS['TL_HOOKS']['loadPageDetails'][PageDetailsListener::class]);
 		return $strAlias;
 	}
 
@@ -151,7 +152,7 @@ class TrueURLBackend
 			return;
 		}
 
-		list($strOld, $strNew) = $this->arrRootInherit[$objDC->id];
+		[$strOld, $strNew] = $this->arrRootInherit[$objDC->id];
 		unset($this->arrRootInherit[$objDC->id]);
 
 		$strQuery = <<<EOT
