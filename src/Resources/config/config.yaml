@@ -1,4 +1,4 @@
-hofff_contao_truel_url:
+hofff_contao_true_url:
   unrouteable_page_types:
     - 'error_401'
     - 'error_403'
