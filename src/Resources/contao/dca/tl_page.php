@@ -12,16 +12,13 @@ $GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_alias']   
     'route' => 'hofff_contao_true_url_alias',
 ];
 $GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_regenerate'] = [
-    'label' => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_regenerate'],
     'route' => 'hofff_contao_true_url_regenerate',
 ];
 $GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_repair']     = [
-    'label' => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_repair'],
     'route' => 'hofff_contao_true_url_repair',
 ];
 $GLOBALS['TL_DCA']['tl_page']['list']['operations']['bbit_turl_autoInherit']       = [
-    'label' => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_autoInherit'],
-    'icon'  => System::getContainer()->get('assets.packages')->getUrl('@HofffContaoTrueUrlBundle/images/page_link.php'),
+    'icon'  => System::getContainer()->get('assets.packages')->getUrl('images/page_link.php', 'hofff_contao_true_url'),
     'route' => 'hofff_contao_true_url_auto_inherit',
 ];
 
@@ -30,7 +27,6 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['alias']['eval']['alwaysSave'] = true;
 $GLOBALS['TL_DCA']['tl_page']['fields']['alias']['save_callback'][]    = ['TrueURLBackend', 'resetFolderUrlConfig'];
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_rootInheritProxy'] = [
-    'label'         => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_rootInherit'],
     'inputType'     => 'select',
     'options'       => ['normal', 'always', 'never'],
     'reference'     => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_rootInheritOptions'],
@@ -47,7 +43,6 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_rootInheritProxy'] = [
 ];
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_defaultInherit'] = [
-    'label'     => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_defaultInherit'],
     'inputType' => 'checkbox',
     'eval'      => [
         'tl_class' => 'w50 cbx m12',
@@ -61,7 +56,6 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_defaultInherit'] = [
 ];
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_inherit'] = [
-    'label'     => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_inherit'],
     'inputType' => 'checkbox',
     'eval'      => [
         'tl_class' => 'clr w50 cbx',
@@ -75,7 +69,6 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_inherit'] = [
 ];
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_transparent'] = [
-    'label'     => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_transparent'],
     'inputType' => 'checkbox',
     'eval'      => [
         'tl_class' => 'w50 cbx',
@@ -89,7 +82,6 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_transparent'] = [
 ];
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_ignoreRoot'] = [
-    'label'     => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_ignoreRoot'],
     'inputType' => 'checkbox',
     'eval'      => [
         'tl_class' => 'clr w50 cbx',

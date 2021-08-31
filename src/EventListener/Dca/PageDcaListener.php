@@ -49,6 +49,7 @@ final class PageDcaListener
         $this->packages             = $packages;
         $this->translator           = $translator;
         $this->session              = $session;
+        $this->security             = $security;
         $this->unrouteablePageTypes = $unrouteablePageTypes;
     }
 
@@ -70,7 +71,7 @@ final class PageDcaListener
         if (is_array($arrCallback)) {
             $arrCallback[0] = System::importStatic($arrCallback[0]);
         }
-        $label = call_user_func(
+        $label            = call_user_func(
             $arrCallback,
             $row,
             $label,
@@ -186,28 +187,29 @@ final class PageDcaListener
      */
     public function buttonAlias($strHREF, $label, $title, $strClass, $strAttributes, $strTable, $intRoot): string
     {
-        switch(Session::getInstance()->get('bbit_turl_alias')) {
+        switch (Session::getInstance()->get('bbit_turl_alias')) {
             case 1:
                 $translationKey = 'bbit_turl_aliasOnly';
-                $intMode = 2;
+                $intMode        = 2;
                 break;
 
             case 2:
                 $translationKey = 'bbit_turl_aliasHide';
-                $intMode = 0;
+                $intMode        = 0;
                 break;
 
             default:
                 $translationKey = 'bbit_turl_aliasShow';
-                $intMode = 1;
+                $intMode        = 1;
                 break;
         }
 
         $label = $this->translate($translationKey . '.0');
         $title = $this->translate($translationKey . '.1');
 
-        return sprintf('%s<a href="%s" class="%s" title="%s"%s>%s</a> ',
-            $this->isAdmin()  ? '<br/><br/>' : ' &#160; :: &#160; ',
+        return sprintf(
+            '%s<a href="%s" class="%s" title="%s"%s>%s</a> ',
+            $this->isAdmin() ? '<br/><br/>' : ' &#160; :: &#160; ',
             Backend::addToUrl($strHREF . '&amp;bbit_turl_alias=' . $intMode),
             $strClass,
             StringUtil::specialchars($title),
@@ -221,7 +223,8 @@ final class PageDcaListener
      */
     public function buttonRegenerate($strHREF, $strLabel, $strTitle, $strClass, $strAttributes): string
     {
-        return $this->isAdmin()  ? sprintf(' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
+        return $this->isAdmin() ? sprintf(
+            ' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
             Backend::addToUrl($strHREF),
             $strClass,
             StringUtil::specialchars($strTitle),
@@ -235,7 +238,8 @@ final class PageDcaListener
      */
     public function buttonRepair($strHREF, $strLabel, $strTitle, $strClass, $strAttributes): string
     {
-        return $this->isAdmin() ? sprintf(' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
+        return $this->isAdmin() ? sprintf(
+            ' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
             Backend::addToUrl($strHREF),
             $strClass,
             StringUtil::specialchars($strTitle),
@@ -249,7 +253,8 @@ final class PageDcaListener
      */
     public function buttonAutoInherit($arrRow, $strHREF, $strLabel, $strTitle, $strIcon, $strAttributes): string
     {
-        return $this->isAdmin() && Input::get('act') !== 'paste' ? sprintf('<a href="%s" title="%s"%s>%s</a> ',
+        return $this->isAdmin() && Input::get('act') !== 'paste' ? sprintf(
+            '<a href="%s" title="%s"%s>%s</a> ',
             Backend::addToUrl($strHREF . '&amp;id=' . $arrRow['id']),
             StringUtil::specialchars($strTitle),
             $strAttributes,
@@ -260,9 +265,10 @@ final class PageDcaListener
     private function makeImage(string $image, string $title): string
     {
         return ' ' . Image::getHtml(
-            $this->packages->getUrl('@HofffContaoTrueUrlBundle/images/' . $image),
-            $title, ' title="' . StringUtil::specialchars($title) . '"'
-        );
+                $this->packages->getUrl('images/' . $image, 'hofff_contao_true_url'),
+                $title,
+                ' title="' . StringUtil::specialchars($title) . '"'
+            );
     }
 
     // TODO: Replace with DI when TrueURL is rewritten
