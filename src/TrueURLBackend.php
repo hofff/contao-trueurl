@@ -3,7 +3,6 @@
 namespace Hofff\Contao\TrueUrl;
 
 use Contao\Backend;
-use Contao\Config;
 use Contao\Database;
 use Contao\System;
 use Hofff\Contao\TrueUrl\EventListener\Hook\PageDetailsListener;
@@ -11,8 +10,6 @@ use tl_page;
 
 class TrueURLBackend
 {
-    private $folderUrlConfig;
-
     public function onLoad()
     {
         foreach ($GLOBALS['TL_DCA']['tl_page']['palettes'] as $strSelector => &$strPalette) {
@@ -67,8 +64,7 @@ class TrueURLBackend
 
     public function saveAlias($strAlias)
     {
-        $this->folderUrlConfig = Config::get('folderUrl');
-        Config::set('folderUrl', false);
+        // TODO: May we want to use the hook all the time?
         $GLOBALS['TL_HOOKS']['loadPageDetails'][PageDetailsListener::class] = [PageDetailsListener::class, '__invoke'];
 
         return trim($strAlias, ' /');
@@ -76,7 +72,6 @@ class TrueURLBackend
 
     public function resetFolderUrlConfig($strAlias)
     {
-        Config::set('folderUrl', $this->folderUrlConfig);
         unset($GLOBALS['TL_HOOKS']['loadPageDetails'][PageDetailsListener::class]);
 
         return $strAlias;
@@ -235,7 +230,7 @@ EOT;
         $objDC->activeRecord->alias = $strAlias;
     }
 
-    protected $objTrueURL;
+    protected TrueURL $objTrueURL;
 
     public function __construct()
     {

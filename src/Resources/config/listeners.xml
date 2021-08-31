@@ -27,6 +27,7 @@
         </service>
 
         <service id="Hofff\Contao\TrueUrl\EventListener\Hook\PageDetailsListener" public="true">
+            <argument type="service" id="Hofff\Contao\TrueUrl\TrueURL"/>
         </service>
     </services>
 </container>

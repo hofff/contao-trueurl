@@ -45,7 +45,7 @@ final class PageDcaListener
         TranslatorInterface $translator,
         SessionInterface $session,
         Security $security,
-        TrueURL $trueURL,
+        TrueURL $trueUrl,
         array $unrouteablePageTypes
     ) {
         $this->framework            = $framework;
@@ -54,7 +54,7 @@ final class PageDcaListener
         $this->session              = $session;
         $this->security             = $security;
         $this->unrouteablePageTypes = $unrouteablePageTypes;
-        $this->trueURL              = $trueURL;
+        $this->trueUrl              = $trueUrl;
     }
 
     public function labelPage(
