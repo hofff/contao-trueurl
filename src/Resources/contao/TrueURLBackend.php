@@ -4,6 +4,7 @@ use Contao\Backend;
 use Contao\Config;
 use Contao\Database;
 use Hofff\Contao\TrueUrl\EventListener\Hook\PageDetailsListener;
+use Hofff\Contao\TrueUrl\TrueURL;
 
 class TrueURLBackend
 {

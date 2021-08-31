@@ -1,5 +1,11 @@
 <?php
 
+namespace Hofff\Contao\TrueUrl;
+
+use Controller;
+
+use function standardize;
+
 class TrueURL extends Controller
 {
     public function regeneratePageRoots($arrPageIDs = null, $blnOrphans = true)

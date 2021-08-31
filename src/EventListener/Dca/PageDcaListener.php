@@ -17,7 +17,7 @@ use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use TrueURL;
+use Hofff\Contao\TrueUrl\TrueURL;
 
 final class PageDcaListener
 {

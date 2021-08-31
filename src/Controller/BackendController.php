@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBag;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
-use TrueURL;
+use Hofff\Contao\TrueUrl\TrueURL;
 
 use function assert;
 use function max;
