@@ -38,10 +38,11 @@
   "require": {
     "php": "^7.4 || ^8.0",
     "contao/core-bundle": "^4.9",
-    "symfony/http-kernel": "^4.4||^9.0",
-    "symfony/dependency-injection": "^4.4||^9.0",
     "symfony/asset": "^4.4||^9.0",
-    "symfony/config": "^4.4||^9.0"
+    "symfony/config": "^4.4||^9.0",
+    "symfony/dependency-injection": "^4.4||^9.0",
+    "symfony/http-kernel": "^4.4||^9.0",
+    "symfony/translation-contracts": "^1.1.6|^2"
   },
   "require-dev": {
     "contao/manager-plugin": "^2.11"

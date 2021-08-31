@@ -10,6 +10,3 @@ $GLOBALS['BBIT']['TURL']['unrouteable'][]	= 'error_403';
 $GLOBALS['BBIT']['TURL']['unrouteable'][]	= 'error_404';
 $GLOBALS['BBIT']['TURL']['unrouteable'][]	= 'folder'; // aschempp's folderpage extension
 
-$GLOBALS['TL_HOOKS']['loadDataContainer'][]		= array('TrueURLBackend', 'hookLoadDataContainer');
-$GLOBALS['TL_HOOKS']['addCustomRegexp'][]       = array('TrueURLBackend', 'hookAddCustomRegexp');
-
