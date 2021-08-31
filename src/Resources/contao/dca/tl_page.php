@@ -64,7 +64,7 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_inherit'] = [
     'sql' => [
         'type'    => Types::STRING,
         'length'  => 1,
-        'notnull' => false,
+        'notnull' => true,
         'default' => '',
     ],
 ];
@@ -77,7 +77,7 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_transparent'] = [
     'sql' => [
         'type'    => Types::STRING,
         'length'  => 1,
-        'notnull' => false,
+        'notnull' => true,
         'default' => '',
     ],
 ];
@@ -90,16 +90,16 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_ignoreRoot'] = [
     'sql' => [
         'type'    => Types::STRING,
         'length'  => 1,
-        'notnull' => false,
+        'notnull' => true,
         'default' => '',
     ]
 ];
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_fragment'] = [
     'sql' => [
-        'type'    => Types::STRING,
+        'type'    => Types::BINARY,
         'length'  => 128,
-        'notnull' => false,
+        'notnull' => true,
         'default' => '',
     ]
 ];
@@ -108,16 +108,17 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_rootInherit'] = [
     'sql' => [
         'type'    => Types::STRING,
         'length'  => 255,
-        'notnull' => false,
+        'notnull' => true,
         'default' => '',
     ]
 ];
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_root'] = [
     'sql' => [
-        'type'    => Types::INTEGER,
-        'length'  => 10,
-        'notnull' => false,
-        'default' => 0,
+        'type'     => Types::INTEGER,
+        'length'   => 10,
+        'notnull'  => true,
+        'unsigned' => true,
+        'default'  => 0,
     ]
 ];
