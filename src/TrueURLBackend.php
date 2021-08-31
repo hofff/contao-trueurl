@@ -1,10 +1,12 @@
 <?php
 
+namespace Hofff\Contao\TrueUrl;
+
 use Contao\Backend;
 use Contao\Config;
 use Contao\Database;
 use Hofff\Contao\TrueUrl\EventListener\Hook\PageDetailsListener;
-use Hofff\Contao\TrueUrl\TrueURL;
+use tl_page;
 
 class TrueURLBackend
 {
@@ -37,7 +39,7 @@ class TrueURLBackend
         foreach (['oncreate', 'onsubmit', 'onrestore', 'oncopy', 'oncut'] as $strCallback) {
             $strKey             = $strCallback . '_callback';
             $arrConfig[$strKey] = (array) $arrConfig[$strKey];
-            array_unshift($arrConfig[$strKey], ['TrueURLBackend', $strCallback . 'Page']);
+            array_unshift($arrConfig[$strKey], [self::class, $strCallback . 'Page']);
         }
 
         foreach ($arrConfig['onsubmit_callback'] as &$arrCallback) {
@@ -45,20 +47,20 @@ class TrueURLBackend
                 continue;
             }
             if ($arrCallback === ['tl_page', 'generateArticle']) {
-                $arrCallback[0] = 'TrueURLBackend';
+                $arrCallback[0] = self::class;
                 break;
             }
             if ($arrCallback === [
                     'Contao\CoreBundle\EventListener\DataContainer\ContentCompositionListener',
                     'generateArticleForPage',
                 ]) {
-                $arrCallback[0] = 'TrueURLBackend';
+                $arrCallback[0] = self::class;
                 $arrCallback[1] = 'generateArticle';
             }
         }
         unset($arrCallback);
 
-        array_unshift($GLOBALS['TL_DCA']['tl_page']['fields']['alias']['save_callback'], ['TrueURLBackend', 'saveAlias']
+        array_unshift($GLOBALS['TL_DCA']['tl_page']['fields']['alias']['save_callback'], [self::class, 'saveAlias']
         );
     }
 

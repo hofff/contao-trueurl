@@ -2,10 +2,11 @@
 
 use Contao\System;
 use Doctrine\DBAL\Types\Types;
+use Hofff\Contao\TrueUrl\TrueURLBackend;
 
-$GLOBALS['TL_DCA']['tl_page']['config']['onload_callback'][]     = ['TrueURLBackend', 'onLoad'];
+$GLOBALS['TL_DCA']['tl_page']['config']['onload_callback'][]     = [TrueURLBackend::class, 'onLoad'];
 $GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl']      = $GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'];
-$GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'] = ['TrueURLBackend', 'labelPage'];
+$GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'] = [TrueURLBackend::class, 'labelPage'];
 
 $GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_alias']      = [
     'label' => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow'],
@@ -24,7 +25,7 @@ $GLOBALS['TL_DCA']['tl_page']['list']['operations']['bbit_turl_autoInherit']    
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['alias']['eval']['rgxp']       = 'trueurl';
 $GLOBALS['TL_DCA']['tl_page']['fields']['alias']['eval']['alwaysSave'] = true;
-$GLOBALS['TL_DCA']['tl_page']['fields']['alias']['save_callback'][]    = ['TrueURLBackend', 'resetFolderUrlConfig'];
+$GLOBALS['TL_DCA']['tl_page']['fields']['alias']['save_callback'][]    = [TrueURLBackend::class, 'resetFolderUrlConfig'];
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_rootInheritProxy'] = [
     'inputType'     => 'select',
@@ -35,10 +36,10 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_rootInheritProxy'] = [
         'tl_class'       => 'clr w50',
     ],
     'load_callback' => [
-        ['TrueURLBackend', 'loadRootInherit'],
+        [TrueURLBackend::class, 'loadRootInherit'],
     ],
     'save_callback' => [
-        ['TrueURLBackend', 'saveRootInherit'],
+        [TrueURLBackend::class, 'saveRootInherit'],
     ],
 ];
 
