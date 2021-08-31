@@ -21,44 +21,51 @@ final class TrueURL
         $this->framework  = $framework;
     }
 
-    public function regeneratePageRoots($arrPageIDs = null, $blnOrphans = true): void
+    public function regeneratePageRoots(?array $pageIds = null, $orphans = true): void
     {
         $this->framework->initialize();
+        $database = $this->framework->createInstance(Database::class);
 
-        if ($arrPageIDs !== null) {
-            $arrPageIDs = array_unique(array_map('intval', array_filter((array) $arrPageIDs, 'is_numeric')));
-            $arrRoots   = [];
-            foreach ($arrPageIDs as $intPageID) {
-                $objPage              = PageModel::findWithDetails($intPageID);
-                $intRoot              = $objPage->type == 'root' ? $objPage->id : intval($objPage->rootId);
-                $arrRoots[$intRoot][] = $objPage->id;
+        if ($pageIds !== null) {
+            $pageIds = array_unique(array_map('intval', array_filter($pageIds, 'is_numeric')));
+            $rootIds = [];
+            foreach ($pageIds as $pageId) {
+                $pageModel = PageModel::findWithDetails($pageId);
+                if (!$pageModel) {
+                    continue;
+                }
+
+                $intRoot             = $pageModel->type === 'root' ? (int) $pageModel->id : (int) $pageModel->rootId;
+                $rootIds[$intRoot][] = (int) $pageModel->id;
             }
         } else {
-            $strQuery = <<<EOT
+            $query = <<<'EOT'
 SELECT	id
 FROM	tl_page
 WHERE	type = 'root'
 EOT;
-            $arrRoots = Database::getInstance()->query($strQuery)->fetchEach('id');
-            $arrRoots = array_combine($arrRoots, $arrRoots);
+            $rootIds = $this->connection->executeQuery($query)->fetchFirstColumn();
+            $rootIds = array_combine($rootIds, $rootIds);
         }
 
-        foreach ($arrRoots as $intRootID => $arrPageIDs) {
-            $arrPageIDs = (array) $arrPageIDs;
-
-            $arrDescendants = Database::getInstance()->getChildRecords($arrPageIDs, 'tl_page');
-            $arrDescendants = array_merge($arrDescendants, $arrPageIDs);
-
-            $strDescendants = implode(',', $arrDescendants);
-            $strQuery       = <<<EOT
+        foreach ($rootIds as $rootId => $pageIds) {
+            $pageIds     = (array) $pageIds;
+            $descendants = $database->getChildRecords($pageIds, 'tl_page');
+            $descendants = array_merge($descendants, $pageIds);
+            $query       = <<<'EOT'
 UPDATE	tl_page
-SET		bbit_turl_root = ?
-WHERE	id IN ($strDescendants)
+SET		bbit_turl_root = :rootId
+WHERE	id IN (:descendants)
 EOT;
-            Database::getInstance()->prepare($strQuery)->execute($intRootID);
+
+            $this->connection->executeQuery(
+                $query,
+                ['rootId' => $rootId, 'descendants' => $descendants],
+                ['descendants' => Connection::PARAM_STR_ARRAY]
+            );
         }
 
-        if (!$blnOrphans) {
+        if (!$orphans) {
             return;
         }
 
@@ -66,26 +73,29 @@ EOT;
         $arrIDs  = [];
         $arrPIDs = [0];
         while ($arrPIDs) {
-            $strPIDs  = implode(',', $arrPIDs);
-            $strQuery = <<<EOT
+            $query = <<<'EOT'
 SELECT	id
 FROM	tl_page
-WHERE	pid IN ($strPIDs)
+WHERE	pid IN (:pids)
 AND		type != 'root'
 EOT;
-            $arrPIDs  = Database::getInstance()->query($strQuery)->fetchEach('id');
+
+            $arrPIDs = $this->connection
+                ->executeQuery($query, ['pids' => $arrPIDs], ['pids' => Connection::PARAM_STR_ARRAY])
+                ->fetchFirstColumn();
+
             $arrIDs[] = $arrPIDs;
         }
         $arrIDs = array_merge(...$arrIDs);
 
         if ($arrIDs) {
-            $strIDs   = implode(',', $arrIDs);
-            $strQuery = <<<EOT
+            $query = <<<'EOT'
 UPDATE	tl_page
 SET		bbit_turl_root = 0
-WHERE	id IN ($strIDs)
+WHERE	id IN (:ids)
 EOT;
-            Database::getInstance()->query($strQuery);
+
+            $this->connection->executeQuery($query, ['ids' => $arrIDs], ['ids' => Connection::PARAM_STR_ARRAY]);
         }
     }
 
@@ -107,31 +117,30 @@ EOT;
      */
     public function extractFragment($intPageID, $strAlias)
     {
-        $this->framework->initialize();
-
         $strFragment = strval($strAlias);
         if (!strlen($strFragment)) {
             throw new InvalidArgumentException('Argument #2 must be a non-empty string');
         }
 
-        $strQuery = <<<EOT
+        $strQuery   = <<<'EOT'
 SELECT 	id, pid, type, bbit_turl_inherit, bbit_turl_ignoreRoot
 FROM	tl_page
 WHERE	id = ?
 EOT;
-        $objPage  = Database::getInstance()->prepare($strQuery)->executeUncached($intPageID);
+        $statement  = $this->connection->executeQuery($strQuery, [$intPageID]);
+        $pageResult = $statement->fetchAssociative();
 
-        if (!$objPage->numRows || $objPage->type == 'root') {
+        if (!$statement->rowCount() || $pageResult['type'] === 'root') {
             return $strFragment;
         }
 
         $objRoot = $this->getRootPage($intPageID);
 
-        if ($objRoot && !$objPage->bbit_turl_ignoreRoot) {
+        if ($objRoot && !$pageResult['bbit_turl_ignoreRoot']) {
             switch ($objRoot->bbit_turl_rootInherit) {
                 default:
                 case 'normal':
-                    $objPage->pid == $objRoot->id && $strParentAlias = $objRoot->alias;
+                    $pageResult['pid'] == $objRoot->id && $strParentAlias = $objRoot->alias;
                     break;
 
                 case 'always':
@@ -143,7 +152,7 @@ EOT;
             }
         }
 
-        if ($objPage->bbit_turl_inherit) {
+        if ($pageResult['bbit_turl_inherit']) {
             $strParentAlias || $strParentAlias = $this->getParentAlias($intPageID, $objRoot);
             $strFragment = self::unprefix($strFragment, $strParentAlias);
         }
@@ -151,22 +160,24 @@ EOT;
         return $strFragment;
     }
 
-    public function repair()
+    public function repair(): array
     {
-        $this->framework->initialize();
-
-        $strQuery = <<<EOT
+        $query = <<<'EOT'
 SELECT	id
 FROM	tl_page
 WHERE	type = 'root'
 EOT;
-        $objPage  = Database::getInstance()->query($strQuery);
-        while ($objPage->next()) {
-            $objRoot        = $this->getRootPage($objPage->id);
-            $strParentAlias = $this->getParentAlias($objPage->id, $objRoot);
+        $statement = $this->connection->executeQuery($query);
+        $success   = [];
 
-            return $this->doUpdate($objPage->id, $objRoot, $strParentAlias, true, false);
+        while ($row = $statement->fetchAssociative()) {
+            $objRoot        = $this->getRootPage($row['id']);
+            $strParentAlias = $this->getParentAlias($row['id'], $objRoot);
+
+            $success[$row['id']] = $this->doUpdate($row['id'], $objRoot, $strParentAlias, true, false);
         }
+
+        return $success;
     }
 
     /**
@@ -203,7 +214,7 @@ EOT;
      *
      * @return boolean Whether the alias could be successfully updated.
      */
-    public function update($intPageID, $strFragment = null, $blnAutoInherit = false)
+    public function update($intPageID, $strFragment = null, $blnAutoInherit = false): bool
     {
         if ($strFragment !== null) {
             $strFragment = strval($strFragment);
@@ -220,11 +231,9 @@ EOT;
         return $this->doUpdate($intPageID, $objRoot, $strParentAlias, $blnUpdateAll, $blnAutoInherit);
     }
 
-    protected function doUpdate($intPageID, $objRoot, $strParentAlias, $blnUpdateAll, $blnAutoInherit)
+    protected function doUpdate($intPageID, $objRoot, $strParentAlias, $blnUpdateAll, $blnAutoInherit): bool
     {
-        $this->framework->initialize();
-
-        $strQuery = <<<EOT
+        $strQuery = <<<'EOT'
 SELECT 	id, pid, alias, type,
 		bbit_turl_fragment,
 		bbit_turl_inherit,
@@ -234,30 +243,31 @@ SELECT 	id, pid, alias, type,
 FROM	tl_page
 WHERE	id = ?
 EOT;
-        $objPage  = Database::getInstance()->prepare($strQuery)->executeUncached($intPageID);
+        $result = $this->connection->executeQuery($strQuery, [$intPageID]);
+        $pageResult = (object) $result->fetchAssociative();
 
-        if (!$objPage->numRows) {
+        if ($result->rowCount() === 0) {
             return false;
         }
 
-        $strAlias = $strFragment = $this->prepareFragment($objPage, $objRoot, $strParentAlias);
+        $strAlias = $strFragment = $this->prepareFragment($pageResult, $objRoot, $strParentAlias);
 
-        if ($objPage->type == 'root') {
+        if ($pageResult->type == 'root') {
             // updating a root page:
             // - do not check inheriting
             // - set new root page for nested updates
             // - reset parent alias for nested updates
-            $objRoot        = $objPage;
+            $objRoot        = $pageResult;
             $strParentAlias = null;
         } else {
             // updating a normal page:
-            $blnInherit = $objPage->bbit_turl_inherit;
+            $blnInherit = $pageResult->bbit_turl_inherit;
 
-            if ($objRoot && !$objPage->bbit_turl_ignoreRoot) {
+            if ($objRoot && !$pageResult->bbit_turl_ignoreRoot) {
                 switch ($objRoot->bbit_turl_rootInherit) {
                     default:
                     case 'normal':
-                        $objPage->pid == $objRoot->id && $strParentAlias = $objRoot->alias;
+                        $pageResult->pid == $objRoot->id && $strParentAlias = $objRoot->alias;
                         break;
 
                     case 'always':
@@ -279,7 +289,7 @@ EOT;
             $strAlias  = trim($strPrefix . '/' . $strFragment, '/');
 
 
-            if (!$objPage->bbit_turl_transparent) {
+            if (!$pageResult->bbit_turl_transparent) {
                 $strParentAlias = $blnInherit ? trim($strParentAlias . '/' . $strFragment, '/') : $strFragment;
             }
         }
@@ -296,10 +306,11 @@ WHERE	pid = ?
 AND		type != 'root'
 $strOnlyInherit
 EOT;
-        $objChildren = Database::getInstance()->prepare($strQuery)->executeUncached($intPageID);
 
-        while ($objChildren->next()) {
-            $this->doUpdate($objChildren->id, $objRoot, $strParentAlias, $blnUpdateAll, $blnAutoInherit);
+        $childrenResult = $this->connection->executeQuery($strQuery, [$intPageID]);
+
+        while ($childId = $childrenResult->fetchOne()) {
+            $this->doUpdate($childId, $objRoot, $strParentAlias, $blnUpdateAll, $blnAutoInherit);
         }
 
         return true;
@@ -342,18 +353,18 @@ EOT;
         return $this->makeAlias($objPage->id);
     }
 
-    protected function storeAlias($intPageID, $strAlias, $strFragment, $blnInherit = null)
+    private function storeAlias($intPageID, $strAlias, $strFragment, $blnInherit = null): void
     {
-        $this->framework->initialize();
+        $set = [
+            'alias' => $strAlias,
+            'bbit_turl_fragment' => $strFragment
+        ];
 
-        $arrSet = ['alias' => $strAlias, 'bbit_turl_fragment' => $strFragment];
-        $blnInherit === null || $arrSet['bbit_turl_inherit'] = $blnInherit ? 1 : '';
-        $strQuery = <<<EOT
-UPDATE	tl_page
-%s
-WHERE	id = ?
-EOT;
-        Database::getInstance()->prepare($strQuery)->set($arrSet)->executeUncached($intPageID);
+        if ($blnInherit !== null) {
+            $set['bbit_turl_inherit'] = $blnInherit ? 1 : '';
+        }
+
+        $this->connection->update('tl_page', $set, ['id' => $intPageID]);
     }
 
     /**
@@ -367,8 +378,6 @@ EOT;
      */
     public function getParentAlias($intPageID, $objRoot = null)
     {
-        $this->framework->initialize();
-
         $objRoot || $objRoot = $this->getRootPage($intPageID);
 
         do {
@@ -379,17 +388,17 @@ JOIN	tl_page AS p2 ON p2.id = p1.pid
 WHERE	p1.id = ?
 AND		p2.type != 'root'
 EOT;
-            $objParent = Database::getInstance()->prepare($strQuery)->executeUncached($intPageID);
-
-            $intPageID = $objParent->id;
-            if (!$objParent->numRows || !$intPageID) {
+            $result = $this->connection->executeQuery($strQuery, [$intPageID]);
+            $parent = (object) $result->fetchAssociative();
+            $intPageID = $parent->id;
+            if ($result->rowCount() === 0 || !$intPageID) {
                 return '';
             }
-        } while ($objParent->bbit_turl_transparent);
+        } while ($parent->bbit_turl_transparent);
 
-        $strAlias = (string) $objParent->alias;
+        $strAlias = (string) $parent->alias;
 
-        if ($objRoot && !$objParent->bbit_turl_ignoreRoot) {
+        if ($objRoot && !$parent->bbit_turl_ignoreRoot) {
             switch ($objRoot->bbit_turl_rootInherit) {
                 default:
                 case 'always':
@@ -416,24 +425,24 @@ EOT;
      *
      * @return object
      */
-    public function getRootPage($intPageID, $blnCached = false)
+    public function getRootPage($intPageID)
     {
         $this->framework->initialize();
 
-        $strMethod = $blnCached ? 'execute' : 'executeUncached';
         $strQuery  = <<<EOT
 SELECT	rt.id, rt.type, rt.alias, rt.bbit_turl_rootInherit
 FROM	tl_page AS p
 JOIN	tl_page AS rt ON rt.id = p.bbit_turl_root
 WHERE	p.id = ?
 EOT;
-        $objRoot   = Database::getInstance()->prepare($strQuery)->$strMethod($intPageID);
+        $result = $this->connection->executeQuery($strQuery, [$intPageID]);
+        $objRoot = (object) $result->fetchAssociative();
 
-        if ($objRoot->numRows && $objRoot->type == 'root') {
+        if ($result->rowCount() > 0 && $objRoot->type == 'root') {
             return $objRoot;
         }
 
-        $objPage = $this->getPageDetails($intPageID);
+        $objPage = PageModel::findWithDetails($intPageID);
         if ($objPage->type == 'root') {
             $intRootID = $objPage->id;
         } elseif ($objPage->rootId) {
@@ -442,15 +451,14 @@ EOT;
             return null;
         }
 
-        $this->regeneratePageRoots($intRootID);
+        $this->regeneratePageRoots([$intRootID]);
         $strQuery = <<<EOT
 SELECT	id, alias, bbit_turl_rootInherit
 FROM	tl_page
 WHERE	id = ?
 EOT;
-        $objRoot  = Database::getInstance()->prepare($strQuery)->executeUncached($intRootID);
 
-        return $objRoot;
+        return (object) $this->connection->executeQuery($strQuery, [$intRootID])->fetchAssociative();
     }
 
     /**
@@ -461,7 +469,7 @@ EOT;
      *
      * @return string
      */
-    public function makeAlias($intPageID)
+    public function makeAlias($intPageID): string
     {
         $this->framework->initialize();
 
@@ -472,16 +480,15 @@ EOT;
         }
 
         $strAlias = StringUtil::standardize($objPage->title);
-
         $strQuery = <<<EOT
 SELECT	id
 FROM	tl_page
 WHERE	id != ?
 AND		alias = ?
 EOT;
-        $objAlias = Database::getInstance()->prepare($strQuery)->executeUncached($intPageID, $strAlias);
+        $result = $this->connection->executeQuery($strQuery, [$intPageID, $strAlias]);
 
-        if ($objAlias->numRows) {
+        if ($result->rowCount() > 0) {
             $strAlias .= '-' . $intPageID;
         }
 
@@ -496,7 +503,7 @@ EOT;
         }
 
         $arrAlias = [];
-        if ($arrPage['type'] == 'root') {
+        if ($arrPage['type'] === 'root') {
             switch ($arrPage['bbit_turl_rootInherit']) {
                 case 'always':
                     $arrAlias['root'] = $strAlias;
@@ -513,7 +520,7 @@ EOT;
         }
 
         if (!$arrPage['bbit_turl_ignoreRoot']) {
-            $objRoot = $this->getRootPage($arrPage['id'], true);
+            $objRoot = $this->getRootPage($arrPage['id']);
 
             if ($objRoot) switch ($objRoot->bbit_turl_rootInherit) {
                 case 'always':

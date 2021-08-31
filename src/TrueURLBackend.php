@@ -5,6 +5,7 @@ namespace Hofff\Contao\TrueUrl;
 use Contao\Backend;
 use Contao\Config;
 use Contao\Database;
+use Contao\System;
 use Hofff\Contao\TrueUrl\EventListener\Hook\PageDetailsListener;
 use tl_page;
 
@@ -203,19 +204,19 @@ EOT;
 
     public function oncopyPage($intID)
     {
-        $this->objTrueURL->regeneratePageRoots($intID);
+        $this->objTrueURL->regeneratePageRoots([$intID]);
         $this->objTrueURL->update($intID);
     }
 
     public function oncutPage($objDC)
     {
-        $this->objTrueURL->regeneratePageRoots($objDC->id);
+        $this->objTrueURL->regeneratePageRoots([$objDC->id]);
         $this->objTrueURL->update($objDC->id);
     }
 
     public function onrestorePage($intID)
     {
-        $this->objTrueURL->regeneratePageRoots($intID);
+        $this->objTrueURL->regeneratePageRoots([$intID]);
         $this->objTrueURL->update($intID);
     }
 
@@ -238,6 +239,6 @@ EOT;
 
     public function __construct()
     {
-        $this->objTrueURL = new TrueURL();
+        $this->objTrueURL = System::getContainer()->get(TrueURL::class);
     }
 }
