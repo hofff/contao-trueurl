@@ -13,13 +13,6 @@ class TrueURLBackend
 {
     private $folderUrlConfig;
 
-	public function hookLoadDataContainer($strTable) {
-		if($strTable == 'tl_page') {
-			$GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl'] = $GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'];
-			$GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'] = array('TrueURLBackend', 'labelPage');
-		}
-	}
-
 	public function onLoad() {
 		foreach($GLOBALS['TL_DCA']['tl_page']['palettes'] as $strSelector => &$strPalette) {
 			if($strSelector === '__selector__') {
