@@ -15,6 +15,7 @@ use Contao\StringUtil;
 use Contao\System;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Hofff\Contao\TrueUrl\TrueURL;
@@ -35,8 +36,10 @@ final class PageDcaListener
 
     private TrueURL $trueUrl;
 
+    private RouterInterface $router;
+
     /** @var list<string> */
-    private array   $unrouteablePageTypes;
+    private array $unrouteablePageTypes;
 
     /** @param list<string> $unrouteablePageTypes */
     public function __construct(
@@ -45,6 +48,7 @@ final class PageDcaListener
         TranslatorInterface $translator,
         SessionInterface $session,
         Security $security,
+        RouterInterface $router,
         TrueURL $trueUrl,
         array $unrouteablePageTypes
     ) {
@@ -55,6 +59,7 @@ final class PageDcaListener
         $this->security             = $security;
         $this->unrouteablePageTypes = $unrouteablePageTypes;
         $this->trueUrl              = $trueUrl;
+        $this->router               = $router;
     }
 
     public function labelPage(
@@ -214,7 +219,7 @@ final class PageDcaListener
         return sprintf(
             '%s<a href="%s" class="%s" title="%s"%s>%s</a> ',
             $this->isAdmin() ? '<br/><br/>' : ' &#160; :: &#160; ',
-            Backend::addToUrl($strHREF . '&amp;bbit_turl_alias=' . $intMode),
+            $this->router->generate('hofff_contao_true_url_alias', ['bbit_turl_alias' => $intMode]),
             $strClass,
             StringUtil::specialchars($title),
             $strAttributes,

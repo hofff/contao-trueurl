@@ -47,7 +47,7 @@ final class BackendController
         assert($bag instanceof AttributeBag);
         $bag->set('bbit_turl_alias', max(0, min(2, $request->query->getInt('bbit_turl_alias'))));
 
-        return $this->redirectToRefererResponse();
+        return $this->redirectToRefererResponse($request);
     }
 
     /**
@@ -57,11 +57,11 @@ final class BackendController
      *     defaults={"_scope": "backend"}
      * )
      */
-    public function regenerateAction(): Response
+    public function regenerateAction(Request $request): Response
     {
         $this->trueUrl->regeneratePageRoots();
 
-        return $this->redirectToRefererResponse();
+        return $this->redirectToRefererResponse($request);
     }
 
     /**
@@ -71,16 +71,16 @@ final class BackendController
      *     defaults={"_scope": "backend"}
      * )
      */
-    public function repairAction(): Response
+    public function repairAction(Request $request): Response
     {
         $this->trueUrl->repair();
 
-        return $this->redirectToRefererResponse();
+        return $this->redirectToRefererResponse($request);
     }
 
     /**
      * @Route("/contao/trueurl/auto-inherit",
-     *     name="hofff_contao_true_urlauto_inherit",
+     *     name="hofff_contao_true_url_auto_inherit",
      *     methods={"GET"},
      *     defaults={"_scope": "backend"}
      * )
@@ -89,15 +89,15 @@ final class BackendController
     {
         $this->trueUrl->update($request->query->getInt('id'), null, true);
 
-        return $this->redirectToRefererResponse();
+        return $this->redirectToRefererResponse($request);
     }
 
-    private function redirectToRefererResponse(): Response
+    private function redirectToRefererResponse(Request $request): Response
     {
         $this->framework->initialize();
 
         return new RedirectResponse(
-            $this->framework->getAdapter(Backend::class)->getReferer(),
+            $request->getSchemeAndHttpHost() . '/' . $this->framework->getAdapter(Backend::class)->getReferer(),
             Response::HTTP_SEE_OTHER
         );
     }
