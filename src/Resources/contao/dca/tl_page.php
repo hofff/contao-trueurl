@@ -1,5 +1,7 @@
 <?php
 
+use Doctrine\DBAL\Types\Types;
+
 $GLOBALS['TL_DCA']['tl_page']['config']['onload_callback'][]     = ['TrueURLBackend', 'onLoad'];
 $GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl']      = $GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'];
 $GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'] = ['TrueURLBackend', 'labelPage'];
@@ -53,6 +55,12 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_defaultInherit'] = [
     'eval'      => [
         'tl_class' => 'w50 cbx m12',
     ],
+    'sql' => [
+        'type'    => 'string',
+        'length'  => 1,
+        'notnull' => false,
+        'default' => '',
+    ]
 ];
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_inherit'] = [
@@ -60,6 +68,12 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_inherit'] = [
     'inputType' => 'checkbox',
     'eval'      => [
         'tl_class' => 'clr w50 cbx',
+    ],
+    'sql' => [
+        'type'    => Types::STRING,
+        'length'  => 1,
+        'notnull' => false,
+        'default' => '',
     ],
 ];
 
@@ -69,6 +83,12 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_transparent'] = [
     'eval'      => [
         'tl_class' => 'w50 cbx',
     ],
+    'sql' => [
+        'type'    => Types::STRING,
+        'length'  => 1,
+        'notnull' => false,
+        'default' => '',
+    ],
 ];
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_ignoreRoot'] = [
@@ -77,4 +97,37 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_ignoreRoot'] = [
     'eval'      => [
         'tl_class' => 'clr w50 cbx',
     ],
+    'sql' => [
+        'type'    => Types::STRING,
+        'length'  => 1,
+        'notnull' => false,
+        'default' => '',
+    ]
+];
+
+$GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_fragment'] = [
+    'sql' => [
+        'type'    => Types::STRING,
+        'length'  => 128,
+        'notnull' => false,
+        'default' => '',
+    ]
+];
+
+$GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_rootInherit'] = [
+    'sql' => [
+        'type'    => Types::STRING,
+        'length'  => 255,
+        'notnull' => false,
+        'default' => '',
+    ]
+];
+
+$GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_root'] = [
+    'sql' => [
+        'type'    => Types::INTEGER,
+        'length'  => 10,
+        'notnull' => false,
+        'default' => 0,
+    ]
 ];
