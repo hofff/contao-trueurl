@@ -37,7 +37,7 @@ final class BackendController
     /**
      * @Route("/contao/trueurl/alias",
      *     name="hofff_contao_true_url_alias",
-     *     methods={"GET"}
+     *     methods={"GET"},
      *     defaults={"_scope": "backend"}
      * )
      */
@@ -53,7 +53,7 @@ final class BackendController
     /**
      * @Route("/contao/trueurl/regenerate",
      *     name="hofff_contao_true_url_regenerate",
-     *     methods={"GET"}
+     *     methods={"GET"},
      *     defaults={"_scope": "backend"}
      * )
      */
@@ -67,7 +67,7 @@ final class BackendController
     /**
      * @Route("/contao/trueurl/repair",
      *     name="hofff_contao_true_url_repair",
-     *     methods={"GET"}
+     *     methods={"GET"},
      *     defaults={"_scope": "backend"}
      * )
      */
@@ -81,7 +81,7 @@ final class BackendController
     /**
      * @Route("/contao/trueurl/auto-inherit",
      *     name="hofff_contao_true_urlauto_inherit",
-     *     methods={"GET"}
+     *     methods={"GET"},
      *     defaults={"_scope": "backend"}
      * )
      */
