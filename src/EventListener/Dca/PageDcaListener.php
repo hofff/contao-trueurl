@@ -71,16 +71,15 @@ final class PageDcaListener
         $blnProtected = false
     ) {
         $blnWasRecurse = self::$blnRecurse;
-        $arrCallback   = $blnWasRecurse ? [
-            'tl_page',
-            'addIcon',
-        ] : $GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl'];
+        $arrCallback   = $blnWasRecurse
+            ? ['tl_page', 'addIcon']
+            : $GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl'];
 
         self::$blnRecurse = true;
         if (is_array($arrCallback)) {
             $arrCallback[0] = System::importStatic($arrCallback[0]);
         }
-        $label            = call_user_func(
+        $label = call_user_func(
             $arrCallback,
             $row,
             $label,
@@ -122,7 +121,12 @@ final class PageDcaListener
             $label = '';
         }
 
-        $label .= '<span style="color:#b3b3b3;">[';
+        if ($intMode == 1) {
+            $label .= '<span style="color:#b3b3b3;display: inline-block; margin-left: 22px;">[';
+        } else {
+            $label .= '<span style="color:#b3b3b3;">[';
+        }
+
         if ($arrAlias['root']) {
             $label        .= '<span style="color:#0C0;">' . $arrAlias['root'] . '</span>';
             $strConnector = '/';
@@ -188,6 +192,10 @@ final class PageDcaListener
 
         if ($image) {
             $label .= $this->makeImage($image . '.png', $title);
+        }
+
+        if ($intMode == 1) {
+            $label = '<div style="display:inline-block;vertical-align: top;">' . $label . '</div>';
         }
 
         return $label;
