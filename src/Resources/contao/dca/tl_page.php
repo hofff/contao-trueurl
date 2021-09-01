@@ -36,12 +36,6 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_rootInheritProxy'] = [
         'doNotSaveEmpty' => true,
         'tl_class'       => 'clr w50',
     ],
-    'load_callback' => [
-        [TrueURLBackend::class, 'loadRootInherit'],
-    ],
-    'save_callback' => [
-        [TrueURLBackend::class, 'saveRootInherit'],
-    ],
 ];
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_defaultInherit'] = [

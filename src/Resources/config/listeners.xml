@@ -12,6 +12,10 @@
             <argument type="service" id="Hofff\Contao\TrueUrl\TrueURL"/>
         </service>
 
+        <service id="Hofff\Contao\TrueUrl\EventListener\Dca\Page\RootInheritListener" public="true">
+            <argument type="service" id="database_connection"/>
+        </service>
+
         <service id="Hofff\Contao\TrueUrl\EventListener\Dca\PageDcaListener" public="true">
             <argument type="service" id="contao.framework"/>
             <argument type="service" id="assets.packages"/>

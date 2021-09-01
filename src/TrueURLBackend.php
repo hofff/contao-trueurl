@@ -58,69 +58,6 @@ class TrueURLBackend
         unset($arrCallback);
     }
 
-    public function loadRootInherit($varValue, $objDC)
-    {
-        $varValue = $objDC->activeRecord->bbit_turl_rootInherit;
-
-        return $varValue ? $varValue : 'normal';
-    }
-
-    protected $arrRootInherit = [];
-
-    public function saveRootInherit($strNew, $objDC)
-    {
-        if ($objDC->activeRecord) {
-            $strOld = $objDC->activeRecord->bbit_turl_rootInherit;
-            $strOld || $strOld = 'normal';
-            if ($strOld != $strNew) {
-                $this->arrRootInherit[$objDC->id] = [$strOld, $strNew];
-            }
-        }
-
-        return null;
-    }
-
-    protected function updateRootInherit($objDC)
-    {
-        if (!isset($this->arrRootInherit[$objDC->id])) {
-            return;
-        }
-
-        if ($objDC->activeRecord->type != 'root') {
-            unset($this->arrRootInherit[$objDC->id]);
-
-            return;
-        }
-
-        [$strOld, $strNew] = $this->arrRootInherit[$objDC->id];
-        unset($this->arrRootInherit[$objDC->id]);
-
-        $strQuery = <<<EOT
-UPDATE	tl_page
-SET		bbit_turl_rootInherit = ?
-WHERE	id = ?
-EOT;
-        Database::getInstance()->prepare($strQuery)->execute($strNew, $objDC->id);
-
-        $strAlias = $objDC->activeRecord->alias;
-        if ($strNew != 'always' || !strlen($strAlias)) {
-            return;
-        }
-
-        // remove the root alias from fragments of all pages,
-        // where the alias consists only of the fragment
-        // and that do not ignore the root alias
-        $strQuery = <<<EOT
-UPDATE	tl_page
-SET		bbit_turl_fragment = SUBSTRING(bbit_turl_fragment, ?)
-WHERE	bbit_turl_root = ?
-AND		bbit_turl_fragment LIKE ?
-AND		bbit_turl_fragment = alias
-AND		bbit_turl_ignoreRoot = ''
-EOT;
-        Database::getInstance()->prepare($strQuery)->execute(strlen($strAlias) + 2, $objDC->id, $strAlias . '/%');
-    }
-
     public function oncreatePage($strTable, $intID, $arrSet, $objDC)
     {
         if (!$arrSet['pid']) {
@@ -168,8 +105,6 @@ EOT;
             $strAlias = $tl_page->generateAlias('', $objDC);
         }
         $strAlias = trim($strAlias, '/');
-
-        $this->updateRootInherit($objDC);
 
         if (strlen($strAlias)) {
             $strFragment = $this->objTrueURL->extractFragment($objDC->id, $strAlias);
