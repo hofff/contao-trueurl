@@ -22,7 +22,7 @@ final class RootInheritListener
     }
 
     /** @Callback(table="tl_page", target="fields.bbit_turl_rootInheritProxy.load") */
-    public function loadRootInherit($varValue, DataContainer $dataContainer)
+    public function onLoad($varValue, DataContainer $dataContainer)
     {
         $varValue = $dataContainer->activeRecord->bbit_turl_rootInherit;
 
@@ -30,7 +30,7 @@ final class RootInheritListener
     }
 
     /** @Callback(table="tl_page", target="fields.bbit_turl_rootInheritProxy.save") */
-    public function saveRootInherit($newValue, DataContainer $dataContainer)
+    public function onSave($newValue, DataContainer $dataContainer)
     {
         if (! $dataContainer->activeRecord) {
             return null;
@@ -46,7 +46,7 @@ final class RootInheritListener
     }
 
     /** @Callback(table="tl_page", target="config.onsubmit") */
-    protected function updateRootInherit(DataContainer $dataContainer)
+    public function onSubmit(DataContainer $dataContainer)
     {
         if (!isset($this->changedValues[$dataContainer->id])) {
             return;
