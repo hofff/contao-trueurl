@@ -7,6 +7,7 @@ namespace Hofff\Contao\TrueUrl\EventListener\Dca;
 use Contao\Backend;
 use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\CoreBundle\ServiceAnnotation\Callback;
+use Contao\Database;
 use Contao\DataContainer;
 use Contao\Image;
 use Contao\Input;
@@ -19,7 +20,13 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Hofff\Contao\TrueUrl\TrueURL;
-use function func_get_arg;
+
+use tl_page;
+use function array_unshift;
+use function is_array;
+use function str_replace;
+use function strlen;
+use function trim;
 
 final class PageDcaListener
 {
@@ -63,6 +70,95 @@ final class PageDcaListener
         $this->router               = $router;
     }
 
+    /** @Callback(table="tl_page", target="config.onload") */
+    public function onLoad()
+    {
+        foreach ($GLOBALS['TL_DCA']['tl_page']['palettes'] as $strSelector => &$strPalette) {
+            if ($strSelector === '__selector__') {
+                continue;
+            }
+
+            if ($strSelector === 'root' || $strSelector === 'rootfallback') {
+                $strPalette = str_replace(
+                    ',type',
+                    ',type,bbit_turl_rootInheritProxy,bbit_turl_defaultInherit',
+                    $strPalette
+                );
+            } else {
+                $strPalette = str_replace(
+                    ',type',
+                    ',type,bbit_turl_inherit,bbit_turl_transparent,bbit_turl_ignoreRoot',
+                    $strPalette
+                );
+            }
+        }
+        unset($strPalette);
+
+        $arrConfig = &$GLOBALS['TL_DCA']['tl_page']['config'];
+        foreach (['oncreate', 'onsubmit'] as $strCallback) {
+            $strKey             = $strCallback . '_callback';
+            $arrConfig[$strKey] = (array) $arrConfig[$strKey];
+            array_unshift($arrConfig[$strKey], [self::class, $strCallback . 'Page']);
+        }
+    }
+
+    public function oncreatePage($strTable, $intID, $arrSet, $objDC)
+    {
+        if (!$arrSet['pid']) {
+            return;
+        }
+
+        $objParent = Backend::getPageDetails($arrSet['pid']);
+        $intRootID = $objParent->type == 'root' ? $objParent->id : $objParent->rootId;
+
+        if ($intRootID) {
+            $strQuery          = <<<EOT
+SELECT	bbit_turl_defaultInherit
+FROM	tl_page
+WHERE	id = ?
+EOT;
+            $blnDefaultInherit = Database::getInstance()->prepare($strQuery)->execute(
+                $intRootID
+            )->bbit_turl_defaultInherit;
+            $strQuery          = <<<EOT
+UPDATE	tl_page
+SET		bbit_turl_root = ?,
+		bbit_turl_inherit = ?
+WHERE	id = ?
+EOT;
+            Database::getInstance()->prepare($strQuery)->execute($intRootID, $blnDefaultInherit, $intID);
+        } else {
+            $strQuery = <<<EOT
+UPDATE	tl_page
+SET		bbit_turl_root = 0
+WHERE	id = ?
+EOT;
+            Database::getInstance()->prepare($strQuery)->execute($intID);
+        }
+    }
+
+    public function onsubmitPage($objDC)
+    {
+        if (!$objDC->activeRecord) {
+            return;
+        }
+
+        $strAlias = $objDC->activeRecord->alias;
+        if (!strlen($strAlias)) {
+            $tl_page  = new tl_page();
+            $strAlias = $tl_page->generateAlias('', $objDC);
+        }
+        $strAlias = trim($strAlias, '/');
+
+        if (strlen($strAlias)) {
+            $strFragment = $this->trueUrl->extractFragment($objDC->id, $strAlias);
+            $this->trueUrl->update($objDC->id, $strFragment);
+        }
+    }
+
+    /**
+     * @Callback(table="tl_page", target="list.label.label")
+     */
     public function labelPage(
         $row,
         $label,

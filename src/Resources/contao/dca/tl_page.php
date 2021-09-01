@@ -2,12 +2,8 @@
 
 use Contao\System;
 use Doctrine\DBAL\Types\Types;
-use Hofff\Contao\TrueUrl\EventListener\Dca\PageDcaListener;
-use Hofff\Contao\TrueUrl\TrueURLBackend;
 
-$GLOBALS['TL_DCA']['tl_page']['config']['onload_callback'][]     = [TrueURLBackend::class, 'onLoad'];
-$GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl']      = $GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'];
-$GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'] = [PageDcaListener::class, 'labelPage'];
+$GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl'] = $GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'];
 
 $GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_alias']      = [
     'label' => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow'],
