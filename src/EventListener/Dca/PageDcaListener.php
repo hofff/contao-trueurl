@@ -21,12 +21,9 @@ use Symfony\Component\Security\Core\Security;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Hofff\Contao\TrueUrl\TrueURL;
 
-use tl_page;
 use function array_unshift;
 use function is_array;
 use function str_replace;
-use function strlen;
-use function trim;
 
 final class PageDcaListener
 {
@@ -95,7 +92,7 @@ final class PageDcaListener
         unset($strPalette);
 
         $arrConfig = &$GLOBALS['TL_DCA']['tl_page']['config'];
-        foreach (['oncreate', 'onsubmit'] as $strCallback) {
+        foreach (['oncreate'] as $strCallback) {
             $strKey             = $strCallback . '_callback';
             $arrConfig[$strKey] = (array) $arrConfig[$strKey];
             array_unshift($arrConfig[$strKey], [self::class, $strCallback . 'Page']);
@@ -134,25 +131,6 @@ SET		bbit_turl_root = 0
 WHERE	id = ?
 EOT;
             Database::getInstance()->prepare($strQuery)->execute($intID);
-        }
-    }
-
-    public function onsubmitPage($objDC)
-    {
-        if (!$objDC->activeRecord) {
-            return;
-        }
-
-        $strAlias = $objDC->activeRecord->alias;
-        if (!strlen($strAlias)) {
-            $tl_page  = new tl_page();
-            $strAlias = $tl_page->generateAlias('', $objDC);
-        }
-        $strAlias = trim($strAlias, '/');
-
-        if (strlen($strAlias)) {
-            $strFragment = $this->trueUrl->extractFragment($objDC->id, $strAlias);
-            $this->trueUrl->update($objDC->id, $strFragment);
         }
     }
 
