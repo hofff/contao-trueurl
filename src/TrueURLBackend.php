@@ -112,24 +112,6 @@ EOT;
         }
     }
 
-    public function oncopyPage($intID)
-    {
-        $this->objTrueURL->regeneratePageRoots([$intID]);
-        $this->objTrueURL->update($intID);
-    }
-
-    public function oncutPage($objDC)
-    {
-        $this->objTrueURL->regeneratePageRoots([$objDC->id]);
-        $this->objTrueURL->update($objDC->id);
-    }
-
-    public function onrestorePage($intID)
-    {
-        $this->objTrueURL->regeneratePageRoots([$intID]);
-        $this->objTrueURL->update($intID);
-    }
-
     public function generateArticle($objDC)
     {
         if (!$objDC->activeRecord) {
