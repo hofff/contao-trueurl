@@ -19,6 +19,7 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Hofff\Contao\TrueUrl\TrueURL;
+use function func_get_arg;
 
 final class PageDcaListener
 {
@@ -244,7 +245,7 @@ final class PageDcaListener
     {
         return $this->isAdmin() ? sprintf(
             ' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
-            Backend::addToUrl($strHREF),
+            $this->router->generate('hofff_contao_true_url_regenerate'),
             $strClass,
             StringUtil::specialchars($strTitle),
             $strAttributes,
@@ -259,7 +260,7 @@ final class PageDcaListener
     {
         return $this->isAdmin() ? sprintf(
             ' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
-            Backend::addToUrl($strHREF),
+            $this->router->generate('hofff_contao_true_url_repair'),
             $strClass,
             StringUtil::specialchars($strTitle),
             $strAttributes,
@@ -268,13 +269,13 @@ final class PageDcaListener
     }
 
     /**
-     * @Callback(table="tl_page", target="list.global_operations.bbit_turl_autoInherit.button")
+     * @Callback(table="tl_page", target="list.operations.bbit_turl_autoInherit.button")
      */
     public function buttonAutoInherit($arrRow, $strHREF, $strLabel, $strTitle, $strIcon, $strAttributes): string
     {
-        return $this->isAdmin() && Input::get('act') !== 'paste' ? sprintf(
+        return ($this->isAdmin() && Input::get('act') !== 'paste') ? sprintf(
             '<a href="%s" title="%s"%s>%s</a> ',
-            Backend::addToUrl($strHREF . '&amp;id=' . $arrRow['id']),
+            $this->router->generate('hofff_contao_true_url_auto_inherit', ['id' => $arrRow['id']]),
             StringUtil::specialchars($strTitle),
             $strAttributes,
             Image::getHtml($strIcon, $strLabel)

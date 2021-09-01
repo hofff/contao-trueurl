@@ -11,17 +11,11 @@ $GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'] = [PageDcaListe
 
 $GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_alias']      = [
     'label' => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow'],
-    'route' => 'hofff_contao_true_url_alias',
 ];
-$GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_regenerate'] = [
-    'route' => 'hofff_contao_true_url_regenerate',
-];
-$GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_repair']     = [
-    'route' => 'hofff_contao_true_url_repair',
-];
+$GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_regenerate'] = [];
+$GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_repair']     = [];
 $GLOBALS['TL_DCA']['tl_page']['list']['operations']['bbit_turl_autoInherit']       = [
-    'icon'  => System::getContainer()->get('assets.packages')->getUrl('images/page_link.php', 'hofff_contao_true_url'),
-    'route' => 'hofff_contao_true_url_auto_inherit',
+    'icon'  => System::getContainer()->get('assets.packages')->getUrl('images/page_link.png', 'hofff_contao_true_url'),
 ];
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['alias']['eval']['rgxp']       = 'trueurl';
