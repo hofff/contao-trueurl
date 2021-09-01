@@ -57,24 +57,6 @@ class TrueURLBackend
             }
         }
         unset($arrCallback);
-
-        array_unshift($GLOBALS['TL_DCA']['tl_page']['fields']['alias']['save_callback'], [self::class, 'saveAlias']
-        );
-    }
-
-    public function saveAlias($strAlias)
-    {
-        // TODO: May we want to use the hook all the time?
-        $GLOBALS['TL_HOOKS']['loadPageDetails'][PageDetailsListener::class] = [PageDetailsListener::class, '__invoke'];
-
-        return trim($strAlias, ' /');
-    }
-
-    public function resetFolderUrlConfig($strAlias)
-    {
-        unset($GLOBALS['TL_HOOKS']['loadPageDetails'][PageDetailsListener::class]);
-
-        return $strAlias;
     }
 
     public function loadRootInherit($varValue, $objDC)
@@ -183,11 +165,10 @@ EOT;
 
         $strAlias = $objDC->activeRecord->alias;
         if (!strlen($strAlias)) {
-            $this->saveAlias($strAlias);
             $tl_page  = new tl_page();
             $strAlias = $tl_page->generateAlias('', $objDC);
-            $this->resetFolderUrlConfig($strAlias);
         }
+        $strAlias = trim($strAlias, '/');
 
         $this->updateRootInherit($objDC);
 

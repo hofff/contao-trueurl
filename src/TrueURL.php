@@ -8,6 +8,7 @@ use Contao\PageModel;
 use Contao\StringUtil;
 use Doctrine\DBAL\Connection;
 use InvalidArgumentException;
+use function count;
 
 final class TrueURL
 {
@@ -581,5 +582,37 @@ EOT;
         $intLength = strlen($strPrefix);
 
         return !$intLength || strncmp($strAlias, $strPrefix . '/', $intLength + 1) == 0;
+    }
+
+    public function configurePageDetails(array $parents, PageModel $pageModel): void
+    {
+        $rootPage                = $this->getRootPage($pageModel->id);
+        $pageModel->useFolderUrl = $this->determineUseFolderUrl($parents, $pageModel);
+
+        if ($pageModel->bbit_turl_inherit) {
+            $folderUrl = $this->getParentAlias($pageModel->id);
+            if ($rootPage && $pageModel->bbit_turl_ignoreRoot) {
+                $folderUrl = self::unprefix($folderUrl, $rootPage->alias);
+            }
+        } elseif ($rootPage && $rootPage->bbit_turl_rootInherit === 'always') {
+            $folderUrl = $rootPage->alias;
+        }
+
+        $pageModel->folderUrl = $folderUrl . '/';
+    }
+
+    private function determineUseFolderUrl(array $parents, PageModel $pageModel): bool
+    {
+        if ($pageModel->bbit_turl_ignoreRoot) {
+            return (bool) $pageModel->bbit_turl_inherit;
+        }
+
+        $rootPage = $this->getRootPage($pageModel->id);
+
+        if ($rootPage && $rootPage->bbit_turl_rootInherit === 'always') {
+            return true;
+        }
+
+        return (bool) $pageModel->bbit_turl_inherit;
     }
 }

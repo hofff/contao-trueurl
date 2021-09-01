@@ -26,9 +26,9 @@ $GLOBALS['TL_DCA']['tl_page']['list']['operations']['bbit_turl_autoInherit']    
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['alias']['eval']['rgxp']       = 'trueurl';
 $GLOBALS['TL_DCA']['tl_page']['fields']['alias']['eval']['alwaysSave'] = true;
-$GLOBALS['TL_DCA']['tl_page']['fields']['alias']['save_callback'][]    = [TrueURLBackend::class, 'resetFolderUrlConfig'];
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_rootInheritProxy'] = [
+    'label'         => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_rootInherit'],
     'inputType'     => 'select',
     'options'       => ['normal', 'always', 'never'],
     'reference'     => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_rootInheritOptions'],

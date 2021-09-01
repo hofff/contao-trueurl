@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Hofff\Contao\TrueUrl\EventListener\Hook;
 
+use Contao\CoreBundle\ServiceAnnotation\Hook;
 use Contao\PageModel;
 use Hofff\Contao\TrueUrl\TrueURL;
 
+/** @Hook("loadPageDetails") */
 final class PageDetailsListener
 {
     private TrueURL $trueUrl;
@@ -19,6 +21,6 @@ final class PageDetailsListener
     /** @param list<PageModel> $parents */
     public function __invoke(array $parents, PageModel $pageModel): void
     {
-        $pageModel->folderUrl = $this->trueUrl->getParentAlias($pageModel->id) . '/';
+        $this->trueUrl->configurePageDetails($parents, $pageModel);
     }
 }

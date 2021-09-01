@@ -186,7 +186,9 @@ final class PageDcaListener
             $title .= "\n" . implode("\n", $arrAlias['err']);
         }
 
-        $label .= $this->makeImage($image . '.png', $title);
+        if ($image) {
+            $label .= $this->makeImage($image . '.png', $title);
+        }
 
         return $label;
     }
