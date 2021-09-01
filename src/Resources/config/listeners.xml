@@ -8,6 +8,10 @@
         <defaults autowire="false" autoconfigure="false" public="false"/>
 
         <!-- Data container callback listeners -->
+        <service id="Hofff\Contao\TrueUrl\EventListener\Dca\Page\RegeneratePageRootsListener" public="true">
+            <argument type="service" id="Hofff\Contao\TrueUrl\TrueURL"/>
+        </service>
+
         <service id="Hofff\Contao\TrueUrl\EventListener\Dca\PageDcaListener" public="true">
             <argument type="service" id="contao.framework"/>
             <argument type="service" id="assets.packages"/>

@@ -5,7 +5,6 @@ namespace Hofff\Contao\TrueUrl;
 use Contao\Backend;
 use Contao\Database;
 use Contao\System;
-use Hofff\Contao\TrueUrl\EventListener\Hook\PageDetailsListener;
 use tl_page;
 
 class TrueURLBackend
@@ -34,7 +33,7 @@ class TrueURLBackend
         unset($strPalette);
 
         $arrConfig = &$GLOBALS['TL_DCA']['tl_page']['config'];
-        foreach (['oncreate', 'onsubmit', 'onrestore', 'oncopy', 'oncut'] as $strCallback) {
+        foreach (['oncreate', 'onsubmit'] as $strCallback) {
             $strKey             = $strCallback . '_callback';
             $arrConfig[$strKey] = (array) $arrConfig[$strKey];
             array_unshift($arrConfig[$strKey], [self::class, $strCallback . 'Page']);
