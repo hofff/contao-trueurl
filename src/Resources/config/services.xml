@@ -11,6 +11,7 @@
             <argument type="service" id="session"/>
             <argument type="service" id="contao.framework"/>
             <argument type="service" id="Hofff\Contao\TrueUrl\TrueURL"/>
+            <argument type="service" id="security.helper"/>
         </service>
 
         <service id="Hofff\Contao\TrueUrl\TrueURL" public="true">
