@@ -94,9 +94,6 @@ final class ViewListener
         }
     }
 
-    /**
-     * @Callback(table="tl_page", target="list.label.label")
-     */
     public function labelPage(
         $row,
         $label,
