@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Hofff\Contao\TrueUrl\EventListener\Dca;
 
+use Contao\CoreBundle\DataContainer\PaletteManipulator;
 use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\CoreBundle\ServiceAnnotation\Callback;
 use Contao\Database;
@@ -21,9 +22,8 @@ use Symfony\Component\Security\Core\Security;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Hofff\Contao\TrueUrl\TrueURL;
 
-use function array_unshift;
 use function is_array;
-use function str_replace;
+use function is_string;
 
 final class PageDcaListener
 {
@@ -68,32 +68,34 @@ final class PageDcaListener
     }
 
     /** @Callback(table="tl_page", target="config.onload") */
-    public function onLoad()
+    public function onLoad(): void
     {
-        foreach ($GLOBALS['TL_DCA']['tl_page']['palettes'] as $strSelector => &$strPalette) {
-            if ($strSelector === '__selector__') {
+        $rootManipulator = PaletteManipulator::create()->addField(
+            ['bbit_turl_rootInheritProxy', 'bbit_turl_defaultInherit'],
+            'type'
+        );
+
+        $pageManipulator = PaletteManipulator::create()->addField(
+            ['bbit_turl_inherit', 'bbit_turl_transparent', 'bbit_turl_ignoreRoot'],
+            'type'
+        );
+
+        foreach ($GLOBALS['TL_DCA']['tl_page']['palettes'] as $selector => $palette) {
+            if ($selector === '__selector__' || !is_string($palette)) {
                 continue;
             }
 
-            if ($strSelector === 'root' || $strSelector === 'rootfallback') {
-                $strPalette = str_replace(
-                    ',type',
-                    ',type,bbit_turl_rootInheritProxy,bbit_turl_defaultInherit',
-                    $strPalette
-                );
-            } else {
-                $strPalette = str_replace(
-                    ',type',
-                    ',type,bbit_turl_inherit,bbit_turl_transparent,bbit_turl_ignoreRoot',
-                    $strPalette
-                );
+            if ($selector === 'root' || $selector === 'rootfallback') {
+                $rootManipulator->applyToPalette($selector, 'tl_page');
+                continue;
             }
+
+            $pageManipulator->applyToPalette($selector, 'tl_page');
         }
-        unset($strPalette);
     }
 
     /** @Callback(table="tl_page", target="config.oncreate", priority=128) */
-    public function oncreatePage($strTable, $intID, $arrSet, $objDC)
+    public function oncreate($strTable, $intID, $arrSet, $objDC)
     {
         if (!$arrSet['pid']) {
             return;
