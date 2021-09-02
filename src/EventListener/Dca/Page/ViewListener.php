@@ -2,30 +2,30 @@
 
 declare(strict_types=1);
 
-namespace Hofff\Contao\TrueUrl\EventListener\Dca;
+namespace Hofff\Contao\TrueUrl\EventListener\Dca\Page;
 
 use Contao\CoreBundle\DataContainer\PaletteManipulator;
 use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\CoreBundle\ServiceAnnotation\Callback;
-use Contao\Database;
 use Contao\DataContainer;
 use Contao\Image;
 use Contao\Input;
-use Contao\PageModel;
-use Contao\Session;
 use Contao\StringUtil;
 use Contao\System;
+use Doctrine\DBAL\Connection;
 use Symfony\Component\Asset\Packages;
+use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBag;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Hofff\Contao\TrueUrl\TrueURL;
 
+use function assert;
 use function is_array;
 use function is_string;
 
-final class PageDcaListener
+final class ViewListener
 {
     private static bool $blnRecurse = false;
 
@@ -94,40 +94,6 @@ final class PageDcaListener
         }
     }
 
-    /** @Callback(table="tl_page", target="config.oncreate", priority=128) */
-    public function oncreate($strTable, $intID, $arrSet, $objDC)
-    {
-        if (!$arrSet['pid']) {
-            return;
-        }
-
-        $objParent = PageModel::findWithDetails($arrSet['pid']);
-        $intRootID = $objParent->type == 'root' ? $objParent->id : $objParent->rootId;
-
-        if ($intRootID) {
-            $strQuery          = <<<EOT
-SELECT	bbit_turl_defaultInherit
-FROM	tl_page
-WHERE	id = ?
-EOT;
-            $blnDefaultInherit = Database::getInstance()->prepare($strQuery)->execute($intRootID)->bbit_turl_defaultInherit;
-            $strQuery          = <<<EOT
-UPDATE	tl_page
-SET		bbit_turl_root = ?,
-		bbit_turl_inherit = ?
-WHERE	id = ?
-EOT;
-            Database::getInstance()->prepare($strQuery)->execute($intRootID, $blnDefaultInherit, $intID);
-        } else {
-            $strQuery = <<<EOT
-UPDATE	tl_page
-SET		bbit_turl_root = 0
-WHERE	id = ?
-EOT;
-            Database::getInstance()->prepare($strQuery)->execute($intID);
-        }
-    }
-
     /**
      * @Callback(table="tl_page", target="list.label.label")
      */
@@ -146,7 +112,7 @@ EOT;
 
         self::$blnRecurse = true;
         if (is_array($arrCallback)) {
-            $arrCallback[0] = System::importStatic($arrCallback[0]);
+            $arrCallback[0] = $this->framework->getAdapter(System::class)->importStatic($arrCallback[0]);
         }
         $label = call_user_func(
             $arrCallback,
@@ -167,7 +133,7 @@ EOT;
             return $label;
         }
 
-        $intMode = Session::getInstance()->get('bbit_turl_alias');
+        $intMode = $this->getViewMode();
         if (!$intMode) {
             return $label;
         }
@@ -210,52 +176,46 @@ EOT;
         $label .= ']</span>';
 
         if ($row['type'] === 'root') {
-            $strTitle = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_rootInherit'][0] . ': ';
+            $strTitle  = $this->translate('bbit_turl_rootInherit.0') . ': ';
+            $strTitle .= $this->translate('bbit_turl_rootInheritOptions.' . $row['bbit_turl_rootInherit']);
+
             switch ($row['bbit_turl_rootInherit']) {
                 default:
                 case 'normal':
-                    $label .= $this->makeImage(
-                        'link.png',
-                        $strTitle . $GLOBALS['TL_LANG']['tl_page']['bbit_turl_rootInheritOptions']['normal']
-                    );
+                    $label .= $this->makeImage('link.png', $strTitle);
                     break;
                 case 'always':
-                    $label .= $this->makeImage(
-                        'link_add.png',
-                        $strTitle . $GLOBALS['TL_LANG']['tl_page']['bbit_turl_rootInheritOptions']['always']
-                    );
+                    $label .= $this->makeImage('link_add.png', $strTitle);
                     break;
                 case 'never':
-                    $label .= $this->makeImage(
-                        'link_delete.png',
-                        $strTitle . $GLOBALS['TL_LANG']['tl_page']['bbit_turl_rootInheritOptions']['never']
-                    );
+                    $label .= $this->makeImage('link_delete.png', $strTitle);
                     break;
             }
         } else {
             $row['bbit_turl_ignoreRoot'] && $label .= $this->makeImage(
                 'link_delete.png',
-                $GLOBALS['TL_LANG']['tl_page']['bbit_turl_ignoreRoot'][0]
+                $this->translate('bbit_turl_ignoreRoot.0')
             );
 
             if ($row['bbit_turl_inherit']) {
                 $image = 'link';
-                $title = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_inherit'][0];
+                $title = $this->translate('bbit_turl_inherit.0');
             } else {
                 $image = 'link_break';
-                $title = $GLOBALS['TL_LANG']['tl_page']['bbit_turl_break'];
+                $title = $this->translate('bbit_turl_break');
             }
             if ($row['bbit_turl_transparent']) {
                 $arrAlias['err'] || $image .= '_go';
-                $title .= "\n" . $GLOBALS['TL_LANG']['tl_page']['bbit_turl_transparent'][0];
+                $title .= "\n" . $this->translate('bbit_turl_transparent.0');
             }
         }
 
         if ($arrAlias['err']) {
             $image .= '_error';
             foreach ($arrAlias['err'] as $strError => &$strLabel) {
-                $strLabel = $GLOBALS['TL_LANG']['tl_page'][$strError];
+                $strLabel = $this->translate($strError);
             }
+            unset($strLabel);
             $title .= "\n" . implode("\n", $arrAlias['err']);
         }
 
@@ -275,7 +235,7 @@ EOT;
      */
     public function buttonAlias($strHREF, $label, $title, $strClass, $strAttributes, $strTable, $intRoot): string
     {
-        switch (Session::getInstance()->get('bbit_turl_alias')) {
+        switch ($this->getViewMode()) {
             case 1:
                 $translationKey = 'bbit_turl_aliasOnly';
                 $intMode        = 2;
@@ -367,5 +327,13 @@ EOT;
     private function isAdmin(): bool
     {
         return $this->security->isGranted('ROLE_ADMIN');
+    }
+
+    private function getViewMode(): int
+    {
+        $bag = $this->session->getBag('contao_backend');
+        assert($bag instanceof AttributeBag);
+
+        return (int) $bag->get('bbit_turl_alias');
     }
 }

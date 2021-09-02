@@ -6,6 +6,7 @@ namespace Hofff\Contao\TrueUrl\EventListener\Dca\Page;
 
 use Contao\CoreBundle\ServiceAnnotation\Callback;
 use Contao\DataContainer;
+use Contao\PageModel;
 use Doctrine\DBAL\Connection;
 
 use function strlen;
@@ -19,6 +20,46 @@ final class RootInheritListener
     public function __construct(Connection $connection)
     {
         $this->connection = $connection;
+    }
+
+    /** @Callback(table="tl_page", target="config.oncreate", priority=128) */
+    public function onCreate(string $table, $recordId, array $set, DataContainer $dataContainer): void
+    {
+        if (!$set['pid']) {
+            return;
+        }
+
+        $parentPage = PageModel::findWithDetails($set['pid']);
+        if (!$parentPage) {
+            $this->connection->update($table, ['bbit_turl_root' => 0], ['id' => $recordId]);
+
+            return;
+        }
+
+        $rootId = $parentPage->type === 'root' ? $parentPage->id : $parentPage->rootId;
+
+        if (! $rootId) {
+            $this->connection->update($table, ['bbit_turl_root' => 0], ['id' => $recordId]);
+
+            return;
+        }
+
+        $strQuery          = <<<'EOT'
+SELECT	bbit_turl_defaultInherit
+FROM	tl_page
+WHERE	id = ?
+EOT;
+        $result = $this->connection->executeQuery($strQuery, [$rootId]);
+        if ($result->rowCount() === 0) {
+            $this->connection->update($table, ['bbit_turl_root' => 0], ['id' => $recordId]);
+            return;
+        }
+
+        $this->connection->update(
+            $table,
+            ['bbit_turl_root' => $rootId, 'bbit_turl_inherit' => $result->fetchOne()],
+            ['id' => $recordId]
+        );
     }
 
     /** @Callback(table="tl_page", target="fields.bbit_turl_rootInheritProxy.load") */

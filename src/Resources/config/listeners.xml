@@ -28,7 +28,7 @@
             <argument type="service" id="database_connection"/>
         </service>
 
-        <service id="Hofff\Contao\TrueUrl\EventListener\Dca\PageDcaListener" public="true">
+        <service id="Hofff\Contao\TrueUrl\EventListener\Dca\Page\ViewListener" public="true">
             <argument type="service" id="contao.framework"/>
             <argument type="service" id="assets.packages"/>
             <argument type="service" id="translator"/>

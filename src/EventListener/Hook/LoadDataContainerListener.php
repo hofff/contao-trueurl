@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Hofff\Contao\TrueUrl\EventListener\Hook;
 
 use Contao\CoreBundle\ServiceAnnotation\Hook;
-use Hofff\Contao\TrueUrl\EventListener\Dca\PageDcaListener;
+use Hofff\Contao\TrueUrl\EventListener\Dca\Page\ViewListener;
 
 /** @Hook("loadDataContainer") */
 final class LoadDataContainerListener
@@ -18,6 +18,6 @@ final class LoadDataContainerListener
 
         $dca                                    = &$GLOBALS['TL_DCA']['tl_page'];
         $dca['list']['label']['bbit_turl']      = $dca['list']['label']['label_callback'];
-        $dca['list']['label']['label_callback'] = [PageDcaListener::class, 'labelPage'];
+        $dca['list']['label']['label_callback'] = [ViewListener::class, 'labelPage'];
     }
 }
