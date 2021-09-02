@@ -90,15 +90,9 @@ final class PageDcaListener
             }
         }
         unset($strPalette);
-
-        $arrConfig = &$GLOBALS['TL_DCA']['tl_page']['config'];
-        foreach (['oncreate'] as $strCallback) {
-            $strKey             = $strCallback . '_callback';
-            $arrConfig[$strKey] = (array) $arrConfig[$strKey];
-            array_unshift($arrConfig[$strKey], [self::class, $strCallback . 'Page']);
-        }
     }
 
+    /** @Callback(table="tl_page", target="config.oncreate", priority=128) */
     public function oncreatePage($strTable, $intID, $arrSet, $objDC)
     {
         if (!$arrSet['pid']) {
