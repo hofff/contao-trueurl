@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Hofff\Contao\TrueUrl\EventListener\Dca;
 
-use Contao\Backend;
 use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\CoreBundle\ServiceAnnotation\Callback;
 use Contao\Database;
 use Contao\DataContainer;
 use Contao\Image;
 use Contao\Input;
+use Contao\PageModel;
 use Contao\Session;
 use Contao\StringUtil;
 use Contao\System;
@@ -105,7 +105,7 @@ final class PageDcaListener
             return;
         }
 
-        $objParent = Backend::getPageDetails($arrSet['pid']);
+        $objParent = PageModel::findWithDetails($arrSet['pid']);
         $intRootID = $objParent->type == 'root' ? $objParent->id : $objParent->rootId;
 
         if ($intRootID) {
@@ -114,9 +114,7 @@ SELECT	bbit_turl_defaultInherit
 FROM	tl_page
 WHERE	id = ?
 EOT;
-            $blnDefaultInherit = Database::getInstance()->prepare($strQuery)->execute(
-                $intRootID
-            )->bbit_turl_defaultInherit;
+            $blnDefaultInherit = Database::getInstance()->prepare($strQuery)->execute($intRootID)->bbit_turl_defaultInherit;
             $strQuery          = <<<EOT
 UPDATE	tl_page
 SET		bbit_turl_root = ?,
