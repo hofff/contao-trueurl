@@ -83,7 +83,7 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_ignoreRoot'] = [
 $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_fragment'] = [
     'sql' => [
         'type'    => Types::BINARY,
-        'length'  => 128,
+        'length'  => 255,
         'notnull' => true,
         'default' => '',
     ]
