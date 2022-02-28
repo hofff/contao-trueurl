@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hofff\Contao\TrueUrl;
 
 use Contao\CoreBundle\Framework\ContaoFramework;
@@ -7,8 +9,23 @@ use Contao\Database;
 use Contao\PageModel;
 use Contao\StringUtil;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Driver\Exception;
 use InvalidArgumentException;
 
+use function array_combine;
+use function array_filter;
+use function array_map;
+use function array_merge;
+use function array_unique;
+use function strlen;
+use function strncasecmp;
+use function strncmp;
+use function substr;
+use function trim;
+
+/**
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
+ */
 final class TrueURL
 {
     private Connection $connection;
@@ -24,13 +41,12 @@ final class TrueURL
     /**
      * Regenerate the direct root page relation.
      *
-     * @param array|null $pageIds
-     * @param bool       $orphans
+     * @param list<string|int>|null $pageIds
      *
-     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws Exception
      * @throws \Doctrine\DBAL\Exception
      */
-    public function regeneratePageRoots(?array $pageIds = null, $orphans = true): void
+    public function regeneratePageRoots(?array $pageIds = null, bool $orphans = true): void
     {
         $this->framework->initialize();
         $database = $this->framework->createInstance(Database::class);
@@ -40,7 +56,7 @@ final class TrueURL
             $rootIds = [];
             foreach ($pageIds as $pageId) {
                 $pageModel = PageModel::findWithDetails($pageId);
-                if (!$pageModel) {
+                if (! $pageModel) {
                     continue;
                 }
 
@@ -48,7 +64,7 @@ final class TrueURL
                 $rootIds[$intRoot][] = (int) $pageModel->id;
             }
         } else {
-            $query = <<<'EOT'
+            $query   = <<<'EOT'
 SELECT	id
 FROM	tl_page
 WHERE	type = 'root'
@@ -74,7 +90,7 @@ EOT;
             );
         }
 
-        if (!$orphans) {
+        if (! $orphans) {
             return;
         }
 
@@ -95,17 +111,20 @@ EOT;
 
             $arrIDs[] = $arrPIDs;
         }
+
         $arrIDs = array_merge(...$arrIDs);
 
-        if ($arrIDs) {
-            $query = <<<'EOT'
-UPDATE	tl_page
-SET		bbit_turl_root = 0
-WHERE	id IN (:ids)
+        if (! $arrIDs) {
+            return;
+        }
+
+        $query = <<<'EOT'
+UPDATE  tl_page
+SET     bbit_turl_root = 0
+WHERE   id IN (:ids)
 EOT;
 
-            $this->connection->executeQuery($query, ['ids' => $arrIDs], ['ids' => Connection::PARAM_STR_ARRAY]);
-        }
+        $this->connection->executeQuery($query, ['ids' => $arrIDs], ['ids' => Connection::PARAM_STR_ARRAY]);
     }
 
     /**
@@ -118,11 +137,9 @@ EOT;
      * This function is meant to be used with alias from current user input and
      * not to generate fragments from a stored alias.
      *
-     * @param integer $pageId
-     * @param string  $alias
+     * @throws InvalidArgumentException If $strAlias casts to an empty string.
      *
-     * @return string
-     * @throws InvalidArgumentException If $strAlias casts to an empty string
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public function extractFragment(int $pageId, string $alias): string
     {
@@ -143,13 +160,14 @@ EOT;
             return $fragment;
         }
 
-        $rootPage = $this->getRootPage($pageId);
+        $rootPage    = $this->getRootPage($pageId);
+        $parentAlias = null;
 
-        if ($rootPage && !$pageResult->bbit_turl_ignoreRoot) {
+        if ($rootPage && ! $pageResult->bbit_turl_ignoreRoot) {
             switch ($rootPage->bbit_turl_rootInherit) {
                 default:
                 case 'normal':
-                    $pageResult->pid == $rootPage->id && $parentAlias = $rootPage->alias;
+                    $pageResult->pid === $rootPage->id && $parentAlias = $rootPage->alias;
                     break;
 
                 case 'always':
@@ -163,7 +181,7 @@ EOT;
 
         if ($pageResult->bbit_turl_inherit) {
             $parentAlias || $parentAlias = $this->getParentAlias($pageId, $rootPage);
-            $fragment = self::unprefix($fragment, $parentAlias);
+            $fragment                    = self::unprefix($fragment, $parentAlias);
         }
 
         return $fragment;
@@ -174,14 +192,14 @@ EOT;
      *
      * Returns an array of succes state for reach root page id.
      *
-     * @return array
+     * @return array<int|string, bool>
      *
-     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws Exception
      * @throws \Doctrine\DBAL\Exception
      */
     public function repair(): array
     {
-        $query = <<<'EOT'
+        $query     = <<<'EOT'
 SELECT	id
 FROM	tl_page
 WHERE	type = 'root'
@@ -228,10 +246,10 @@ EOT;
      *
      * 6. Generate a fragment with makeAlias and use the result as new page fragment
      *
-     * @param integer $pageId   The page to be updated.
-     * @param string  $fragment The fragment to be used.
+     * @param int    $pageId   The page to be updated.
+     * @param string $fragment The fragment to be used.
      *
-     * @return boolean Whether the alias could be successfully updated.
+     * @return bool Whether the alias could be successfully updated.
      */
     public function update(int $pageId, ?string $fragment = null, bool $autoInherit = false): bool
     {
@@ -239,16 +257,21 @@ EOT;
             if ($fragment === '') {
                 return false;
             }
+
             $this->storeAlias($pageId, $fragment, $fragment);
         }
 
         $rootPage    = $this->getRootPage($pageId);
         $parentAlias = $this->getParentAlias($pageId, $rootPage);
-        $updateAll   = $rootPage && $rootPage->id == $pageId;
+        $updateAll   = $rootPage && $rootPage->id === $pageId;
 
         return $this->doUpdate($pageId, $rootPage, $parentAlias, $updateAll, $autoInherit);
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     */
     private function doUpdate(
         int $pageId,
         ?object $rootPage,
@@ -256,7 +279,7 @@ EOT;
         bool $updateAll,
         bool $autoInherit
     ): bool {
-        $query   = <<<'EOT'
+        $query      = <<<'EOT'
 SELECT 	id, pid, alias, type,
 		bbit_turl_fragment,
 		bbit_turl_inherit,
@@ -273,7 +296,9 @@ EOT;
             return false;
         }
 
-        $strAlias = $fragment = $this->prepareFragment($pageResult, $rootPage, $parentAlias);
+        $strAlias     = $fragment = $this->prepareFragment($pageResult, $rootPage, $parentAlias);
+        $inherit      = false;
+        $strRootAlias = '';
 
         if ($pageResult->type === 'root') {
             // updating a root page:
@@ -286,11 +311,11 @@ EOT;
             // updating a normal page:
             $inherit = $pageResult->bbit_turl_inherit;
 
-            if ($rootPage && !$pageResult->bbit_turl_ignoreRoot) {
+            if ($rootPage && ! $pageResult->bbit_turl_ignoreRoot) {
                 switch ($rootPage->bbit_turl_rootInherit) {
                     default:
                     case 'normal':
-                        $pageResult->pid == $rootPage->id && $parentAlias = $rootPage->alias;
+                        $pageResult->pid === $rootPage->id && $parentAlias = $rootPage->alias;
                         break;
 
                     case 'always':
@@ -302,7 +327,7 @@ EOT;
                 }
             }
 
-            if ($autoInherit && !$inherit) {
+            if ($autoInherit && ! $inherit) {
                 $unprefixed = self::unprefix($fragment, $parentAlias);
                 $inherit    = $unprefixed !== $fragment;
                 $fragment   = $unprefixed;
@@ -311,16 +336,18 @@ EOT;
             $strPrefix = $inherit ? trim($strRootAlias . '/' . $parentAlias, '/') : $strRootAlias;
             $strAlias  = trim($strPrefix . '/' . $fragment, '/');
 
-            if (!$pageResult->bbit_turl_transparent) {
+            if (! $pageResult->bbit_turl_transparent) {
                 $parentAlias = $inherit ? trim($parentAlias . '/' . $fragment, '/') : $fragment;
             }
         }
 
         $this->storeAlias($pageId, $strAlias, $fragment, $inherit);
 
-        if (!$updateAll && !$autoInherit && $rootPage && $rootPage->bbit_turl_rootInherit !== 'always') {
+        $strOnlyInherit = '';
+        if (! $updateAll && ! $autoInherit && $rootPage && $rootPage->bbit_turl_rootInherit !== 'always') {
             $strOnlyInherit = 'AND bbit_turl_inherit = \'1\'';
         }
+
         $query = <<<EOT
 SELECT	id
 FROM	tl_page
@@ -338,22 +365,25 @@ EOT;
         return true;
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     */
     private function prepareFragment(object $page, ?object $rootPage, ?string $parentAlias = null): string
     {
         // use stored fragment
-        $strFragment = $page->bbit_turl_fragment;
-        if (strlen($strFragment)) {
+        $strFragment = (string) $page->bbit_turl_fragment;
+        if ($strFragment !== '') {
             return $strFragment;
         }
 
         // create fragment from existing alias
         $strFragment = $page->alias;
         // remove root alias, if obeyed, according to inherit settings
-        if ($rootPage && !$page->bbit_turl_ignoreRoot) {
+        if ($rootPage && ! $page->bbit_turl_ignoreRoot) {
             switch ($rootPage->bbit_turl_rootInherit) {
                 default:
                 case 'normal': // if root page is direct parent, use its alias as parent alias
-                    $page->pid == $rootPage->id && $parentAlias = $rootPage->alias;
+                    $page->pid === $rootPage->id && $parentAlias = $rootPage->alias;
                     break;
 
                 case 'always': // always unprefix
@@ -364,11 +394,13 @@ EOT;
                     break;
             }
         }
+
         // remove parent alias, if inheriting is enabled
         if ($page->bbit_turl_inherit) {
             $strFragment = self::unprefix($strFragment, $parentAlias);
         }
-        if (strlen($strFragment)) {
+
+        if ($strFragment !== '') {
             return $strFragment;
         }
 
@@ -379,7 +411,7 @@ EOT;
     {
         $set = [
             'alias' => $alias,
-            'bbit_turl_fragment' => $fragment
+            'bbit_turl_fragment' => $fragment,
         ];
 
         if ($inherit !== null) {
@@ -394,9 +426,7 @@ EOT;
      * that is not a root page and is not transparent in alias inheritance
      * hierarchy.
      *
-     * @param integer $pageId
-     *
-     * @return string
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     private function getParentAlias(int $pageId, ?object $rootPage = null): string
     {
@@ -413,14 +443,14 @@ EOT;
             $result   = $this->connection->executeQuery($strQuery, [$pageId]);
             $parent   = (object) $result->fetchAssociative();
             $pageId   = $parent->id;
-            if ($result->rowCount() === 0 || !$pageId) {
+            if ($result->rowCount() === 0 || ! $pageId) {
                 return '';
             }
         } while ($parent->bbit_turl_transparent);
 
         $strAlias = (string) $parent->alias;
 
-        if ($rootPage && !$parent->bbit_turl_ignoreRoot) {
+        if ($rootPage && ! $parent->bbit_turl_ignoreRoot) {
             switch ($rootPage->bbit_turl_rootInherit) {
                 default:
                 case 'always':
@@ -442,30 +472,30 @@ EOT;
      * page or does not exist, the root page is retrieved via
      * PageModel::findWithDetails() and the root page references within that
      * root page are repaired.
-     *
-     * @param int $pageId
-     *
-     * @return object|null
      */
     private function getRootPage(int $pageId): ?object
     {
         $this->framework->initialize();
 
-        $strQuery  = <<<EOT
+        $strQuery = <<<EOT
 SELECT	rt.id, rt.type, rt.alias, rt.bbit_turl_rootInherit
 FROM	tl_page AS p
 JOIN	tl_page AS rt ON rt.id = p.bbit_turl_root
 WHERE	p.id = ?
 EOT;
-        $result = $this->connection->executeQuery($strQuery, [$pageId]);
-        $objRoot = (object) $result->fetchAssociative();
+        $result   = $this->connection->executeQuery($strQuery, [$pageId]);
+        $objRoot  = (object) $result->fetchAssociative();
 
-        if ($result->rowCount() > 0 && $objRoot->type == 'root') {
+        if ($result->rowCount() > 0 && $objRoot->type === 'root') {
             return $objRoot;
         }
 
         $objPage = PageModel::findWithDetails($pageId);
-        if ($objPage->type == 'root') {
+        if ($objPage === null) {
+            return null;
+        }
+
+        if ($objPage->type === 'root') {
             $intRootID = $objPage->id;
         } elseif ($objPage->rootId) {
             $intRootID = $objPage->rootId;
@@ -491,10 +521,6 @@ EOT;
     /**
      * This is a simple alias generation function, which ALWAYS generates an
      * alias for the given page id.
-     *
-     * @param integer $pageId
-     *
-     * @return string
      */
     private function makeAlias(int $pageId): string
     {
@@ -502,7 +528,7 @@ EOT;
 
         $objPage = PageModel::findWithDetails($pageId);
 
-        if (!$objPage) {
+        if (! $objPage) {
             return 'page-' . $pageId;
         }
 
@@ -513,7 +539,7 @@ FROM	tl_page
 WHERE	id != ?
 AND		alias = ?
 EOT;
-        $result = $this->connection->executeQuery($strQuery, [$pageId, $strAlias]);
+        $result   = $this->connection->executeQuery($strQuery, [$pageId, $strAlias]);
 
         if ($result->rowCount() > 0) {
             $strAlias .= '-' . $pageId;
@@ -522,10 +548,18 @@ EOT;
         return $strAlias;
     }
 
+    /**
+     * @param array<string,mixed> $page
+     *
+     * @return array<string,mixed>|null
+     *
+     * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     */
     public function splitAlias(array $page): ?array
     {
         $strAlias = $page['alias'];
-        if (!strlen($strAlias)) {
+        if (! strlen($strAlias)) {
             return null;
         }
 
@@ -546,35 +580,38 @@ EOT;
             return $arrAlias;
         }
 
-        if (!$page['bbit_turl_ignoreRoot']) {
+        if (! $page['bbit_turl_ignoreRoot']) {
             $objRoot = $this->getRootPage((int) $page['id']);
 
-            if ($objRoot) switch ($objRoot->bbit_turl_rootInherit) {
-                case 'always':
-                    $intLength = strlen($objRoot->alias);
-                    if ($intLength && strncasecmp($strAlias, $objRoot->alias, $intLength) == 0) {
-                        $arrAlias['root'] = $objRoot->alias;
-                        $strAlias         = substr($strAlias, $intLength + 1);
-                    } else {
-                        $arrAlias['err']['errInvalidRoot'] = true;
-                    }
-                    break;
+            if ($objRoot) {
+                switch ($objRoot->bbit_turl_rootInherit) {
+                    case 'always':
+                        $intLength = strlen($objRoot->alias);
+                        if ($intLength && strncasecmp($strAlias, $objRoot->alias, $intLength) === 0) {
+                            $arrAlias['root'] = $objRoot->alias;
+                            $strAlias         = substr($strAlias, $intLength + 1);
+                        } else {
+                            $arrAlias['err']['errInvalidRoot'] = true;
+                        }
 
-                default:
-                case 'normal':
-                case 'never':
-                    break;
+                        break;
+
+                    default:
+                    case 'normal':
+                    case 'never':
+                        break;
+                }
             }
         }
 
-        if (!$page['bbit_turl_inherit']) {
+        if (! $page['bbit_turl_inherit']) {
             $arrAlias['fragment'] = $strAlias;
 
             return $arrAlias;
         }
 
         $intLength = strlen($page['bbit_turl_fragment']);
-        if (!$intLength) {
+        if (! $intLength) {
             $arrAlias['fragment']             = $strAlias;
             $arrAlias['err']['errNoFragment'] = true;
 
@@ -582,7 +619,7 @@ EOT;
         }
 
         $strFragment = substr($strAlias, -$intLength);
-        if ($strFragment != $page['bbit_turl_fragment']) {
+        if ($strFragment !== $page['bbit_turl_fragment']) {
             $arrAlias['fragment']                  = $strAlias;
             $arrAlias['err']['errInvalidFragment'] = true;
 
@@ -595,9 +632,9 @@ EOT;
         return $arrAlias;
     }
 
-    private static function unprefix(string $alias, string $prefix): string
+    private static function unprefix(string $alias, ?string $prefix): string
     {
-        return $prefix !== '' && self::isPrefix($alias, $prefix)
+        return ! empty($prefix) && self::isPrefix($alias, $prefix)
             ? substr($alias, strlen($prefix) + 1)
             : $alias;
     }
@@ -606,13 +643,14 @@ EOT;
     {
         $length = strlen($prefix);
 
-        return !$length || strncmp($alias, $prefix . '/', $length + 1) === 0;
+        return ! $length || strncmp($alias, $prefix . '/', $length + 1) === 0;
     }
 
-    public function configurePageDetails(array $parents, PageModel $pageModel): void
+    public function configurePageDetails(PageModel $pageModel): void
     {
+        $folderUrl               = null;
         $rootPage                = $this->getRootPage((int) $pageModel->id);
-        $pageModel->useFolderUrl = $this->determineUseFolderUrl($parents, $pageModel);
+        $pageModel->useFolderUrl = $this->determineUseFolderUrl($pageModel);
 
         if ($pageModel->bbit_turl_inherit) {
             $folderUrl = $this->getParentAlias((int) $pageModel->id, $rootPage);
@@ -623,10 +661,10 @@ EOT;
             $folderUrl = $rootPage->alias;
         }
 
-        $pageModel->folderUrl = $folderUrl . '/';
+        $pageModel->folderUrl = $folderUrl === null ? '' : $folderUrl . '/';
     }
 
-    private function determineUseFolderUrl(array $parents, PageModel $pageModel): bool
+    private function determineUseFolderUrl(PageModel $pageModel): bool
     {
         if ($pageModel->bbit_turl_ignoreRoot) {
             return (bool) $pageModel->bbit_turl_inherit;

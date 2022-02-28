@@ -18,20 +18,29 @@ use Symfony\Component\Routing\RouteCollection;
 
 final class Plugin implements BundlePluginInterface, ConfigPluginInterface, RoutingPluginInterface
 {
+    /**
+     * {@inheritDoc}
+     */
     public function getBundles(ParserInterface $parser): array
     {
         return [
             BundleConfig::create(HofffContaoTrueUrlBundle::class)
                 ->setLoadAfter([ContaoCoreBundle::class])
-                ->setReplace(['backboneit_trueurl'])
+                ->setReplace(['backboneit_trueurl']),
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function registerContainerConfiguration(LoaderInterface $loader, array $managerConfig): void
     {
         $loader->load(__DIR__ . '/../Resources/config/config.yaml');
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     public function getRouteCollection(LoaderResolverInterface $resolver, KernelInterface $kernel): ?RouteCollection
     {
         $loader = $resolver->resolve(__DIR__ . '/../Resources/config/routes.xml');

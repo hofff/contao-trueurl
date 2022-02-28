@@ -10,9 +10,12 @@ use Hofff\Contao\TrueUrl\EventListener\Dca\Page\ViewListener;
 /** @Hook("loadDataContainer") */
 final class LoadDataContainerListener
 {
+    /**
+     * @SuppressWarnings(PHPMD.Superglobals)
+     */
     public function __invoke(string $tableName): void
     {
-        if($tableName !== 'tl_page') {
+        if ($tableName !== 'tl_page') {
             return;
         }
 

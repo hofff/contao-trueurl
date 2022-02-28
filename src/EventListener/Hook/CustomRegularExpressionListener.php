@@ -20,13 +20,14 @@ final class CustomRegularExpressionListener
         $this->translator = $translator;
     }
 
+    /** @param mixed $value */
     public function __invoke(string $regexp, $value, Widget $widget): bool
     {
         if ($regexp !== 'trueurl') {
             return false;
         }
 
-        if (!preg_match('/^[\pN\pL \.\/_-]*$/u', $value)) {
+        if (! preg_match('/^[\pN\pL \.\/_-]*$/u', $value)) {
             $widget->addError($this->translator->trans('ERR.alnum', [$widget->label], 'contao_default'));
         }
 

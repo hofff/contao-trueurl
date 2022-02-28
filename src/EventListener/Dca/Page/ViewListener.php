@@ -12,19 +12,25 @@ use Contao\Image;
 use Contao\Input;
 use Contao\StringUtil;
 use Contao\System;
-use Doctrine\DBAL\Connection;
+use Hofff\Contao\TrueUrl\TrueURL;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBag;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Hofff\Contao\TrueUrl\TrueURL;
 
 use function assert;
+use function implode;
+use function in_array;
 use function is_array;
 use function is_string;
+use function preg_match;
+use function sprintf;
 
+/**
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ */
 final class ViewListener
 {
     private static bool $blnRecurse = false;
@@ -46,7 +52,9 @@ final class ViewListener
     /** @var list<string> */
     private array $unrouteablePageTypes;
 
-    /** @param list<string> $unrouteablePageTypes */
+    /**
+     * @param list<string> $unrouteablePageTypes
+     */
     public function __construct(
         ContaoFramework $framework,
         Packages $packages,
@@ -67,7 +75,10 @@ final class ViewListener
         $this->router               = $router;
     }
 
-    /** @Callback(table="tl_page", target="config.onload") */
+    /**
+     * @Callback(table="tl_page", target="config.onload")
+     * @SuppressWarnings(PHPMD.Superglobals)
+     */
     public function onLoad(): void
     {
         $rootManipulator = PaletteManipulator::create()->addField(
@@ -81,7 +92,7 @@ final class ViewListener
         );
 
         foreach ($GLOBALS['TL_DCA']['tl_page']['palettes'] as $selector => $palette) {
-            if ($selector === '__selector__' || !is_string($palette)) {
+            if ($selector === '__selector__' || ! is_string($palette)) {
                 continue;
             }
 
@@ -94,35 +105,36 @@ final class ViewListener
         }
     }
 
+    /**
+     * @param array<string,mixed> $row
+     *
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.Superglobals)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     */
     public function labelPage(
-        $row,
-        $label,
-        DataContainer $dc = null,
-        $imageAttribute = '',
-        $blnReturnImage = false,
-        $blnProtected = false
-    ) {
-        $blnWasRecurse = self::$blnRecurse;
-        $arrCallback   = $blnWasRecurse
+        array $row,
+        string $label,
+        ?DataContainer $dataContainer = null,
+        string $imageAttribute = '',
+        bool $returnImage = false,
+        bool $protect = false
+    ): string {
+        $wasRecurse = self::$blnRecurse;
+        $callback   = $wasRecurse
             ? ['tl_page', 'addIcon']
             : $GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl'];
 
         self::$blnRecurse = true;
-        if (is_array($arrCallback)) {
-            $arrCallback[0] = $this->framework->getAdapter(System::class)->importStatic($arrCallback[0]);
+        if (is_array($callback)) {
+            $callback[0] = $this->framework->getAdapter(System::class)->importStatic($callback[0]);
         }
-        $label = call_user_func(
-            $arrCallback,
-            $row,
-            $label,
-            $dc,
-            $imageAttribute,
-            $blnReturnImage,
-            $blnProtected
-        );
+
+        $label            = $callback($row, $label, $dataContainer, $imageAttribute, $returnImage, $protect);
         self::$blnRecurse = false;
 
-        if ($blnWasRecurse) {
+        if ($wasRecurse) {
             return $label;
         }
 
@@ -131,13 +143,13 @@ final class ViewListener
         }
 
         $intMode = $this->getViewMode();
-        if (!$intMode) {
+        if (! $intMode) {
             return $label;
         }
 
         $arrAlias = $this->trueUrl->splitAlias($row);
 
-        if (!$arrAlias) {
+        if (! $arrAlias) {
             $label .= ' <span style="color:#CC5555;">[';
             $label .= $this->translate('errNoAlias');
             $label .= ']</span>';
@@ -145,7 +157,7 @@ final class ViewListener
             return $label;
         }
 
-        if ($intMode == 1) {
+        if ($intMode === 1) {
             $label .= '<br />';
         } elseif (preg_match('@<a[^>]*><img[^>]*></a>@', $label, $arrMatch)) {
             $label = $arrMatch[0] . ' ';
@@ -153,24 +165,30 @@ final class ViewListener
             $label = '';
         }
 
-        if ($intMode == 1) {
+        if ($intMode === 1) {
             $label .= '<span style="color:#b3b3b3;display: inline-block; margin-left: 22px;">[';
         } else {
             $label .= '<span style="color:#b3b3b3;">[';
         }
 
+        $strConnector = '';
         if ($arrAlias['root']) {
-            $label        .= '<span style="color:#0C0;">' . $arrAlias['root'] . '</span>';
+            $label       .= '<span style="color:#0C0;">' . $arrAlias['root'] . '</span>';
             $strConnector = '/';
         }
+
         if ($arrAlias['parent']) {
-            $label        .= $strConnector . $arrAlias['parent'];
+            $label       .= $strConnector . $arrAlias['parent'];
             $strConnector = '/';
         }
+
         if ($arrAlias['fragment']) {
             $label .= $strConnector . '<span style="color:#5C9AC9;">' . $arrAlias['fragment'] . '</span>';
         }
+
         $label .= ']</span>';
+        $image  = '';
+        $title  = '';
 
         if ($row['type'] === 'root') {
             $strTitle  = $this->translate('bbit_turl_rootInherit.0') . ': ';
@@ -201,9 +219,10 @@ final class ViewListener
                 $image = 'link_break';
                 $title = $this->translate('bbit_turl_break');
             }
+
             if ($row['bbit_turl_transparent']) {
                 $arrAlias['err'] || $image .= '_go';
-                $title .= "\n" . $this->translate('bbit_turl_transparent.0');
+                $title                     .= "\n" . $this->translate('bbit_turl_transparent.0');
             }
         }
 
@@ -212,6 +231,7 @@ final class ViewListener
             foreach ($arrAlias['err'] as $strError => &$strLabel) {
                 $strLabel = $this->translate($strError);
             }
+
             unset($strLabel);
             $title .= "\n" . implode("\n", $arrAlias['err']);
         }
@@ -220,7 +240,7 @@ final class ViewListener
             $label .= $this->makeImage($image . '.png', $title);
         }
 
-        if ($intMode == 1) {
+        if ($intMode === 1) {
             $label = '<div style="display:inline-block;vertical-align: top;">' . $label . '</div>';
         }
 
@@ -229,9 +249,15 @@ final class ViewListener
 
     /**
      * @Callback(table="tl_page", target="list.global_operations.bbit_turl_alias.button")
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function buttonAlias($strHREF, $label, $title, $strClass, $strAttributes, $strTable, $intRoot): string
-    {
+    public function buttonAlias(
+        string $href,
+        string $label,
+        string $title,
+        string $class,
+        string $attributes
+    ): string {
         switch ($this->getViewMode()) {
             case 1:
                 $translationKey = 'bbit_turl_aliasOnly';
@@ -256,69 +282,85 @@ final class ViewListener
             '%s<a href="%s" class="%s" title="%s"%s>%s</a> ',
             $this->isAdmin() ? '<br/><br/>' : ' &#160; :: &#160; ',
             $this->router->generate('hofff_contao_true_url_alias', ['bbit_turl_alias' => $intMode]),
-            $strClass,
+            $class,
             StringUtil::specialchars($title),
-            $strAttributes,
+            $attributes,
             $label
         );
     }
 
     /**
      * @Callback(table="tl_page", target="list.global_operations.bbit_turl_regenerate.button")
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function buttonRegenerate($strHREF, $strLabel, $strTitle, $strClass, $strAttributes): string
-    {
+    public function buttonRegenerate(
+        string $href,
+        string $label,
+        string $title,
+        string $class,
+        string $attributes
+    ): string {
         return $this->isAdmin() ? sprintf(
             ' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
             $this->router->generate('hofff_contao_true_url_regenerate'),
-            $strClass,
-            StringUtil::specialchars($strTitle),
-            $strAttributes,
-            $strLabel
+            $class,
+            StringUtil::specialchars($title),
+            $attributes,
+            $label
         ) : '';
     }
 
     /**
      * @Callback(table="tl_page", target="list.global_operations.bbit_turl_repair.button")
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function buttonRepair($strHREF, $strLabel, $strTitle, $strClass, $strAttributes): string
+    public function buttonRepair(string $href, string $label, string $title, string $class, string $attributes): string
     {
         return $this->isAdmin() ? sprintf(
             ' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
             $this->router->generate('hofff_contao_true_url_repair'),
-            $strClass,
-            StringUtil::specialchars($strTitle),
-            $strAttributes,
-            $strLabel
+            $class,
+            StringUtil::specialchars($title),
+            $attributes,
+            $label
         ) : '';
     }
 
     /**
+     * @param array<string,mixed> $row
+     *
      * @Callback(table="tl_page", target="list.operations.bbit_turl_autoInherit.button")
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function buttonAutoInherit($arrRow, $strHREF, $strLabel, $strTitle, $strIcon, $strAttributes): string
-    {
-        return ($this->isAdmin() && Input::get('act') !== 'paste') ? sprintf(
+    public function buttonAutoInherit(
+        array $row,
+        string $href,
+        string $label,
+        string $title,
+        string $icon,
+        string $attributes
+    ): string {
+        return $this->isAdmin() && Input::get('act') !== 'paste' ? sprintf(
             '<a href="%s" title="%s"%s>%s</a> ',
-            $this->router->generate('hofff_contao_true_url_auto_inherit', ['id' => $arrRow['id']]),
-            StringUtil::specialchars($strTitle),
-            $strAttributes,
-            Image::getHtml($strIcon, $strLabel)
+            $this->router->generate('hofff_contao_true_url_auto_inherit', ['id' => $row['id']]),
+            StringUtil::specialchars($title),
+            $attributes,
+            Image::getHtml($icon, $label)
         ) : '';
     }
 
     private function makeImage(string $image, string $title): string
     {
         return ' ' . Image::getHtml(
-                $this->packages->getUrl('images/' . $image, 'hofff_contao_true_url'),
-                $title,
-                ' title="' . StringUtil::specialchars($title) . '"'
-            );
+            $this->packages->getUrl('images/' . $image, 'hofff_contao_true_url'),
+            $title,
+            ' title="' . StringUtil::specialchars($title) . '"'
+        );
     }
 
-    private function translate(string $key, array $params = []): string
+    private function translate(string $key): string
     {
-        return $this->translator->trans('tl_page.' . $key, $params, 'contao_tl_page');
+        return $this->translator->trans('tl_page.' . $key, [], 'contao_tl_page');
     }
 
     private function isAdmin(): bool

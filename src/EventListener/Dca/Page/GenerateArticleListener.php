@@ -21,10 +21,13 @@ final class GenerateArticleListener
         $this->listener = $listener;
     }
 
-    /** @Callback(table="tl_page", target="config.onload") */
-    public function onLoad(DataContainer $dataContainer): void
+    /**
+     * @Callback(table="tl_page", target="config.onload")
+     * @SuppressWarnings(PHPMD.Superglobals)
+     */
+    public function onLoad(): void
     {
-        if (!isset($GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'])) {
+        if (! isset($GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'])) {
             return;
         }
 

@@ -18,9 +18,13 @@ final class PageDetailsListener
         $this->trueUrl = $trueUrl;
     }
 
-    /** @param list<PageModel> $parents */
+    /**
+     * @param list<PageModel> $parents
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     public function __invoke(array $parents, PageModel $pageModel): void
     {
-        $this->trueUrl->configurePageDetails($parents, $pageModel);
+        $this->trueUrl->configurePageDetails($pageModel);
     }
 }

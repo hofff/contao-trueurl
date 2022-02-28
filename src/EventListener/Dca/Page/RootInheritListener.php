@@ -15,6 +15,7 @@ final class RootInheritListener
 {
     private Connection $connection;
 
+    /** @var array<int|string,string> */
     private array $changedValues = [];
 
     public function __construct(Connection $connection)
@@ -22,15 +23,20 @@ final class RootInheritListener
         $this->connection = $connection;
     }
 
-    /** @Callback(table="tl_page", target="config.oncreate", priority=128) */
-    public function onCreate(string $table, $recordId, array $set, DataContainer $dataContainer): void
+    /**
+     * @param string|int          $recordId
+     * @param array<string,mixed> $set
+     *
+     * @Callback(table="tl_page", target="config.oncreate", priority=128)
+     */
+    public function onCreate(string $table, $recordId, array $set): void
     {
-        if (!$set['pid']) {
+        if (! $set['pid']) {
             return;
         }
 
         $parentPage = PageModel::findWithDetails($set['pid']);
-        if (!$parentPage) {
+        if (! $parentPage) {
             $this->connection->update($table, ['bbit_turl_root' => 0], ['id' => $recordId]);
 
             return;
@@ -44,14 +50,15 @@ final class RootInheritListener
             return;
         }
 
-        $strQuery          = <<<'EOT'
+        $strQuery = <<<'EOT'
 SELECT	bbit_turl_defaultInherit
 FROM	tl_page
 WHERE	id = ?
 EOT;
-        $result = $this->connection->executeQuery($strQuery, [$rootId]);
+        $result   = $this->connection->executeQuery($strQuery, [$rootId]);
         if ($result->rowCount() === 0) {
             $this->connection->update($table, ['bbit_turl_root' => 0], ['id' => $recordId]);
+
             return;
         }
 
@@ -62,15 +69,31 @@ EOT;
         );
     }
 
-    /** @Callback(table="tl_page", target="fields.bbit_turl_rootInheritProxy.load") */
+    /**
+     * @param mixed $varValue
+     *
+     * @return mixed
+     *
+     * @Callback(table="tl_page", target="fields.bbit_turl_rootInheritProxy.load")
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     public function onLoad($varValue, DataContainer $dataContainer)
     {
-        $varValue = $dataContainer->activeRecord->bbit_turl_rootInherit;
+        if (! $dataContainer->activeRecord) {
+            return 'normal';
+        }
 
-        return $varValue ? $varValue : 'normal';
+        return $dataContainer->activeRecord->bbit_turl_rootInherit ?: 'normal';
     }
 
-    /** @Callback(table="tl_page", target="fields.bbit_turl_rootInheritProxy.save") */
+    /**
+     * @param mixed $newValue
+     *
+     * @return null
+     *
+     * @Callback(table="tl_page", target="fields.bbit_turl_rootInheritProxy.save")
+     */
     public function onSave($newValue, DataContainer $dataContainer)
     {
         if (! $dataContainer->activeRecord) {
@@ -87,13 +110,13 @@ EOT;
     }
 
     /** @Callback(table="tl_page", target="config.onsubmit") */
-    public function onSubmit(DataContainer $dataContainer)
+    public function onSubmit(DataContainer $dataContainer): void
     {
-        if (!isset($this->changedValues[$dataContainer->id])) {
+        if (! isset($this->changedValues[$dataContainer->id]) || ! $dataContainer->activeRecord) {
             return;
         }
 
-        if ($dataContainer->activeRecord->type != 'root') {
+        if ($dataContainer->activeRecord->type !== 'root') {
             unset($this->changedValues[$dataContainer->id]);
 
             return;
@@ -111,7 +134,7 @@ EOT;
         $this->connection->executeStatement($strQuery, [$newValue, $dataContainer->id]);
 
         $strAlias = $dataContainer->activeRecord->alias;
-        if ($newValue !== 'always' || !strlen($strAlias)) {
+        if ($newValue !== 'always' || (string) $strAlias === '') {
             return;
         }
 
@@ -127,6 +150,9 @@ AND		bbit_turl_fragment = alias
 AND		bbit_turl_ignoreRoot = ''
 EOT;
 
-        $this->connection->executeStatement($strQuery, [strlen($strAlias) + 2, $dataContainer->id, $strAlias . '/%']);
+        $this->connection->executeStatement(
+            $strQuery,
+            [strlen((string) $strAlias) + 2, $dataContainer->id, $strAlias . '/%']
+        );
     }
 }

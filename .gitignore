@@ -8,3 +8,8 @@
 !/build.xml
 !/README.md
 !/composer.json
+!/.phpcq.yaml.dist
+!/.composer-require-checker.json
+!/psalm.xml
+!/phpcs.xml.dist
+!/.github

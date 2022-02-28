@@ -1,6 +1,8 @@
 {
   "name": "hofff/contao-trueurl",
   "description": "Folderlike page alias' with different editing tools and an improved frontend page selection algorithmn.",
+  "license": "LGPL-3.0-or-later",
+  "type": "contao-bundle",
   "keywords": [
     "folderurl",
     "alias",
@@ -9,8 +11,6 @@
     "url",
     "contao"
   ],
-  "type": "contao-bundle",
-  "license": "LGPL-3.0-or-later",
   "authors": [
     {
       "name": "Nicky Hoff",
@@ -37,27 +37,40 @@
   },
   "require": {
     "php": "^7.4 || ^8.0",
+    "ext-pcre": "*",
     "ext-pdo": "*",
     "contao/core-bundle": "^4.10",
-    "doctrine/dbal": "^2.13.0",
-    "symfony/asset": "^4.4||^5.0",
-    "symfony/config": "^4.4||^5.0",
-    "symfony/dependency-injection": "^4.4||^5.0",
-    "symfony/http-kernel": "^4.4||^5.0",
-    "symfony/routing": "^4.4||^5.0",
-    "symfony/translation-contracts": "^1.1.6|^2"
+    "doctrine/dbal": "^2.13.0 || ^3.0",
+    "symfony/asset": "^4.4 || ^5.0",
+    "symfony/config": "^4.4 || ^5.0",
+    "symfony/dependency-injection": "^4.4 || ^5.0",
+    "symfony/http-foundation": "^4.4 || ^5.0",
+    "symfony/http-kernel": "^4.4 || ^5.0",
+    "symfony/routing": "^4.4 || ^5.0",
+    "symfony/security-core": "^4.4 || ^5.0",
+    "symfony/translation-contracts": "^1.1.6 || ^2"
   },
   "require-dev": {
-    "contao/manager-plugin": "^2.11"
+    "contao/manager-plugin": "^2.11",
+    "doctrine/coding-standard": "^9.0.",
+    "phpcq/runner-bootstrap": "^1.0@dev"
+  },
+  "replace": {
+    "backboneit/contao-trueurl": "self.version",
+    "contao-legacy/backboneit_trueurl": "self.version"
   },
   "autoload": {
     "psr-4": {
       "Hofff\\Contao\\TrueUrl\\": "src/"
     }
   },
-  "replace": {
-    "backboneit/contao-trueurl": "self.version",
-    "contao-legacy/backboneit_trueurl": "self.version"
+  "config": {
+    "allow-plugins": {
+      "contao-components/installer": true,
+      "contao/manager-plugin": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    },
+    "sort-packages": true
   },
   "extra": {
     "contao-manager-plugin": "Hofff\\Contao\\TrueUrl\\ContaoManager\\Plugin"

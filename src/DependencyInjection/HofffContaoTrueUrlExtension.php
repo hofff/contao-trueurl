@@ -11,6 +11,11 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
 final class HofffContaoTrueUrlExtension extends Extension
 {
+    /**
+     * @param list<array<string,mixed>> $configs
+     *
+     * @psalm-suppress MoreSpecificImplementedParamType
+     */
     public function load(array $configs, ContainerBuilder $container): void
     {
         $loader = new XmlFileLoader(

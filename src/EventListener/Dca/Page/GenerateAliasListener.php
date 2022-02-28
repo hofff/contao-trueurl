@@ -15,6 +15,7 @@ use Hofff\Contao\TrueUrl\TrueURL;
 use Symfony\Component\Security\Core\Security;
 
 use function array_key_exists;
+use function count;
 use function trim;
 
 final class GenerateAliasListener
@@ -44,11 +45,16 @@ final class GenerateAliasListener
     }
 
     /**
+     * @param mixed $value
+     *
+     * @return mixed
+     *
      * @Callback(table="tl_page", target="fields.alias.save", priority=255)
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
     public function onSave($value, DataContainer $dataContainer)
     {
-        if ($dataContainer->activeRecord->type === 'root') {
+        if (! $dataContainer->activeRecord || $dataContainer->activeRecord->type === 'root') {
             return $value;
         }
 
@@ -58,12 +64,12 @@ final class GenerateAliasListener
         // Make sure that alias settings are saved before the alias is generated
         foreach (['bbit_turl_inherit', 'bbit_turl_transparent', 'bbit_turl_ignoreRoot'] as $column) {
             if (
-                !$this->security->isGranted(ContaoCorePermissions::USER_CAN_EDIT_FIELD_OF_TABLE, 'tl_page::' . $column)
+                ! $this->security->isGranted(ContaoCorePermissions::USER_CAN_EDIT_FIELD_OF_TABLE, 'tl_page::' . $column)
             ) {
                 continue;
             }
 
-            if (!array_key_exists($column, $_POST)) {
+            if (! array_key_exists($column, $_POST)) {
                 continue;
             }
 
@@ -88,8 +94,10 @@ final class GenerateAliasListener
 
         $alias = (string) $dataContainer->activeRecord->alias;
         if ($alias === '') {
+            /** @psalm-suppress InternalMethod */
             $alias = $this->pageUrlListener->generateAlias('', $dataContainer);
         }
+
         $alias = trim($alias, '/');
 
         if ($alias === '') {

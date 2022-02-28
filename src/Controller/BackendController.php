@@ -7,15 +7,16 @@ namespace Hofff\Contao\TrueUrl\Controller;
 use Contao\Backend;
 use Contao\CoreBundle\Exception\AccessDeniedException;
 use Contao\CoreBundle\Framework\ContaoFramework;
+use Hofff\Contao\TrueUrl\TrueURL;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBag;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Hofff\Contao\TrueUrl\TrueURL;
 use Symfony\Component\Security\Core\Security;
 
+use function assert;
 use function max;
 use function min;
 
@@ -29,8 +30,12 @@ final class BackendController
 
     private Security $security;
 
-    public function __construct(SessionInterface $session, ContaoFramework $framework, TrueURL $trueUrl, Security $security)
-    {
+    public function __construct(
+        SessionInterface $session,
+        ContaoFramework $framework,
+        TrueURL $trueUrl,
+        Security $security
+    ) {
         $this->session   = $session;
         $this->framework = $framework;
         $this->trueUrl   = $trueUrl;
