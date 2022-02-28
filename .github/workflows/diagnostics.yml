@@ -70,7 +70,7 @@ jobs:
         run: ./vendor/bin/phpcq ${{ matrix.phpcq_install }} -v
 
       - name: Run tests
-        run: ./vendor/bin/phpcq run -v -o github-action -o default
+        run: ./vendor/bin/phpcq run -v -o github-action -o default --threshold=info
 
       - name: Upload build directory to artifact
         uses: actions/upload-artifact@v2
