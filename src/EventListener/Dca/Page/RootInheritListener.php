@@ -64,7 +64,7 @@ EOT;
 
         $this->connection->update(
             $table,
-            ['bbit_turl_root' => $rootId, 'bbit_turl_inherit' => $result->fetchOne()],
+            ['bbit_turl_root' => $rootId, 'bbit_turl_inherit' => (string) $result->fetchOne()],
             ['id' => $recordId]
         );
     }

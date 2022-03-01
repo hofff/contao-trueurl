@@ -192,7 +192,9 @@ final class ViewListener
 
         if ($row['type'] === 'root') {
             $strTitle  = $this->translate('bbit_turl_rootInherit.0') . ': ';
-            $strTitle .= $this->translate('bbit_turl_rootInheritOptions.' . $row['bbit_turl_rootInherit']);
+            $strTitle .= $this->translate(
+                'bbit_turl_rootInheritOptions.' . ($row['bbit_turl_rootInherit'] ?: 'normal')
+            );
 
             switch ($row['bbit_turl_rootInherit']) {
                 default:
