@@ -309,7 +309,7 @@ EOT;
             $parentAlias = null;
         } else {
             // updating a normal page:
-            $inherit = $pageResult->bbit_turl_inherit;
+            $inherit = (bool) $pageResult->bbit_turl_inherit;
 
             if ($rootPage && ! $pageResult->bbit_turl_ignoreRoot) {
                 switch ($rootPage->bbit_turl_rootInherit) {
@@ -475,6 +475,16 @@ EOT;
      */
     private function getRootPage(int $pageId): ?object
     {
+        $pageModel = PageModel::findWithDetails($pageId);
+        if ($pageModel === null) {
+            return null;
+        }
+
+        return $this->getRootPageFromPageModel($pageModel);
+    }
+
+    private function getRootPageFromPageModel(PageModel $pageModel): ?object
+    {
         $this->framework->initialize();
 
         $strQuery = <<<EOT
@@ -483,27 +493,21 @@ FROM	tl_page AS p
 JOIN	tl_page AS rt ON rt.id = p.bbit_turl_root
 WHERE	p.id = ?
 EOT;
-        $result   = $this->connection->executeQuery($strQuery, [$pageId]);
+        $result   = $this->connection->executeQuery($strQuery, [$pageModel->id]);
         $objRoot  = (object) $result->fetchAssociative();
 
         if ($result->rowCount() > 0 && $objRoot->type === 'root') {
             return $objRoot;
         }
 
-        $objPage = PageModel::findWithDetails($pageId);
-        if ($objPage === null) {
-            return null;
-        }
-
-        if ($objPage->type === 'root') {
-            $intRootID = $objPage->id;
-        } elseif ($objPage->rootId) {
-            $intRootID = $objPage->rootId;
+        if ($pageModel->type === 'root') {
+            $intRootID = $pageModel->id;
+        } elseif ($pageModel->rootId) {
+            $intRootID = $pageModel->rootId;
         } else {
             return null;
         }
 
-        $this->regeneratePageRoots([$intRootID]);
         $strQuery = <<<EOT
 SELECT	id, alias, bbit_turl_rootInherit
 FROM	tl_page
@@ -649,7 +653,7 @@ EOT;
     public function configurePageDetails(PageModel $pageModel): void
     {
         $folderUrl               = null;
-        $rootPage                = $this->getRootPage((int) $pageModel->id);
+        $rootPage                = $this->getRootPageFromPageModel($pageModel);
         $pageModel->useFolderUrl = $this->determineUseFolderUrl($pageModel);
 
         if ($pageModel->bbit_turl_inherit) {
@@ -670,7 +674,7 @@ EOT;
             return (bool) $pageModel->bbit_turl_inherit;
         }
 
-        $rootPage = $this->getRootPage((int) $pageModel->id);
+        $rootPage = $this->getRootPageFromPageModel($pageModel);
 
         if ($rootPage && $rootPage->bbit_turl_rootInherit === 'always') {
             return true;
