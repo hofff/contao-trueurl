@@ -252,10 +252,10 @@ final class ViewListener
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function buttonAlias(
-        string $href,
+        ?string $href,
         string $label,
         string $title,
-        string $class,
+        ?string $class,
         string $attributes
     ): string {
         switch ($this->getViewMode()) {
@@ -282,7 +282,7 @@ final class ViewListener
             '%s<a href="%s" class="%s" title="%s"%s>%s</a> ',
             $this->isAdmin() ? '<br/><br/>' : ' &#160; :: &#160; ',
             $this->router->generate('hofff_contao_true_url_alias', ['bbit_turl_alias' => $intMode]),
-            $class,
+            (string) $class,
             StringUtil::specialchars($title),
             $attributes,
             $label
@@ -294,16 +294,16 @@ final class ViewListener
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function buttonRegenerate(
-        string $href,
+        ?string $href,
         string $label,
         string $title,
-        string $class,
+        ?string $class,
         string $attributes
     ): string {
         return $this->isAdmin() ? sprintf(
             ' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
             $this->router->generate('hofff_contao_true_url_regenerate'),
-            $class,
+            (string) $class,
             StringUtil::specialchars($title),
             $attributes,
             $label
@@ -314,12 +314,17 @@ final class ViewListener
      * @Callback(table="tl_page", target="list.global_operations.bbit_turl_repair.button")
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function buttonRepair(string $href, string $label, string $title, string $class, string $attributes): string
-    {
+    public function buttonRepair(
+        ?string $href,
+        string $label,
+        string $title,
+        ?string $class,
+        string $attributes
+    ): string {
         return $this->isAdmin() ? sprintf(
             ' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
             $this->router->generate('hofff_contao_true_url_repair'),
-            $class,
+            (string) $class,
             StringUtil::specialchars($title),
             $attributes,
             $label
@@ -334,7 +339,7 @@ final class ViewListener
      */
     public function buttonAutoInherit(
         array $row,
-        string $href,
+        ?string $href,
         string $label,
         string $title,
         string $icon,
