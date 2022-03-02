@@ -359,7 +359,7 @@ EOT;
         $childrenResult = $this->connection->executeQuery($query, [$pageId]);
 
         while ($childId = $childrenResult->fetchOne()) {
-            $this->doUpdate($childId, $rootPage, $parentAlias, $updateAll, $autoInherit);
+            $this->doUpdate((int) $childId, $rootPage, $parentAlias, $updateAll, $autoInherit);
         }
 
         return true;
