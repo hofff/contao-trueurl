@@ -442,10 +442,10 @@ AND		p2.type != 'root'
 EOT;
             $result   = $this->connection->executeQuery($strQuery, [$pageId]);
             $parent   = (object) $result->fetchAssociative();
-            $pageId   = $parent->id;
-            if ($result->rowCount() === 0 || ! $pageId) {
+            if ($result->rowCount() === 0 || ! $parent->id) {
                 return '';
             }
+            $pageId   = $parent->id;
         } while ($parent->bbit_turl_transparent);
 
         $strAlias = (string) $parent->alias;
