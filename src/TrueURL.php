@@ -434,7 +434,7 @@ EOT;
 
         do {
             $strQuery = <<<EOT
-SELECT	p2.id, p2.alias, p2.bbit_turl_transparent
+SELECT	p2.id, p2.alias, p2.bbit_turl_transparent, p2.bbit_turl_ignoreRoot
 FROM	tl_page AS p1
 JOIN	tl_page AS p2 ON p2.id = p1.pid
 WHERE	p1.id = ?
