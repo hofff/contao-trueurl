@@ -9,10 +9,18 @@ $GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl'] =
     $GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'];
 
 $GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_alias']      = [
+    'href'  => '',
+    'class' => '',
     'label' => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow'],
 ];
-$GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_regenerate'] = [];
-$GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_repair']     = [];
+$GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_regenerate'] = [
+    'href'  => '',
+    'class' => '',
+];
+$GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_repair']     = [
+    'href'  => '',
+    'class' => '',
+];
 
 /** @psalm-suppress PossiblyNullReference */
 $GLOBALS['TL_DCA']['tl_page']['list']['operations']['bbit_turl_autoInherit'] = [

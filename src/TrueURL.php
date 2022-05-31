@@ -567,7 +567,11 @@ EOT;
             return null;
         }
 
-        $arrAlias = [];
+        $arrAlias = [
+            'root'   => null,
+            'parent' => null,
+            'err'    => null,
+        ];
         if ($page['type'] === 'root') {
             switch ($page['bbit_turl_rootInherit']) {
                 case 'always':
