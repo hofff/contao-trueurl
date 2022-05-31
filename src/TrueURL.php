@@ -445,7 +445,8 @@ EOT;
             if ($result->rowCount() === 0 || ! $parent->id) {
                 return '';
             }
-            $pageId   = $parent->id;
+
+            $pageId = $parent->id;
         } while ($parent->bbit_turl_transparent);
 
         $strAlias = (string) $parent->alias;

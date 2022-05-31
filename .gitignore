@@ -9,6 +9,7 @@
 !/README.md
 !/composer.json
 !/.phpcq.yaml.dist
+!/.phpcq.lock
 !/.composer-require-checker.json
 !/psalm.xml
 !/phpcs.xml.dist
