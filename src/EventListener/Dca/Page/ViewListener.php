@@ -107,6 +107,7 @@ final class ViewListener
 
     /**
      * @param array<string,mixed> $row
+     * @param mixed               $imageAttribute
      *
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.Superglobals)
@@ -117,7 +118,7 @@ final class ViewListener
         array $row,
         string $label,
         ?DataContainer $dataContainer = null,
-        string $imageAttribute = '',
+        $imageAttribute = '',
         bool $returnImage = false,
         bool $protect = false
     ): string {
@@ -131,6 +132,7 @@ final class ViewListener
             $callback[0] = $this->framework->getAdapter(System::class)->importStatic($callback[0]);
         }
 
+        $imageAttribute   = is_string($imageAttribute) ? $imageAttribute : '';
         $label            = $callback($row, $label, $dataContainer, $imageAttribute, $returnImage, $protect);
         self::$blnRecurse = false;
 
