@@ -8,6 +8,7 @@ use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\Database;
 use Contao\PageModel;
 use Contao\StringUtil;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\Exception;
 use InvalidArgumentException;
@@ -86,7 +87,7 @@ EOT;
             $this->connection->executeQuery(
                 $query,
                 ['rootId' => $rootId, 'descendants' => $descendants],
-                ['descendants' => Connection::PARAM_STR_ARRAY]
+                ['descendants' => ArrayParameterType::STRING]
             );
         }
 
@@ -106,7 +107,7 @@ AND		type != 'root'
 EOT;
 
             $arrPIDs = $this->connection
-                ->executeQuery($query, ['pids' => $arrPIDs], ['pids' => Connection::PARAM_STR_ARRAY])
+                ->executeQuery($query, ['pids' => $arrPIDs], ['pids' => ArrayParameterType::STRING])
                 ->fetchFirstColumn();
 
             $arrIDs[] = $arrPIDs;
@@ -124,7 +125,7 @@ SET     bbit_turl_root = 0
 WHERE   id IN (:ids)
 EOT;
 
-        $this->connection->executeQuery($query, ['ids' => $arrIDs], ['ids' => Connection::PARAM_STR_ARRAY]);
+        $this->connection->executeQuery($query, ['ids' => $arrIDs], ['ids' => ArrayParameterType::STRING]);
     }
 
     /**
@@ -180,8 +181,11 @@ EOT;
         }
 
         if ($pageResult->bbit_turl_inherit) {
-            $parentAlias || $parentAlias = $this->getParentAlias($pageId, $rootPage);
-            $fragment                    = self::unprefix($fragment, $parentAlias);
+            if ($parentAlias === null) {
+                $parentAlias = $this->getParentAlias($pageId, $rootPage);
+            }
+
+            $fragment = self::unprefix($fragment, $parentAlias);
         }
 
         return $fragment;
@@ -643,7 +647,7 @@ EOT;
 
     private static function unprefix(string $alias, ?string $prefix): string
     {
-        return ! empty($prefix) && self::isPrefix($alias, $prefix)
+        return $prefix !== null && $prefix !== '' && self::isPrefix($alias, $prefix)
             ? substr($alias, strlen($prefix) + 1)
             : $alias;
     }

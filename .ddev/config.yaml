@@ -10,12 +10,8 @@ database:
     type: mariadb
     version: "10.4"
 use_dns_when_possible: true
-composer_root: ".ddev/contao"
 composer_version: "2"
 web_environment: []
-working_dir: {
-    web: "/var/www/html/.ddev/contao"
-}
 
 
 # Key features of DDEV's config.yaml:

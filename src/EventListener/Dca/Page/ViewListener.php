@@ -30,6 +30,7 @@ use function sprintf;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  */
 final class ViewListener
 {
@@ -118,7 +119,7 @@ final class ViewListener
         array $row,
         string $label,
         ?DataContainer $dataContainer = null,
-        $imageAttribute = '',
+        mixed $imageAttribute = '',
         bool $returnImage = false,
         bool $protect = false
     ): string {
@@ -132,7 +133,9 @@ final class ViewListener
             $callback[0] = $this->framework->getAdapter(System::class)->importStatic($callback[0]);
         }
 
-        $imageAttribute   = is_string($imageAttribute) ? $imageAttribute : '';
+        $imageAttribute = is_string($imageAttribute) ? $imageAttribute : '';
+
+        /** @psalm-suppress PossiblyInvalidFunctionCall */
         $label            = $callback($row, $label, $dataContainer, $imageAttribute, $returnImage, $protect);
         self::$blnRecurse = false;
 
@@ -151,7 +154,7 @@ final class ViewListener
 
         $arrAlias = $this->trueUrl->splitAlias($row);
 
-        if (! $arrAlias) {
+        if ($arrAlias === null) {
             $label .= ' <span style="color:#CC5555;">[';
             $label .= $this->translate('errNoAlias');
             $label .= ']</span>';
@@ -230,7 +233,7 @@ final class ViewListener
             }
         }
 
-        if ($arrAlias['err']) {
+        if (isset($arrAlias['err']) && is_array($arrAlias['err'])) {
             $image .= '_error';
             foreach ($arrAlias['err'] as $strError => &$strLabel) {
                 $strLabel = $this->translate($strError);

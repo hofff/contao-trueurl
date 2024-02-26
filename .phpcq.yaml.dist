@@ -42,10 +42,12 @@ phpcq:
     - D2CCAC42F6295E7D
     # PHP_CodeSniffer
     - 31C7E470E2138192
+    - 5E6DDE998AB73B8E
     # Composer normalize
     - C00543248C87FB13
     # phpmd
     - 0F9684B8B16B7AB0
+    - 9093F8B32E4815AA
 
 tasks:
   fix:
@@ -93,7 +95,14 @@ tasks:
       <<: *phpcs-config
       fix: true
 
+  composer-normalize:
+    config: &composer-normalize-config
+      ignore_output:
+        - '#> pre-command-run: Contao\\ManagerPlugin\\Composer\\ArtifactsPlugin->preCommandRun#'
+        - '#Root package is not of type "project" or "contao-theme", we will not be installing Contao extensions.#'
+
   composer-normalize-fix:
     plugin: composer-normalize
     config:
+      <<: *composer-normalize-config
       dry_run: false
