@@ -1,6 +1,6 @@
 {
   "name": "hofff/contao-trueurl",
-  "description": "Folderlike page alias' with different editing tools and an improved frontend page selection algorithmn.",
+  "description": "Folderlike page alias' with different editing tools and an improved frontend page selection algorithm.",
   "license": "LGPL-3.0-or-later",
   "type": "contao-bundle",
   "keywords": [
