@@ -30,14 +30,10 @@ final class GenerateAliasListener
     }
 
     /**
-     * @param mixed $value
-     *
-     * @return mixed
-     *
      * @Callback(table="tl_page", target="fields.alias.save", priority=255)
      * @SuppressWarnings(PHPMD.Superglobals)
      */
-    public function onSave($value, DataContainer $dataContainer)
+    public function onSave(mixed $value, DataContainer $dataContainer): mixed
     {
         if (! $dataContainer->activeRecord || $dataContainer->activeRecord->type === 'root') {
             return $value;

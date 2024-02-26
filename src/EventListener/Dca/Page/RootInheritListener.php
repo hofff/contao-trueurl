@@ -66,15 +66,10 @@ EOT;
     }
 
     /**
-     * @param mixed $varValue
-     *
-     * @return mixed
-     *
      * @Callback(table="tl_page", target="fields.bbit_turl_rootInheritProxy.load")
-     *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function onLoad($varValue, DataContainer $dataContainer)
+    public function onLoad(mixed $varValue, DataContainer $dataContainer): mixed
     {
         if (! $dataContainer->activeRecord) {
             return 'normal';
@@ -84,13 +79,11 @@ EOT;
     }
 
     /**
-     * @param mixed $newValue
-     *
      * @return null
      *
      * @Callback(table="tl_page", target="fields.bbit_turl_rootInheritProxy.save")
      */
-    public function onSave($newValue, DataContainer $dataContainer)
+    public function onSave(mixed $newValue, DataContainer $dataContainer): mixed
     {
         if (! $dataContainer->activeRecord) {
             return null;

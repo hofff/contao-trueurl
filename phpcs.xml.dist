@@ -17,13 +17,7 @@
 
     <!-- Include full Doctrine Coding Standard -->
     <rule ref="Doctrine">
-        <exclude name="SlevomatCodingStandard.Classes.SuperfluousExceptionNaming.SuperfluousSuffix"/>
-        <exclude name="SlevomatCodingStandard.Classes.SuperfluousAbstractClassNaming.SuperfluousPrefix"/>
-        <exclude name="SlevomatCodingStandard.Classes.SuperfluousTraitNaming.SuperfluousSuffix"/>
         <exclude name="Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps"/>
-        <exclude name="SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint"/>
-        <exclude name="SlevomatCodingStandard.Classes.ModernClassNameReference.ClassNameReferencedViaFunctionCall"/>
-        <exclude name="SlevomatCodingStandard.ControlStructures.RequireNullCoalesceEqualOperator.RequiredNullCoalesceEqualOperator"/>
     </rule>
 
     <rule ref="Generic.Files.LineLength">
@@ -32,71 +26,5 @@
             <property name="absoluteLineLimit" value="120"/>
         </properties>
         <exclude-pattern>src/Resources/contao/languages/*</exclude-pattern>
-    </rule>
-
-    <rule ref="SlevomatCodingStandard.TypeHints.ParameterTypeHint">
-        <properties>
-            <property name="enableObjectTypeHint" value="false" />
-        </properties>
-    </rule>
-
-    <rule ref="SlevomatCodingStandard.TypeHints.PropertyTypeHint">
-        <properties>
-            <property name="enableMixedTypeHint" value="false" />
-            <property name="enableUnionTypeHint" value="false" />
-        </properties>
-    </rule>
-
-    <rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHint">
-        <properties>
-            <property name="enableStaticTypeHint" value="false" />
-            <property name="enableMixedTypeHint" value="false" />
-            <property name="enableUnionTypeHint" value="false" />
-        </properties>
-    </rule>
-
-    <!-- Require specific order of phpDoc annotations with empty newline between specific groups -->
-    <rule ref="SlevomatCodingStandard.Commenting.DocCommentSpacing">
-        <properties>
-            <property name="linesCountBeforeFirstContent" value="0"/>
-            <property name="linesCountAfterLastContent" value="0"/>
-            <property name="linesCountBetweenDescriptionAndAnnotations" value="1"/>
-            <property name="linesCountBetweenAnnotationsGroups" value="1"/>
-            <property name="annotationsGroups" type="array">
-                <element value="
-                    @internal,
-                    @deprecated,
-                "/>
-                <element value="
-                    @template,
-                    @psalm-template,
-                    @template-implements,
-                    @template-extends,
-                    @implements,
-                    @extends
-                "/>
-                <element value="
-                    @link,
-                    @see,
-                    @uses,
-                "/>
-                <element value="
-                    @ORM\,
-                    @ODM\,
-                    @PHPCR\,
-                "/>
-                <element value="
-                    @param,
-                    @psalm-param,
-                    @phpstan-param,
-                "/>
-                <element value="
-                    @return,
-                    @psalm-return,
-                    @phpstan-return,
-                "/>
-                <element value="@throws"/>
-            </property>
-        </properties>
     </rule>
 </ruleset>

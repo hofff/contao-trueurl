@@ -13,12 +13,11 @@ use function preg_match;
 /** @Hook("addCustomRegexp") */
 final class CustomRegularExpressionListener
 {
-    public function __construct(private TranslatorInterface $translator)
+    public function __construct(private readonly TranslatorInterface $translator)
     {
     }
 
-    /** @param mixed $value */
-    public function __invoke(string $regexp, $value, Widget $widget): bool
+    public function __invoke(string $regexp, mixed $value, Widget $widget): bool
     {
         if ($regexp !== 'trueurl') {
             return false;

@@ -29,12 +29,10 @@ final class RegeneratePageRootsListener
     }
 
     /**
-     * @param string|int $recordId
-     *
      * @Callback(table="tl_page", target="config.onrestore_version", priority=255)
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function onRestoreVersion(string $table, $recordId): void
+    public function onRestoreVersion(string $table, int|string $recordId): void
     {
         $this->trueUrl->regeneratePageRoots([$recordId]);
         $this->trueUrl->update((int) $recordId);
