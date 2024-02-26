@@ -13,23 +13,19 @@ use function strlen;
 
 final class RootInheritListener
 {
-    private Connection $connection;
-
     /** @var array<int|string,string> */
     private array $changedValues = [];
 
-    public function __construct(Connection $connection)
+    public function __construct(private readonly Connection $connection)
     {
-        $this->connection = $connection;
     }
 
     /**
-     * @param string|int          $recordId
      * @param array<string,mixed> $set
      *
      * @Callback(table="tl_page", target="config.oncreate", priority=128)
      */
-    public function onCreate(string $table, $recordId, array $set): void
+    public function onCreate(string $table, string|int $recordId, array $set): void
     {
         if (! $set['pid']) {
             return;
@@ -65,7 +61,7 @@ EOT;
         $this->connection->update(
             $table,
             ['bbit_turl_root' => $rootId, 'bbit_turl_inherit' => (string) $result->fetchOne()],
-            ['id' => $recordId]
+            ['id' => $recordId],
         );
     }
 
@@ -125,7 +121,7 @@ EOT;
         $newValue = $this->changedValues[$dataContainer->id];
         unset($this->changedValues[$dataContainer->id]);
 
-        $strQuery = <<<EOT
+        $strQuery = <<<'EOT'
 UPDATE	tl_page
 SET		bbit_turl_rootInherit = ?
 WHERE	id = ?
@@ -152,7 +148,7 @@ EOT;
 
         $this->connection->executeStatement(
             $strQuery,
-            [strlen((string) $strAlias) + 2, $dataContainer->id, $strAlias . '/%']
+            [strlen((string) $strAlias) + 2, $dataContainer->id, $strAlias . '/%'],
         );
     }
 }

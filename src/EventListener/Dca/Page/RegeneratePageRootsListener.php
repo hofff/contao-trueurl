@@ -10,27 +10,18 @@ use Hofff\Contao\TrueUrl\TrueURL;
 
 final class RegeneratePageRootsListener
 {
-    private TrueURL $trueUrl;
-
-    public function __construct(TrueURL $trueUrl)
+    public function __construct(private readonly TrueURL $trueUrl)
     {
-        $this->trueUrl = $trueUrl;
     }
 
-    /**
-     * @param string|int $recordId
-     *
-     * @Callback(table="tl_page", target="config.oncopy", priority=255)
-     */
-    public function onCopy($recordId): void
+    /** @Callback(table="tl_page", target="config.oncopy", priority=255) */
+    public function onCopy(int|string $recordId): void
     {
         $this->trueUrl->regeneratePageRoots([$recordId]);
         $this->trueUrl->update((int) $recordId);
     }
 
-    /**
-     * @Callback(table="tl_page", target="config.oncut", priority=255)
-     */
+    /** @Callback(table="tl_page", target="config.oncut", priority=255) */
     public function onCut(DataContainer $dataContainer): void
     {
         $this->trueUrl->regeneratePageRoots([$dataContainer->id]);

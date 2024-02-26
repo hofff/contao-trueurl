@@ -22,24 +22,12 @@ use function min;
 
 final class BackendController
 {
-    private SessionInterface $session;
-
-    private ContaoFramework $framework;
-
-    private TrueURL $trueUrl;
-
-    private Security $security;
-
     public function __construct(
-        SessionInterface $session,
-        ContaoFramework $framework,
-        TrueURL $trueUrl,
-        Security $security
+        private readonly SessionInterface $session,
+        private readonly ContaoFramework $framework,
+        private readonly TrueURL $trueUrl,
+        private readonly Security $security,
     ) {
-        $this->session   = $session;
-        $this->framework = $framework;
-        $this->trueUrl   = $trueUrl;
-        $this->security  = $security;
     }
 
     /**
@@ -114,7 +102,7 @@ final class BackendController
 
         return new RedirectResponse(
             $request->getSchemeAndHttpHost() . '/' . $this->framework->getAdapter(Backend::class)->getReferer(),
-            Response::HTTP_SEE_OTHER
+            Response::HTTP_SEE_OTHER,
         );
     }
 

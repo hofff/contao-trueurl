@@ -11,11 +11,8 @@ use Hofff\Contao\TrueUrl\TrueURL;
 /** @Hook("loadPageDetails") */
 final class PageDetailsListener
 {
-    private TrueURL $trueUrl;
-
-    public function __construct(TrueURL $trueUrl)
+    public function __construct(private readonly TrueURL $trueUrl)
     {
-        $this->trueUrl = $trueUrl;
     }
 
     /**

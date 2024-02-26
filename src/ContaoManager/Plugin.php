@@ -18,9 +18,7 @@ use Symfony\Component\Routing\RouteCollection;
 
 final class Plugin implements BundlePluginInterface, ConfigPluginInterface, RoutingPluginInterface
 {
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public function getBundles(ParserInterface $parser): array
     {
         return [
@@ -30,18 +28,14 @@ final class Plugin implements BundlePluginInterface, ConfigPluginInterface, Rout
         ];
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public function registerContainerConfiguration(LoaderInterface $loader, array $managerConfig): void
     {
         $loader->load(__DIR__ . '/../Resources/config/config.yaml');
     }
 
-    /**
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     */
-    public function getRouteCollection(LoaderResolverInterface $resolver, KernelInterface $kernel): ?RouteCollection
+    /** @SuppressWarnings(PHPMD.UnusedFormalParameter) */
+    public function getRouteCollection(LoaderResolverInterface $resolver, KernelInterface $kernel): RouteCollection|null
     {
         $loader = $resolver->resolve(__DIR__ . '/../Resources/config/routes.xml');
         if (! $loader) {

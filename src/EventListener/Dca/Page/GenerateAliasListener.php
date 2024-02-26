@@ -20,28 +20,13 @@ use function trim;
 
 final class GenerateAliasListener
 {
-    private PageUrlListener $pageUrlListener;
-
-    private TrueURL $trueUrl;
-
-    private Connection $connection;
-
-    private ContaoFramework $framework;
-
-    private Security $security;
-
     public function __construct(
-        PageUrlListener $pageUrlListener,
-        TrueURL $trueUrl,
-        Connection $connection,
-        ContaoFramework $framework,
-        Security $security
+        private readonly PageUrlListener $pageUrlListener,
+        private readonly TrueURL $trueUrl,
+        private readonly Connection $connection,
+        private readonly ContaoFramework $framework,
+        private readonly Security $security,
     ) {
-        $this->pageUrlListener = $pageUrlListener;
-        $this->trueUrl         = $trueUrl;
-        $this->connection      = $connection;
-        $this->framework       = $framework;
-        $this->security        = $security;
     }
 
     /**

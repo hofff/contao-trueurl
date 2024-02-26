@@ -24,19 +24,11 @@ use function strncmp;
 use function substr;
 use function trim;
 
-/**
- * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
- */
+/** @SuppressWarnings(PHPMD.ExcessiveClassComplexity) */
 final class TrueURL
 {
-    private Connection $connection;
-
-    private ContaoFramework $framework;
-
-    public function __construct(Connection $connection, ContaoFramework $framework)
+    public function __construct(private readonly Connection $connection, private readonly ContaoFramework $framework)
     {
-        $this->connection = $connection;
-        $this->framework  = $framework;
     }
 
     /**
@@ -47,7 +39,7 @@ final class TrueURL
      * @throws Exception
      * @throws \Doctrine\DBAL\Exception
      */
-    public function regeneratePageRoots(?array $pageIds = null, bool $orphans = true): void
+    public function regeneratePageRoots(array|null $pageIds = null, bool $orphans = true): void
     {
         $this->framework->initialize();
         $database = $this->framework->createInstance(Database::class);
@@ -87,7 +79,7 @@ EOT;
             $this->connection->executeQuery(
                 $query,
                 ['rootId' => $rootId, 'descendants' => $descendants],
-                ['descendants' => ArrayParameterType::STRING]
+                ['descendants' => ArrayParameterType::STRING],
             );
         }
 
@@ -255,7 +247,7 @@ EOT;
      *
      * @return bool Whether the alias could be successfully updated.
      */
-    public function update(int $pageId, ?string $fragment = null, bool $autoInherit = false): bool
+    public function update(int $pageId, string|null $fragment = null, bool $autoInherit = false): bool
     {
         if ($fragment !== null) {
             if ($fragment === '') {
@@ -278,10 +270,10 @@ EOT;
      */
     private function doUpdate(
         int $pageId,
-        ?object $rootPage,
-        ?string $parentAlias,
+        object|null $rootPage,
+        string|null $parentAlias,
         bool $updateAll,
-        bool $autoInherit
+        bool $autoInherit,
     ): bool {
         $query      = <<<'EOT'
 SELECT 	id, pid, alias, type,
@@ -347,18 +339,15 @@ EOT;
 
         $this->storeAlias($pageId, $strAlias, $fragment, $inherit);
 
-        $strOnlyInherit = '';
-        if (! $updateAll && ! $autoInherit && $rootPage && $rootPage->bbit_turl_rootInherit !== 'always') {
-            $strOnlyInherit = 'AND bbit_turl_inherit = \'1\'';
-        }
-
-        $query = <<<EOT
+        $query = <<<'EOT'
 SELECT	id
 FROM	tl_page
 WHERE	pid = ?
-AND		type != 'root'
-$strOnlyInherit
+AND		type != 'root';
 EOT;
+        if (! $updateAll && ! $autoInherit && $rootPage && $rootPage->bbit_turl_rootInherit !== 'always') {
+            $query .= 'AND bbit_turl_inherit = \'1\'';
+        }
 
         $childrenResult = $this->connection->executeQuery($query, [$pageId]);
 
@@ -369,10 +358,8 @@ EOT;
         return true;
     }
 
-    /**
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     */
-    private function prepareFragment(object $page, ?object $rootPage, ?string $parentAlias = null): string
+    /** @SuppressWarnings(PHPMD.CyclomaticComplexity) */
+    private function prepareFragment(object $page, object|null $rootPage, string|null $parentAlias = null): string
     {
         // use stored fragment
         $strFragment = (string) $page->bbit_turl_fragment;
@@ -411,7 +398,7 @@ EOT;
         return $this->makeAlias((int) $page->id);
     }
 
-    private function storeAlias(int $pageId, string $alias, string $fragment, ?bool $inherit = null): void
+    private function storeAlias(int $pageId, string $alias, string $fragment, bool|null $inherit = null): void
     {
         $set = [
             'alias' => $alias,
@@ -432,12 +419,12 @@ EOT;
      *
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
-    private function getParentAlias(int $pageId, ?object $rootPage = null): string
+    private function getParentAlias(int $pageId, object|null $rootPage = null): string
     {
         $rootPage || $rootPage = $this->getRootPage($pageId);
 
         do {
-            $strQuery = <<<EOT
+            $strQuery = <<<'EOT'
 SELECT	p2.id, p2.alias, p2.bbit_turl_transparent, p2.bbit_turl_ignoreRoot
 FROM	tl_page AS p1
 JOIN	tl_page AS p2 ON p2.id = p1.pid
@@ -478,7 +465,7 @@ EOT;
      * PageModel::findWithDetails() and the root page references within that
      * root page are repaired.
      */
-    private function getRootPage(int $pageId): ?object
+    private function getRootPage(int $pageId): object|null
     {
         $pageModel = PageModel::findWithDetails($pageId);
         if ($pageModel === null) {
@@ -488,11 +475,11 @@ EOT;
         return $this->getRootPageFromPageModel($pageModel);
     }
 
-    private function getRootPageFromPageModel(PageModel $pageModel): ?object
+    private function getRootPageFromPageModel(PageModel $pageModel): object|null
     {
         $this->framework->initialize();
 
-        $strQuery = <<<EOT
+        $strQuery = <<<'EOT'
 SELECT	rt.id, rt.type, rt.alias, rt.bbit_turl_rootInherit
 FROM	tl_page AS p
 JOIN	tl_page AS rt ON rt.id = p.bbit_turl_root
@@ -513,7 +500,7 @@ EOT;
             return null;
         }
 
-        $strQuery = <<<EOT
+        $strQuery = <<<'EOT'
 SELECT	id, alias, bbit_turl_rootInherit
 FROM	tl_page
 WHERE	id = ?
@@ -542,7 +529,7 @@ EOT;
         }
 
         $strAlias = StringUtil::standardize($objPage->title);
-        $strQuery = <<<EOT
+        $strQuery = <<<'EOT'
 SELECT	id
 FROM	tl_page
 WHERE	id != ?
@@ -565,7 +552,7 @@ EOT;
      * @SuppressWarnings(PHPMD.NPathComplexity)
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
-    public function splitAlias(array $page): ?array
+    public function splitAlias(array $page): array|null
     {
         $strAlias = $page['alias'];
         if (! strlen($strAlias)) {
@@ -645,7 +632,7 @@ EOT;
         return $arrAlias;
     }
 
-    private static function unprefix(string $alias, ?string $prefix): string
+    private static function unprefix(string $alias, string|null $prefix): string
     {
         return $prefix !== null && $prefix !== '' && self::isPrefix($alias, $prefix)
             ? substr($alias, strlen($prefix) + 1)

@@ -13,11 +13,8 @@ use function preg_match;
 /** @Hook("addCustomRegexp") */
 final class CustomRegularExpressionListener
 {
-    private TranslatorInterface $translator;
-
-    public function __construct(TranslatorInterface $translator)
+    public function __construct(private TranslatorInterface $translator)
     {
-        $this->translator = $translator;
     }
 
     /** @param mixed $value */

@@ -36,44 +36,17 @@ final class ViewListener
 {
     private static bool $blnRecurse = false;
 
-    private ContaoFramework $framework;
-
-    private Packages $packages;
-
-    private TranslatorInterface $translator;
-
-    private SessionInterface $session;
-
-    private Security $security;
-
-    private TrueURL $trueUrl;
-
-    private RouterInterface $router;
-
-    /** @var list<string> */
-    private array $unrouteablePageTypes;
-
-    /**
-     * @param list<string> $unrouteablePageTypes
-     */
+    /** @param list<string> $unrouteablePageTypes */
     public function __construct(
-        ContaoFramework $framework,
-        Packages $packages,
-        TranslatorInterface $translator,
-        SessionInterface $session,
-        Security $security,
-        RouterInterface $router,
-        TrueURL $trueUrl,
-        array $unrouteablePageTypes
+        private readonly ContaoFramework $framework,
+        private readonly Packages $packages,
+        private readonly TranslatorInterface $translator,
+        private readonly SessionInterface $session,
+        private readonly Security $security,
+        private readonly RouterInterface $router,
+        private readonly TrueURL $trueUrl,
+        private readonly array $unrouteablePageTypes,
     ) {
-        $this->framework            = $framework;
-        $this->packages             = $packages;
-        $this->translator           = $translator;
-        $this->session              = $session;
-        $this->security             = $security;
-        $this->unrouteablePageTypes = $unrouteablePageTypes;
-        $this->trueUrl              = $trueUrl;
-        $this->router               = $router;
     }
 
     /**
@@ -84,12 +57,12 @@ final class ViewListener
     {
         $rootManipulator = PaletteManipulator::create()->addField(
             ['bbit_turl_rootInheritProxy', 'bbit_turl_defaultInherit'],
-            'type'
+            'type',
         );
 
         $pageManipulator = PaletteManipulator::create()->addField(
             ['bbit_turl_inherit', 'bbit_turl_transparent', 'bbit_turl_ignoreRoot'],
-            'type'
+            'type',
         );
 
         foreach ($GLOBALS['TL_DCA']['tl_page']['palettes'] as $selector => $palette) {
@@ -108,7 +81,6 @@ final class ViewListener
 
     /**
      * @param array<string,mixed> $row
-     * @param mixed               $imageAttribute
      *
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.Superglobals)
@@ -118,10 +90,10 @@ final class ViewListener
     public function labelPage(
         array $row,
         string $label,
-        ?DataContainer $dataContainer = null,
+        DataContainer|null $dataContainer = null,
         mixed $imageAttribute = '',
         bool $returnImage = false,
-        bool $protect = false
+        bool $protect = false,
     ): string {
         $wasRecurse = self::$blnRecurse;
         $callback   = $wasRecurse
@@ -198,7 +170,7 @@ final class ViewListener
         if ($row['type'] === 'root') {
             $strTitle  = $this->translate('bbit_turl_rootInherit.0') . ': ';
             $strTitle .= $this->translate(
-                'bbit_turl_rootInheritOptions.' . ($row['bbit_turl_rootInherit'] ?: 'normal')
+                'bbit_turl_rootInheritOptions.' . ($row['bbit_turl_rootInherit'] ?: 'normal'),
             );
 
             switch ($row['bbit_turl_rootInherit']) {
@@ -216,7 +188,7 @@ final class ViewListener
         } else {
             $row['bbit_turl_ignoreRoot'] && $label .= $this->makeImage(
                 'link_delete.png',
-                $this->translate('bbit_turl_ignoreRoot.0')
+                $this->translate('bbit_turl_ignoreRoot.0'),
             );
 
             if ($row['bbit_turl_inherit']) {
@@ -259,11 +231,11 @@ final class ViewListener
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function buttonAlias(
-        ?string $href,
+        string|null $href,
         string $label,
         string $title,
-        ?string $class,
-        string $attributes
+        string|null $class,
+        string $attributes,
     ): string {
         switch ($this->getViewMode()) {
             case 1:
@@ -292,7 +264,7 @@ final class ViewListener
             (string) $class,
             StringUtil::specialchars($title),
             $attributes,
-            $label
+            $label,
         );
     }
 
@@ -301,11 +273,11 @@ final class ViewListener
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function buttonRegenerate(
-        ?string $href,
+        string|null $href,
         string $label,
         string $title,
-        ?string $class,
-        string $attributes
+        string|null $class,
+        string $attributes,
     ): string {
         return $this->isAdmin() ? sprintf(
             ' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
@@ -313,7 +285,7 @@ final class ViewListener
             (string) $class,
             StringUtil::specialchars($title),
             $attributes,
-            $label
+            $label,
         ) : '';
     }
 
@@ -322,11 +294,11 @@ final class ViewListener
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function buttonRepair(
-        ?string $href,
+        string|null $href,
         string $label,
         string $title,
-        ?string $class,
-        string $attributes
+        string|null $class,
+        string $attributes,
     ): string {
         return $this->isAdmin() ? sprintf(
             ' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
@@ -334,7 +306,7 @@ final class ViewListener
             (string) $class,
             StringUtil::specialchars($title),
             $attributes,
-            $label
+            $label,
         ) : '';
     }
 
@@ -346,18 +318,18 @@ final class ViewListener
      */
     public function buttonAutoInherit(
         array $row,
-        ?string $href,
+        string|null $href,
         string $label,
         string $title,
         string $icon,
-        string $attributes
+        string $attributes,
     ): string {
         return $this->isAdmin() && Input::get('act') !== 'paste' ? sprintf(
             '<a href="%s" title="%s"%s>%s</a> ',
             $this->router->generate('hofff_contao_true_url_auto_inherit', ['id' => $row['id']]),
             StringUtil::specialchars($title),
             $attributes,
-            Image::getHtml($icon, $label)
+            Image::getHtml($icon, $label),
         ) : '';
     }
 
@@ -366,7 +338,7 @@ final class ViewListener
         return ' ' . Image::getHtml(
             $this->packages->getUrl('images/' . $image, 'hofff_contao_true_url'),
             $title,
-            ' title="' . StringUtil::specialchars($title) . '"'
+            ' title="' . StringUtil::specialchars($title) . '"',
         );
     }
 

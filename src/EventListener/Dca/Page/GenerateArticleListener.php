@@ -14,11 +14,8 @@ use function is_array;
 
 final class GenerateArticleListener
 {
-    private ContentCompositionListener $listener;
-
-    public function __construct(ContentCompositionListener $listener)
+    public function __construct(private readonly ContentCompositionListener $listener)
     {
-        $this->listener = $listener;
     }
 
     /**
