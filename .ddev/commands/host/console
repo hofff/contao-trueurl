@@ -4,4 +4,4 @@
 ## Usage: console
 ## Example: "ddev console contao:migrate"
 
-ddev exec vendor/bin/contao-console "$@"
+ddev exec ./.ddev/contao/vendor/bin/contao-console "$@"

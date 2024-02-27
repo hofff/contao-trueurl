@@ -4,4 +4,4 @@
 ## Usage: migrate
 ## Example: "ddev migrate --no-backup"
 
-ddev exec vendor/bin/contao-console contao:migrate "$@"
+ddev exec ./.ddev/contao/vendor/bin/contao-console contao:migrate "$@"
