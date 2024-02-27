@@ -14,8 +14,8 @@ use Contao\StringUtil;
 use Contao\System;
 use Hofff\Contao\TrueUrl\TrueURL;
 use Symfony\Component\Asset\Packages;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBag;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -41,7 +41,7 @@ final class ViewListener
         private readonly ContaoFramework $framework,
         private readonly Packages $packages,
         private readonly TranslatorInterface $translator,
-        private readonly SessionInterface $session,
+        private readonly RequestStack $requestStack,
         private readonly Security $security,
         private readonly RouterInterface $router,
         private readonly TrueURL $trueUrl,
@@ -354,7 +354,12 @@ final class ViewListener
 
     private function getViewMode(): int
     {
-        $bag = $this->session->getBag('contao_backend');
+        $request = $this->requestStack->getCurrentRequest();
+        if ($request === null) {
+            return -1;
+        }
+
+        $bag = $request->getSession()->getBag('contao_backend');
         assert($bag instanceof AttributeBag);
 
         return (int) $bag->get('bbit_turl_alias');

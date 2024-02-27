@@ -9,7 +9,7 @@
 
         <!-- Data container callback listeners -->
         <service id="Hofff\Contao\TrueUrl\EventListener\Dca\Page\GenerateAliasListener">
-            <argument type="service" id="Contao\CoreBundle\EventListener\DataContainer\PageUrlListener"/>
+            <argument type="service" id="contao.listener.data_container.page_url"/>
             <argument type="service" id="Hofff\Contao\TrueUrl\TrueURL"/>
             <argument type="service" id="database_connection"/>
             <argument type="service" id="contao.framework"/>
@@ -17,7 +17,7 @@
         </service>
 
         <service id="Hofff\Contao\TrueUrl\EventListener\Dca\Page\GenerateArticleListener" public="true">
-            <argument type="service" id="Contao\CoreBundle\EventListener\DataContainer\ContentCompositionListener"/>
+            <argument type="service" id="contao.listener.data_container.content_composition"/>
         </service>
 
         <service id="Hofff\Contao\TrueUrl\EventListener\Dca\Page\RegeneratePageRootsListener" public="true">
@@ -32,7 +32,7 @@
             <argument type="service" id="contao.framework"/>
             <argument type="service" id="assets.packages"/>
             <argument type="service" id="translator"/>
-            <argument type="service" id="session"/>
+            <argument type="service" id="request_stack"/>
             <argument type="service" id="security.helper"/>
             <argument type="service" id="router"/>
             <argument type="service" id="Hofff\Contao\TrueUrl\TrueURL"/>
