@@ -2,26 +2,6 @@
 
 declare(strict_types=1);
 
-$GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow']          = [
-    'Show page alias',
-    'Shows the alias of the pages within the listing overview.',
-];
-$GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasOnly']          = [
-    'Show page alias only',
-    'Shows just the alias of the pages within listing overview.',
-];
-$GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasHide']          = [
-    'Hide page alias',
-    'Hides the alias of the pages from the listing overview.',
-];
-$GLOBALS['TL_LANG']['tl_page']['bbit_turl_regenerate']         = [
-    'Regenerate pages',
-    'Regenerates direct references of all pages to their root pages. This reference is needed by the "backboneit_trueurl" extension to provide an efficient calculation of the frontend page selection algorithmn.',
-];
-$GLOBALS['TL_LANG']['tl_page']['bbit_turl_repair']             = [
-    'Repair page alias',
-    'Checks and repairs all page alias, if needed. Additionally empty alias will be filled with a generated one.',
-];
 $GLOBALS['TL_LANG']['tl_page']['bbit_turl_autoInherit']        = [
     'Check and enable automatic parent page alias inheritance',
     'Enables the automatic parent page alias inheritance for this page and all its descendants, if the page alias starts with the alias of the parent page.',

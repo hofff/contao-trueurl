@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Hofff\Contao\TrueUrl\EventListener\Dca\Page;
 
 use Contao\BackendUser;
-use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\DataContainer;
 use Contao\Image;
@@ -25,7 +24,6 @@ use function preg_match;
 use function str_starts_with;
 use function substr;
 
-#[AsCallback('tl_page', 'list.label.label')]
 final class GenerateLabelListener
 {
     private static bool $blnRecurse = false;

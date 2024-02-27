@@ -2,26 +2,6 @@
 
 declare(strict_types=1);
 
-$GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow']          = [
-    'Seitenalias zeigen',
-    'Den Alias der Seiten in der Übersicht anzeigen.',
-];
-$GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasOnly']          = [
-    'Nur Seitenalias zeigen',
-    'Ausschließlich den Alias der Seiten in der Übersicht anzeigen.',
-];
-$GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasHide']          = [
-    'Seitenalias verstecken',
-    'Den Alias der Seiten in der Übersicht verstecken.',
-];
-$GLOBALS['TL_LANG']['tl_page']['bbit_turl_regenerate']         = [
-    'Seiten regenerieren',
-    'Regeneriert alle direkten Referenzen auf die Startpunktseite in der sich die jeweilige Seite befindet. Diese Information wird von der Erweiterung "backboneit_trueurl" benötigt um eine effiziente Ermittelung der anzuzeigenden Seite durchzuführen.',
-];
-$GLOBALS['TL_LANG']['tl_page']['bbit_turl_repair']             = [
-    'Seitenalias reparieren',
-    'Überprüft alle Seitenaliase und repariert diese, wenn nötig. Außerdem werden leere Aliase automatisch befüllt.',
-];
 $GLOBALS['TL_LANG']['tl_page']['bbit_turl_autoInherit']        = [
     'Automatische Vererbung des Seitenalias prüfen und aktivieren',
     'Aktiviert die automatische Vererbung des Seitenalias für diese und alle Unterseiten, wenn der jeweilige Seitenalias mit der Elternseite beginnt.',

@@ -2,27 +2,10 @@
 
 declare(strict_types=1);
 
-use Contao\System;
 use Doctrine\DBAL\Types\Types;
 
 $GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl'] =
     $GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'];
-
-$GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_regenerate'] = [
-    'href'  => '',
-    'class' => '',
-];
-$GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_repair']     = [
-    'href'  => '',
-    'class' => '',
-];
-
-/** @psalm-suppress PossiblyNullReference */
-$GLOBALS['TL_DCA']['tl_page']['list']['operations']['bbit_turl_autoInherit'] = [
-    'icon' => System::getContainer()
-        ->get('assets.packages')
-        ->getUrl('images/page_link.png', 'hofff_contao_true_url'),
-];
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['alias']['eval']['rgxp']       = 'trueurl';
 $GLOBALS['TL_DCA']['tl_page']['fields']['alias']['eval']['alwaysSave'] = true;

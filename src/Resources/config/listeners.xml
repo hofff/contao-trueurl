@@ -35,11 +35,6 @@
             <argument type="service" id="database_connection"/>
         </service>
 
-        <service id="Hofff\Contao\TrueUrl\EventListener\Dca\Page\ViewListener" public="true">
-            <argument type="service" id="security.helper"/>
-            <argument type="service" id="router"/>
-        </service>
-
         <!-- Hook listeners -->
         <service id="Hofff\Contao\TrueUrl\EventListener\Hook\CustomRegularExpressionListener" public="true">
             <argument type="service" id="translator"/>
