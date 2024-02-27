@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Hofff\Contao\TrueUrl\EventListener\Dca\Page;
 
-use Contao\CoreBundle\DataContainer\PaletteManipulator;
 use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\CoreBundle\ServiceAnnotation\Callback;
 use Contao\DataContainer;
@@ -47,36 +46,6 @@ final class ViewListener
         private readonly TrueURL $trueUrl,
         private readonly array $unrouteablePageTypes,
     ) {
-    }
-
-    /**
-     * @Callback(table="tl_page", target="config.onload")
-     * @SuppressWarnings(PHPMD.Superglobals)
-     */
-    public function onLoad(): void
-    {
-        $rootManipulator = PaletteManipulator::create()->addField(
-            ['bbit_turl_rootInheritProxy', 'bbit_turl_defaultInherit'],
-            'type',
-        );
-
-        $pageManipulator = PaletteManipulator::create()->addField(
-            ['bbit_turl_inherit', 'bbit_turl_transparent', 'bbit_turl_ignoreRoot'],
-            'type',
-        );
-
-        foreach ($GLOBALS['TL_DCA']['tl_page']['palettes'] as $selector => $palette) {
-            if ($selector === '__selector__' || ! is_string($palette)) {
-                continue;
-            }
-
-            if ($selector === 'root' || $selector === 'rootfallback') {
-                $rootManipulator->applyToPalette($selector, 'tl_page');
-                continue;
-            }
-
-            $pageManipulator->applyToPalette($selector, 'tl_page');
-        }
     }
 
     /**

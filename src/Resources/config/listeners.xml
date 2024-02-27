@@ -5,9 +5,11 @@
         https://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
-        <defaults autowire="false" autoconfigure="false" public="false"/>
+        <defaults autowire="false" autoconfigure="true" public="false"/>
 
         <!-- Data container callback listeners -->
+        <service id="Hofff\Contao\TrueUrl\EventListener\Dca\Page\PaletteListener" />
+
         <service id="Hofff\Contao\TrueUrl\EventListener\Dca\Page\GenerateAliasListener">
             <argument type="service" id="contao.listener.data_container.page_url"/>
             <argument type="service" id="Hofff\Contao\TrueUrl\TrueURL"/>
