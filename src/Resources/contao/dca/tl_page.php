@@ -8,11 +8,6 @@ use Doctrine\DBAL\Types\Types;
 $GLOBALS['TL_DCA']['tl_page']['list']['label']['bbit_turl'] =
     $GLOBALS['TL_DCA']['tl_page']['list']['label']['label_callback'];
 
-$GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_alias']      = [
-    'href'  => '',
-    'class' => '',
-    'label' => &$GLOBALS['TL_LANG']['tl_page']['bbit_turl_aliasShow'],
-];
 $GLOBALS['TL_DCA']['tl_page']['list']['global_operations']['bbit_turl_regenerate'] = [
     'href'  => '',
     'class' => '',

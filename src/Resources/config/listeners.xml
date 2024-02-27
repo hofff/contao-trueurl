@@ -22,6 +22,15 @@
             <argument type="service" id="contao.listener.data_container.content_composition"/>
         </service>
 
+      <service id="Hofff\Contao\TrueUrl\EventListener\Dca\Page\GenerateLabelListener" public="true">
+        <argument type="service" id="contao.framework"/>
+        <argument type="service" id="translator"/>
+        <argument type="service" id="assets.packages"/>
+        <argument type="service" id="security.helper"/>
+        <argument type="service" id="Hofff\Contao\TrueUrl\TrueURL"/>
+        <argument>%hofff_contao_true_url.unrouteable_page_types%</argument>
+      </service>
+
         <service id="Hofff\Contao\TrueUrl\EventListener\Dca\Page\RegeneratePageRootsListener" public="true">
             <argument type="service" id="Hofff\Contao\TrueUrl\TrueURL"/>
         </service>
@@ -31,14 +40,8 @@
         </service>
 
         <service id="Hofff\Contao\TrueUrl\EventListener\Dca\Page\ViewListener" public="true">
-            <argument type="service" id="contao.framework"/>
-            <argument type="service" id="assets.packages"/>
-            <argument type="service" id="translator"/>
-            <argument type="service" id="request_stack"/>
             <argument type="service" id="security.helper"/>
             <argument type="service" id="router"/>
-            <argument type="service" id="Hofff\Contao\TrueUrl\TrueURL"/>
-            <argument>%hofff_contao_true_url.unrouteable_page_types%</argument>
         </service>
 
         <!-- Hook listeners -->
@@ -52,5 +55,8 @@
         <service id="Hofff\Contao\TrueUrl\EventListener\Hook\PageDetailsListener" public="true">
             <argument type="service" id="Hofff\Contao\TrueUrl\TrueURL"/>
         </service>
+
+        <service id="Hofff\Contao\TrueUrl\EventListener\Dca\User\PaletteListener"/>
+        <service id="Hofff\Contao\TrueUrl\EventListener\Dca\User\ViewModeOptions"/>
     </services>
 </container>

@@ -36,5 +36,6 @@
 
   <universalObjectCrates>
     <class name="Contao\PageModel"/>
+    <class name="Contao\BackendUser"/>
   </universalObjectCrates>
 </psalm>

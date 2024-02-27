@@ -11,13 +11,9 @@ use Hofff\Contao\TrueUrl\TrueURL;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBag;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Security;
 
-use function assert;
-use function max;
-use function min;
 use function str_starts_with;
 
 final class BackendController
@@ -27,24 +23,6 @@ final class BackendController
         private readonly TrueURL $trueUrl,
         private readonly Security $security,
     ) {
-    }
-
-    /**
-     * @Route("/contao/trueurl/alias",
-     *     name="hofff_contao_true_url_alias",
-     *     methods={"GET"},
-     *     defaults={"_scope": "backend"}
-     * )
-     */
-    public function aliasAction(Request $request): Response
-    {
-        $this->checkPermissions();
-
-        $bag = $request->getSession()->getBag('contao_backend');
-        assert($bag instanceof AttributeBag);
-        $bag->set('bbit_turl_alias', max(0, min(2, $request->query->getInt('bbit_turl_alias'))));
-
-        return $this->redirectToRefererResponse($request);
     }
 
     /**
