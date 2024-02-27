@@ -164,10 +164,6 @@ final class GenerateLabelListener
         if ($row['type'] !== 'root') {
             $label = '';
 
-            if ($row['bbit_turl_ignoreRoot']) {
-                $label .= $this->makeImage('link_delete.png', $this->translate('bbit_turl_ignoreRoot.0'));
-            }
-
             if ($row['bbit_turl_inherit']) {
                 $image = 'link';
                 $title = $this->translate('bbit_turl_inherit.0');
