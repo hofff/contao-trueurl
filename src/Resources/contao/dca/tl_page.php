@@ -75,11 +75,12 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_transparent'] = [
 $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_ignoreRoot'] = [
     'inputType' => 'checkbox',
     'eval'      => ['tl_class' => 'clr w50 cbx'],
+    'default'   => '1',
     'sql' => [
         'type'    => Types::STRING,
         'length'  => 1,
         'notnull' => true,
-        'default' => '',
+        'default' => '1',
     ],
 ];
 
