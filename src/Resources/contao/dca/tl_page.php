@@ -101,13 +101,3 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_rootInherit'] = [
         'default' => '',
     ],
 ];
-
-$GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_root'] = [
-    'sql' => [
-        'type'     => Types::INTEGER,
-        'length'   => 10,
-        'notnull'  => true,
-        'unsigned' => true,
-        'default'  => 0,
-    ],
-];

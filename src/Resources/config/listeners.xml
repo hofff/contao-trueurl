@@ -31,10 +31,6 @@
         <argument>%hofff_contao_true_url.unrouteable_page_types%</argument>
       </service>
 
-        <service id="Hofff\Contao\TrueUrl\EventListener\Dca\Page\RegeneratePageRootsListener" public="true">
-            <argument type="service" id="Hofff\Contao\TrueUrl\TrueURL"/>
-        </service>
-
         <service id="Hofff\Contao\TrueUrl\EventListener\Dca\Page\RootInheritListener" public="true">
             <argument type="service" id="database_connection"/>
         </service>

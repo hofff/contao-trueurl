@@ -32,35 +32,24 @@ final class RootInheritListener
         }
 
         $parentPage = PageModel::findWithDetails($set['pid']);
-        if (! $parentPage) {
-            $this->connection->update($table, ['bbit_turl_root' => 0], ['id' => $recordId]);
-
+        if (! $parentPage instanceof PageModel) {
             return;
         }
 
         $rootId = $parentPage->type === 'root' ? $parentPage->id : $parentPage->rootId;
-
-        if (! $rootId) {
-            $this->connection->update($table, ['bbit_turl_root' => 0], ['id' => $recordId]);
-
-            return;
-        }
-
-        $strQuery = <<<'EOT'
-SELECT	bbit_turl_defaultInherit
-FROM	tl_page
-WHERE	id = ?
+        $query  = <<<'EOT'
+ SELECT	bbit_turl_defaultInherit
+   FROM	tl_page
+  WHERE	id = ?
 EOT;
-        $result   = $this->connection->executeQuery($strQuery, [$rootId]);
+        $result = $this->connection->executeQuery($query, [$rootId]);
         if ($result->rowCount() === 0) {
-            $this->connection->update($table, ['bbit_turl_root' => 0], ['id' => $recordId]);
-
             return;
         }
 
         $this->connection->update(
             $table,
-            ['bbit_turl_root' => $rootId, 'bbit_turl_inherit' => (string) $result->fetchOne()],
+            ['bbit_turl_inherit' => (string) $result->fetchOne()],
             ['id' => $recordId],
         );
     }
@@ -98,7 +87,7 @@ EOT;
         return null;
     }
 
-    /** @Callback(table="tl_page", target="config.onsubmit") */
+    /** @Callback(table="tl_page", target="config.onsubmit", priority=-1) */
     public function onSubmit(DataContainer $dataContainer): void
     {
         if (! isset($this->changedValues[$dataContainer->id]) || ! $dataContainer->activeRecord) {
@@ -133,7 +122,7 @@ EOT;
         $strQuery = <<<'EOT'
 UPDATE	tl_page
 SET		bbit_turl_fragment = SUBSTRING(bbit_turl_fragment, ?)
-WHERE	bbit_turl_root = ?
+WHERE	hofff_root_page_id = ?
 AND		bbit_turl_fragment LIKE ?
 AND		bbit_turl_fragment = alias
 AND		bbit_turl_ignoreRoot = ''

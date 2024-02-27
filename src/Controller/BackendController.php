@@ -26,22 +26,6 @@ final class BackendController
     }
 
     /**
-     * @Route("/contao/trueurl/regenerate",
-     *     name="hofff_contao_true_url_regenerate",
-     *     methods={"GET"},
-     *     defaults={"_scope": "backend"}
-     * )
-     */
-    public function regenerateAction(Request $request): Response
-    {
-        $this->checkPermissions();
-
-        $this->trueUrl->regeneratePageRoots();
-
-        return $this->redirectToRefererResponse($request);
-    }
-
-    /**
      * @Route("/contao/trueurl/repair",
      *     name="hofff_contao_true_url_repair",
      *     methods={"GET"},

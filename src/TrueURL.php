@@ -5,19 +5,12 @@ declare(strict_types=1);
 namespace Hofff\Contao\TrueUrl;
 
 use Contao\CoreBundle\Framework\ContaoFramework;
-use Contao\Database;
 use Contao\PageModel;
 use Contao\StringUtil;
-use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\Exception;
 use InvalidArgumentException;
 
-use function array_combine;
-use function array_filter;
-use function array_map;
-use function array_merge;
-use function array_unique;
 use function strlen;
 use function strncasecmp;
 use function strncmp;
@@ -29,95 +22,6 @@ final class TrueURL
 {
     public function __construct(private readonly Connection $connection, private readonly ContaoFramework $framework)
     {
-    }
-
-    /**
-     * Regenerate the direct root page relation.
-     *
-     * @param list<string|int>|null $pageIds
-     *
-     * @throws Exception
-     * @throws \Doctrine\DBAL\Exception
-     */
-    public function regeneratePageRoots(array|null $pageIds = null, bool $orphans = true): void
-    {
-        $this->framework->initialize();
-        $database = $this->framework->createInstance(Database::class);
-
-        if ($pageIds !== null) {
-            $pageIds = array_unique(array_map('intval', array_filter($pageIds, 'is_numeric')));
-            $rootIds = [];
-            foreach ($pageIds as $pageId) {
-                $pageModel = PageModel::findWithDetails($pageId);
-                if (! $pageModel) {
-                    continue;
-                }
-
-                $intRoot             = $pageModel->type === 'root' ? (int) $pageModel->id : (int) $pageModel->rootId;
-                $rootIds[$intRoot][] = (int) $pageModel->id;
-            }
-        } else {
-            $query   = <<<'EOT'
- SELECT	id
-   FROM	tl_page
-  WHERE	type = 'root'
-EOT;
-            $rootIds = $this->connection->executeQuery($query)->fetchFirstColumn();
-            $rootIds = array_combine($rootIds, $rootIds);
-        }
-
-        foreach ($rootIds as $rootId => $pageIds) {
-            $pageIds     = (array) $pageIds;
-            $descendants = $database->getChildRecords($pageIds, 'tl_page');
-            $descendants = array_merge($descendants, $pageIds);
-            $query       = <<<'EOT'
- UPDATE	tl_page
-    SET	bbit_turl_root = :rootId
-  WHERE	id IN (:descendants)
-EOT;
-
-            $this->connection->executeQuery(
-                $query,
-                ['rootId' => $rootId, 'descendants' => $descendants],
-                ['descendants' => ArrayParameterType::STRING],
-            );
-        }
-
-        if (! $orphans) {
-            return;
-        }
-
-        // retrieve all pages not within a root page
-        $arrIDs  = [];
-        $arrPIDs = [0];
-        while ($arrPIDs) {
-            $query = <<<'EOT'
- SELECT id
-   FROM	tl_page
-  WHERE	pid IN (:pids)
-    AND	type != 'root'
-EOT;
-
-            $arrPIDs = $this->connection
-                ->executeQuery($query, ['pids' => $arrPIDs], ['pids' => ArrayParameterType::STRING])
-                ->fetchFirstColumn();
-
-            $arrIDs[] = $arrPIDs;
-        }
-
-        $arrIDs = array_merge(...$arrIDs);
-
-        if (! $arrIDs) {
-            return;
-        }
-
-        $query = <<<'EOT'
- UPDATE tl_page
-    SET bbit_turl_root = 0
-  WHERE id IN (:ids)
-EOT;
-
-        $this->connection->executeQuery($query, ['ids' => $arrIDs], ['ids' => ArrayParameterType::STRING]);
     }
 
     /**
@@ -482,7 +386,7 @@ EOT;
         $strQuery = <<<'EOT'
  SELECT	rt.id, rt.type, rt.alias, rt.bbit_turl_rootInherit
    FROM	tl_page AS p
-   JOIN	tl_page AS rt ON rt.id = p.bbit_turl_root
+   JOIN	tl_page AS rt ON rt.id = p.hofff_root_page_id
   WHERE	p.id = ?
 EOT;
         $result   = $this->connection->executeQuery($strQuery, [$pageModel->id]);

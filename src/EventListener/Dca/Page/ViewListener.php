@@ -22,27 +22,6 @@ final class ViewListener
     }
 
     /**
-     * @Callback(table="tl_page", target="list.global_operations.bbit_turl_regenerate.button")
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     */
-    public function buttonRegenerate(
-        string|null $href,
-        string $label,
-        string $title,
-        string|null $class,
-        string $attributes,
-    ): string {
-        return $this->isAdmin() ? sprintf(
-            ' &#160; :: &#160; <a href="%s" class="%s" title="%s"%s>%s</a> ',
-            $this->router->generate('hofff_contao_true_url_regenerate'),
-            (string) $class,
-            StringUtil::specialchars($title),
-            $attributes,
-            $label,
-        ) : '';
-    }
-
-    /**
      * @Callback(table="tl_page", target="list.global_operations.bbit_turl_repair.button")
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
