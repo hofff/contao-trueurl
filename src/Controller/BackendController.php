@@ -12,18 +12,17 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Attribute\AttributeBag;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Security;
 
 use function assert;
 use function max;
 use function min;
+use function str_starts_with;
 
 final class BackendController
 {
     public function __construct(
-        private readonly SessionInterface $session,
         private readonly ContaoFramework $framework,
         private readonly TrueURL $trueUrl,
         private readonly Security $security,
@@ -41,7 +40,7 @@ final class BackendController
     {
         $this->checkPermissions();
 
-        $bag = $this->session->getBag('contao_backend');
+        $bag = $request->getSession()->getBag('contao_backend');
         assert($bag instanceof AttributeBag);
         $bag->set('bbit_turl_alias', max(0, min(2, $request->query->getInt('bbit_turl_alias'))));
 
@@ -100,8 +99,13 @@ final class BackendController
     {
         $this->framework->initialize();
 
+        $referer = $this->framework->getAdapter(Backend::class)->getReferer();
+        if (! str_starts_with($referer, '/')) {
+            $referer = '/' . $referer;
+        }
+
         return new RedirectResponse(
-            $request->getSchemeAndHttpHost() . '/' . $this->framework->getAdapter(Backend::class)->getReferer(),
+            $request->getSchemeAndHttpHost() . $referer,
             Response::HTTP_SEE_OTHER,
         );
     }
