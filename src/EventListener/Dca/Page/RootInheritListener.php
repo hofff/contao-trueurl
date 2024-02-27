@@ -67,11 +67,7 @@ EOT;
         return $dataContainer->activeRecord->bbit_turl_rootInherit ?: 'normal';
     }
 
-    /**
-     * @return null
-     *
-     * @Callback(table="tl_page", target="fields.bbit_turl_rootInheritProxy.save")
-     */
+    /** @Callback(table="tl_page", target="fields.bbit_turl_rootInheritProxy.save") */
     public function onSave(mixed $newValue, DataContainer $dataContainer): mixed
     {
         if (! $dataContainer->activeRecord) {
