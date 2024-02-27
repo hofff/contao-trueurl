@@ -41,11 +41,12 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_rootInheritProxy'] = [
 $GLOBALS['TL_DCA']['tl_page']['fields']['bbit_turl_defaultInherit'] = [
     'inputType' => 'checkbox',
     'eval'      => ['tl_class' => 'w50 cbx m12'],
+    'default'   => '1',
     'sql' => [
-        'type'    => 'string',
+        'type'    => Types::STRING,
         'length'  => 1,
         'notnull' => false,
-        'default' => '',
+        'default' => '1',
     ],
 ];
 
