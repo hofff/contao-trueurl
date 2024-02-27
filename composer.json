@@ -74,6 +74,10 @@
     "sort-packages": true
   },
   "extra": {
+    "branch-alias": {
+      "dev-develop": "4.1.x-dev",
+      "dev-master": "4.0.x-dev"
+    },
     "contao-manager-plugin": "Hofff\\Contao\\TrueUrl\\ContaoManager\\Plugin"
   }
 }
