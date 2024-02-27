@@ -58,9 +58,9 @@ final class TrueURL
             }
         } else {
             $query   = <<<'EOT'
-SELECT	id
-FROM	tl_page
-WHERE	type = 'root'
+ SELECT	id
+   FROM	tl_page
+  WHERE	type = 'root'
 EOT;
             $rootIds = $this->connection->executeQuery($query)->fetchFirstColumn();
             $rootIds = array_combine($rootIds, $rootIds);
@@ -71,9 +71,9 @@ EOT;
             $descendants = $database->getChildRecords($pageIds, 'tl_page');
             $descendants = array_merge($descendants, $pageIds);
             $query       = <<<'EOT'
-UPDATE	tl_page
-SET		bbit_turl_root = :rootId
-WHERE	id IN (:descendants)
+ UPDATE	tl_page
+    SET	bbit_turl_root = :rootId
+  WHERE	id IN (:descendants)
 EOT;
 
             $this->connection->executeQuery(
@@ -92,10 +92,10 @@ EOT;
         $arrPIDs = [0];
         while ($arrPIDs) {
             $query = <<<'EOT'
-SELECT	id
-FROM	tl_page
-WHERE	pid IN (:pids)
-AND		type != 'root'
+ SELECT id
+   FROM	tl_page
+  WHERE	pid IN (:pids)
+    AND	type != 'root'
 EOT;
 
             $arrPIDs = $this->connection
@@ -112,9 +112,9 @@ EOT;
         }
 
         $query = <<<'EOT'
-UPDATE  tl_page
-SET     bbit_turl_root = 0
-WHERE   id IN (:ids)
+ UPDATE tl_page
+    SET bbit_turl_root = 0
+  WHERE id IN (:ids)
 EOT;
 
         $this->connection->executeQuery($query, ['ids' => $arrIDs], ['ids' => ArrayParameterType::STRING]);
@@ -142,9 +142,9 @@ EOT;
         }
 
         $query      = <<<'EOT'
-SELECT 	id, pid, type, bbit_turl_inherit, bbit_turl_ignoreRoot
-FROM	tl_page
-WHERE	id = ?
+ SELECT	id, pid, type, bbit_turl_inherit, bbit_turl_ignoreRoot
+   FROM	tl_page
+  WHERE	id = ?
 EOT;
         $statement  = $this->connection->executeQuery($query, [$pageId]);
         $pageResult = (object) $statement->fetchAssociative();
@@ -196,9 +196,9 @@ EOT;
     public function repair(): array
     {
         $query     = <<<'EOT'
-SELECT	id
-FROM	tl_page
-WHERE	type = 'root'
+ SELECT	id
+   FROM	tl_page
+  WHERE	type = 'root'
 EOT;
         $statement = $this->connection->executeQuery($query);
         $success   = [];
@@ -276,14 +276,14 @@ EOT;
         bool $autoInherit,
     ): bool {
         $query      = <<<'EOT'
-SELECT 	id, pid, alias, type,
+ SELECT	id, pid, alias, type,
 		bbit_turl_fragment,
 		bbit_turl_inherit,
 		bbit_turl_transparent,
 		bbit_turl_ignoreRoot,
 		bbit_turl_rootInherit
-FROM	tl_page
-WHERE	id = ?
+   FROM	tl_page
+  WHERE	id = ?
 EOT;
         $result     = $this->connection->executeQuery($query, [$pageId]);
         $pageResult = (object) $result->fetchAssociative();
@@ -340,13 +340,13 @@ EOT;
         $this->storeAlias($pageId, $strAlias, $fragment, $inherit);
 
         $query = <<<'EOT'
-SELECT	id
-FROM	tl_page
-WHERE	pid = ?
-AND		type != 'root';
+ SELECT id
+   FROM tl_page
+  WHERE pid = ?
+    AND type != 'root'
 EOT;
         if (! $updateAll && ! $autoInherit && $rootPage && $rootPage->bbit_turl_rootInherit !== 'always') {
-            $query .= 'AND bbit_turl_inherit = \'1\'';
+            $query .= ' AND bbit_turl_inherit = \'1\'';
         }
 
         $childrenResult = $this->connection->executeQuery($query, [$pageId]);
@@ -425,11 +425,11 @@ EOT;
 
         do {
             $strQuery = <<<'EOT'
-SELECT	p2.id, p2.alias, p2.bbit_turl_transparent, p2.bbit_turl_ignoreRoot
-FROM	tl_page AS p1
-JOIN	tl_page AS p2 ON p2.id = p1.pid
-WHERE	p1.id = ?
-AND		p2.type != 'root'
+ SELECT	p2.id, p2.alias, p2.bbit_turl_transparent, p2.bbit_turl_ignoreRoot
+   FROM	tl_page AS p1
+   JOIN	tl_page AS p2 ON p2.id = p1.pid
+  WHERE	p1.id = ?
+    AND p2.type != 'root'
 EOT;
             $result   = $this->connection->executeQuery($strQuery, [$pageId]);
             $parent   = (object) $result->fetchAssociative();
@@ -480,10 +480,10 @@ EOT;
         $this->framework->initialize();
 
         $strQuery = <<<'EOT'
-SELECT	rt.id, rt.type, rt.alias, rt.bbit_turl_rootInherit
-FROM	tl_page AS p
-JOIN	tl_page AS rt ON rt.id = p.bbit_turl_root
-WHERE	p.id = ?
+ SELECT	rt.id, rt.type, rt.alias, rt.bbit_turl_rootInherit
+   FROM	tl_page AS p
+   JOIN	tl_page AS rt ON rt.id = p.bbit_turl_root
+  WHERE	p.id = ?
 EOT;
         $result   = $this->connection->executeQuery($strQuery, [$pageModel->id]);
         $objRoot  = (object) $result->fetchAssociative();
@@ -501,9 +501,9 @@ EOT;
         }
 
         $strQuery = <<<'EOT'
-SELECT	id, alias, bbit_turl_rootInherit
-FROM	tl_page
-WHERE	id = ?
+ SELECT	id, alias, bbit_turl_rootInherit
+   FROM	tl_page
+  WHERE	id = ?
 EOT;
 
         $result = $this->connection->executeQuery($strQuery, [$intRootID]);
@@ -530,10 +530,10 @@ EOT;
 
         $strAlias = StringUtil::standardize($objPage->title);
         $strQuery = <<<'EOT'
-SELECT	id
-FROM	tl_page
-WHERE	id != ?
-AND		alias = ?
+ SELECT	id
+   FROM	tl_page
+  WHERE	id != ?
+    AND	alias = ?
 EOT;
         $result   = $this->connection->executeQuery($strQuery, [$pageId, $strAlias]);
 
