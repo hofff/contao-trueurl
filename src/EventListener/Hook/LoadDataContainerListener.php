@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Hofff\Contao\TrueUrl\EventListener\Hook;
 
-use Contao\CoreBundle\ServiceAnnotation\Hook;
+use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
 use Hofff\Contao\TrueUrl\EventListener\Dca\Page\GenerateLabelListener;
 
-/** @Hook("loadDataContainer") */
+#[AsHook('loadDataContainer')]
 final class LoadDataContainerListener
 {
     /** @SuppressWarnings(PHPMD.Superglobals) */

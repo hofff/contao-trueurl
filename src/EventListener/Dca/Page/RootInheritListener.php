@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Hofff\Contao\TrueUrl\EventListener\Dca\Page;
 
-use Contao\CoreBundle\ServiceAnnotation\Callback;
+use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\DataContainer;
 use Contao\PageModel;
 use Doctrine\DBAL\Connection;
@@ -20,11 +20,8 @@ final class RootInheritListener
     {
     }
 
-    /**
-     * @param array<string,mixed> $set
-     *
-     * @Callback(table="tl_page", target="config.oncreate", priority=128)
-     */
+    /** @param array<string,mixed> $set */
+    #[AsCallback('tl_page', 'config.oncreate', priority:128)]
     public function onCreate(string $table, string|int $recordId, array $set): void
     {
         if (! $set['pid']) {
@@ -54,10 +51,8 @@ EOT;
         );
     }
 
-    /**
-     * @Callback(table="tl_page", target="fields.bbit_turl_rootInheritProxy.load")
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     */
+    /** @SuppressWarnings(PHPMD.UnusedFormalParameter) */
+    #[AsCallback('tl_page', 'fields.bbit_turl_rootInheritProxy.load')]
     public function onLoad(mixed $varValue, DataContainer $dataContainer): mixed
     {
         if (! $dataContainer->activeRecord) {
@@ -67,7 +62,7 @@ EOT;
         return $dataContainer->activeRecord->bbit_turl_rootInherit ?: 'normal';
     }
 
-    /** @Callback(table="tl_page", target="fields.bbit_turl_rootInheritProxy.save") */
+    #[AsCallback('tl_page', 'fields.bbit_turl_rootInheritProxy.save')]
     public function onSave(mixed $newValue, DataContainer $dataContainer): mixed
     {
         if (! $dataContainer->activeRecord) {
@@ -83,7 +78,7 @@ EOT;
         return null;
     }
 
-    /** @Callback(table="tl_page", target="config.onsubmit", priority=-1) */
+    #[AsCallback('tl_page', 'config.onsubmit', priority: -1)]
     public function onSubmit(DataContainer $dataContainer): void
     {
         if (! isset($this->changedValues[$dataContainer->id]) || ! $dataContainer->activeRecord) {

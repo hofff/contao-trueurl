@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Hofff\Contao\TrueUrl\EventListener\Hook;
 
-use Contao\CoreBundle\ServiceAnnotation\Hook;
+use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
 use Contao\Widget;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 use function preg_match;
 
-/** @Hook("addCustomRegexp") */
+#[AsHook('addCustomRegexp')]
 final class CustomRegularExpressionListener
 {
     public function __construct(private readonly TranslatorInterface $translator)

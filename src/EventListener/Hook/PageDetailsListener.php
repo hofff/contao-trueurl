@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Hofff\Contao\TrueUrl\EventListener\Hook;
 
-use Contao\CoreBundle\ServiceAnnotation\Hook;
+use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
 use Contao\PageModel;
 use Hofff\Contao\TrueUrl\TrueURL;
 
-/** @Hook("loadPageDetails") */
+#[AsHook('loadPageDetails')]
 final class PageDetailsListener
 {
     public function __construct(private readonly TrueURL $trueUrl)
