@@ -53,11 +53,16 @@
   "require-dev": {
     "contao/manager-plugin": "^2.11",
     "doctrine/coding-standard": "^12.0",
-    "phpcq/runner-bootstrap": "^1.0@dev"
+    "phpcq/runner-bootstrap": "^1.0@dev",
+    "terminal42/contao-folderpage": "^3.0"
   },
   "replace": {
     "backboneit/contao-trueurl": "self.version",
     "contao-legacy/backboneit_trueurl": "self.version"
+  },
+  "conflict": {
+    "contao/manager-plugin": "<2.1 || >= 3.0",
+    "terminal42/contao-folderpage": "<3.0 || >=4.0"
   },
   "autoload": {
     "psr-4": {

@@ -7,7 +7,8 @@
     "contao/conflicts": "@dev",
     "contao/faq-bundle": "^5.3",
     "contao/manager-bundle": "5.3.*",
-    "hofff/contao-trueurl": "*"
+    "hofff/contao-trueurl": "*",
+    "terminal42/contao-folderpage": "^3.2"
   },
   "conflict": {
     "contao-components/installer": "<1.3"

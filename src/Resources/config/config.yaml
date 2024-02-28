@@ -3,4 +3,3 @@ hofff_contao_true_url:
     - 'error_401'
     - 'error_403'
     - 'error_404'
-    - 'folder'

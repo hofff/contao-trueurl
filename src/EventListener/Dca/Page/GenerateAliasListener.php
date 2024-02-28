@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Hofff\Contao\TrueUrl\EventListener\Dca\Page;
 
+use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\CoreBundle\EventListener\DataContainer\PageUrlListener;
 use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\CoreBundle\Security\ContaoCorePermissions;
-use Contao\CoreBundle\ServiceAnnotation\Callback;
 use Contao\DataContainer;
 use Contao\Input;
 use Doctrine\DBAL\Connection;
@@ -29,10 +29,8 @@ final class GenerateAliasListener
     ) {
     }
 
-    /**
-     * @Callback(table="tl_page", target="fields.alias.save", priority=255)
-     * @SuppressWarnings(PHPMD.Superglobals)
-     */
+    /** @SuppressWarnings(PHPMD.Superglobals) */
+    #[AsCallback('tl_page', 'fields.alias.save', priority: 255)]
     public function onSave(mixed $value, DataContainer $dataContainer): mixed
     {
         if (! $dataContainer->activeRecord || $dataContainer->activeRecord->type === 'root') {
@@ -66,7 +64,7 @@ final class GenerateAliasListener
         return $value;
     }
 
-    /** @Callback(table="tl_page", target="config.onsubmit", priority=128) */
+    #[AsCallback('tl_page', 'config.onsubmit', priority: -1)]
     public function onSubmit(DataContainer $dataContainer): void
     {
         if (! $dataContainer->activeRecord) {

@@ -37,6 +37,11 @@ final class PaletteListener
                 continue;
             }
 
+            if ($selector === 'folder') {
+                $pageManipulator->addLegend('routing_legend', 'title_legend');
+                $pageManipulator->addField('alias', 'routing_legend', PaletteManipulator::POSITION_PREPEND);
+            }
+
             $pageManipulator->applyToPalette($selector, 'tl_page');
         }
     }
