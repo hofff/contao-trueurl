@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace Hofff\Contao\TrueUrl\EventListener\Dca\Page;
 
+use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\CoreBundle\EventListener\DataContainer\ContentCompositionListener;
-use Contao\CoreBundle\ServiceAnnotation\Callback;
 use Contao\DataContainer;
+use ReflectionMethod;
 
 use function array_pop;
 use function explode;
 use function is_array;
+use function method_exists;
 
 final class GenerateArticleListener
 {
@@ -18,10 +20,8 @@ final class GenerateArticleListener
     {
     }
 
-    /**
-     * @Callback(table="tl_page", target="config.onload")
-     * @SuppressWarnings(PHPMD.Superglobals)
-     */
+    /** @SuppressWarnings(PHPMD.Superglobals) */
+    #[AsCallback('tl_page', 'config.onload')]
     public function onLoad(): void
     {
         if (! isset($GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'])) {
@@ -38,7 +38,7 @@ final class GenerateArticleListener
         }
     }
 
-    /** @Callback(table="tl_page", target="config.onsubmit", priority=128) */
+    #[AsCallback('tl_page', 'config.onsubmit', priority: 128)]
     public function onSubmit(DataContainer $dataContainer): void
     {
         if (! $dataContainer->activeRecord) {
@@ -49,6 +49,18 @@ final class GenerateArticleListener
         $arrAlias = explode('/', $strAlias);
 
         $dataContainer->activeRecord->alias = array_pop($arrAlias);
+
+        if (method_exists($dataContainer, 'setCurrentRecordCache')) {
+            $reflection = new ReflectionMethod($dataContainer, 'setCurrentRecordCache');
+            $reflection->setAccessible(true);
+            $reflection->invoke(
+                $dataContainer,
+                $dataContainer->id,
+                $dataContainer->table,
+                (array) $dataContainer->activeRecord,
+            );
+        }
+
         $this->listener->generateArticleForPage($dataContainer);
         $dataContainer->activeRecord->alias = $strAlias;
     }
