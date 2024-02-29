@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <defaults autowire="false" autoconfigure="true" public="false"/>
+
+        <!-- Data container callback listeners -->
+        <service id="Hofff\Contao\TrueUrl\EventListener\Dca\Page\PaletteListener" />
+
+        <service id="Hofff\Contao\TrueUrl\EventListener\Dca\Page\GenerateAliasListener">
+            <argument type="service" id="contao.listener.data_container.page_url"/>
+            <argument type="service" id="Hofff\Contao\TrueUrl\TrueURL"/>
+            <argument type="service" id="database_connection"/>
+            <argument type="service" id="contao.framework"/>
+            <argument type="service" id="security.helper"/>
+        </service>
+
+        <service id="Hofff\Contao\TrueUrl\EventListener\Dca\Page\GenerateArticleListener" public="true">
+            <argument type="service" id="contao.listener.data_container.content_composition"/>
+        </service>
+
+      <service id="Hofff\Contao\TrueUrl\EventListener\Dca\Page\GenerateLabelListener" public="true">
+        <argument type="service" id="contao.framework"/>
+        <argument type="service" id="translator"/>
+        <argument type="service" id="assets.packages"/>
+        <argument type="service" id="security.helper"/>
+        <argument type="service" id="Hofff\Contao\TrueUrl\TrueURL"/>
+        <argument>%hofff_contao_true_url.unrouteable_page_types%</argument>
+      </service>
+
+        <service id="Hofff\Contao\TrueUrl\EventListener\Dca\Page\RootInheritListener" public="true">
+            <argument type="service" id="database_connection"/>
+        </service>
+
+        <!-- Hook listeners -->
+        <service id="Hofff\Contao\TrueUrl\EventListener\Hook\CustomRegularExpressionListener" public="true">
+            <argument type="service" id="translator"/>
+        </service>
+
+        <service id="Hofff\Contao\TrueUrl\EventListener\Hook\LoadDataContainerListener" public="true">
+        </service>
+
+        <service id="Hofff\Contao\TrueUrl\EventListener\Hook\PageDetailsListener" public="true">
+            <argument type="service" id="Hofff\Contao\TrueUrl\TrueURL"/>
+        </service>
+
+        <service id="Hofff\Contao\TrueUrl\EventListener\Dca\User\PaletteListener"/>
+        <service id="Hofff\Contao\TrueUrl\EventListener\Dca\User\ViewModeOptions"/>
+    </services>
+</container>

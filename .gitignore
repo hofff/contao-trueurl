@@ -1,9 +1,5 @@
-/*
-!/.gitignore
-!/TL_ROOT/
-!/dev/
-!/ext/
-!/publish/
-!/build.xml
-!/README.md
-!/composer.json
+/vendor
+/composer.lock
+
+/.phpcq
+.phpcs-cache
