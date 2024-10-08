@@ -21,12 +21,6 @@ final class PaletteListener
             PaletteManipulator::POSITION_APPEND,
         );
 
-        $pageManipulator = PaletteManipulator::create()->addField(
-            ['bbit_turl_inherit', 'bbit_turl_transparent', 'bbit_turl_ignoreRoot'],
-            'routing_legend',
-            PaletteManipulator::POSITION_APPEND,
-        );
-
         foreach ($GLOBALS['TL_DCA']['tl_page']['palettes'] as $selector => $palette) {
             if ($selector === '__selector__' || ! is_string($palette)) {
                 continue;
@@ -36,6 +30,12 @@ final class PaletteListener
                 $rootManipulator->applyToPalette($selector, 'tl_page');
                 continue;
             }
+
+            $pageManipulator = PaletteManipulator::create()->addField(
+                ['bbit_turl_inherit', 'bbit_turl_transparent', 'bbit_turl_ignoreRoot'],
+                'routing_legend',
+                PaletteManipulator::POSITION_APPEND,
+            );
 
             if ($selector === 'folder') {
                 $pageManipulator->addLegend('routing_legend', 'title_legend');
