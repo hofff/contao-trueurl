@@ -7,6 +7,8 @@ namespace Hofff\Contao\TrueUrl\EventListener\Dca\Page;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\CoreBundle\EventListener\DataContainer\ContentCompositionListener;
 use Contao\DataContainer;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Types\BooleanType;
 use ReflectionMethod;
 
 use function array_pop;
@@ -16,8 +18,10 @@ use function method_exists;
 
 final class GenerateArticleListener
 {
-    public function __construct(private readonly ContentCompositionListener $listener)
-    {
+    public function __construct(
+        private readonly ContentCompositionListener $listener,
+        private readonly Connection $connection,
+    ) {
     }
 
     /** @SuppressWarnings(PHPMD.Superglobals) */
@@ -50,6 +54,13 @@ final class GenerateArticleListener
 
         $dataContainer->activeRecord->alias = array_pop($arrAlias);
 
+        $row     = (array) $dataContainer->activeRecord;
+        $columns = $this->connection->createSchemaManager()->listTableColumns('tl_article');
+
+        if (isset($columns['published']) && $columns['published']->getType() instanceof BooleanType) {
+            $row['published'] = $row['published'] ? 1 : 0;
+        }
+
         if (method_exists($dataContainer, 'setCurrentRecordCache')) {
             $reflection = new ReflectionMethod($dataContainer, 'setCurrentRecordCache');
             $reflection->setAccessible(true);
@@ -57,7 +68,7 @@ final class GenerateArticleListener
                 $dataContainer,
                 $dataContainer->id,
                 $dataContainer->table,
-                (array) $dataContainer->activeRecord,
+                $row,
             );
         }
 
