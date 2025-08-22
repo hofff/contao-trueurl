@@ -10,11 +10,13 @@ use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
 use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
 use Contao\ManagerPlugin\Config\ConfigPluginInterface;
 use Hofff\Contao\TrueUrl\HofffContaoTrueUrlBundle;
+use Override;
 use Symfony\Component\Config\Loader\LoaderInterface;
 
 final class Plugin implements BundlePluginInterface, ConfigPluginInterface
 {
     /** {@inheritDoc} */
+    #[Override]
     public function getBundles(ParserInterface $parser): array
     {
         return [
@@ -25,6 +27,7 @@ final class Plugin implements BundlePluginInterface, ConfigPluginInterface
     }
 
     /** {@inheritDoc} */
+    #[Override]
     public function registerContainerConfiguration(LoaderInterface $loader, array $managerConfig): void
     {
         $loader->load(__DIR__ . '/../Resources/config/config.yaml');

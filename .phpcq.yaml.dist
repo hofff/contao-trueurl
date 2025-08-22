@@ -43,6 +43,7 @@ phpcq:
     # PHP_CodeSniffer
     - 31C7E470E2138192
     - 5E6DDE998AB73B8E
+    - 97B02DD8E5071466
     # Composer normalize
     - C00543248C87FB13
     # phpmd

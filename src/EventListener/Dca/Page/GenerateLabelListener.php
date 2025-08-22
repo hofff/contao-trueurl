@@ -147,8 +147,11 @@ final class GenerateLabelListener
 
         self::$blnRecurse = true;
 
-        /** @psalm-suppress PossiblyInvalidFunctionCall */
-        $label =  $callback($row, $label, $dataContainer, $imageAttribute, $returnImage, $protect);
+        /**
+         * @psalm-suppress PossiblyInvalidFunctionCall
+         * @psalm-suppress TooManyArguments
+         */
+        $label = $callback($row, $label, $dataContainer, $imageAttribute, $returnImage, $protect);
 
         self::$blnRecurse = false;
 
