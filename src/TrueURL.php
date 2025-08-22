@@ -24,6 +24,9 @@ final class TrueURL
     /** @var array<int, object|null> */
     private array $rootPages = [];
 
+    /** @var array<int, string> */
+    private array $aliases = [];
+
     public function __construct(private readonly Connection $connection, private readonly ContaoFramework $framework)
     {
     }
@@ -329,6 +332,10 @@ EOT;
      */
     private function getParentAlias(int $pageId, object|null $rootPage = null): string
     {
+        if (isset($this->aliases[$pageId])) {
+            return $this->aliases[$pageId];
+        }
+
         $rootPage || $rootPage = $this->getRootPage($pageId);
 
         do {
@@ -342,19 +349,21 @@ EOT;
             $result   = $this->connection->executeQuery($strQuery, [$pageId]);
             $parent   = (object) $result->fetchAssociative();
             if ($result->rowCount() === 0 || ! $parent->id) {
+                $this->aliases[$pageId] = '';
+
                 return '';
             }
 
             $pageId = $parent->id;
         } while ($parent->bbit_turl_transparent);
 
-        $strAlias = (string) $parent->alias;
+        $alias = (string) $parent->alias;
 
         if ($rootPage && ! $parent->bbit_turl_ignoreRoot) {
             switch ($rootPage->bbit_turl_rootInherit) {
                 default:
                 case 'always':
-                    $strAlias = self::unprefix($strAlias, $rootPage->alias);
+                    $alias = self::unprefix($alias, $rootPage->alias);
                     break;
 
                 case 'normal':
@@ -363,7 +372,9 @@ EOT;
             }
         }
 
-        return $strAlias;
+        $this->aliases[$pageId] = $alias;
+
+        return $alias;
     }
 
     /**
