@@ -11,6 +11,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\Exception;
 use InvalidArgumentException;
 
+use function array_key_exists;
 use function strlen;
 use function strncasecmp;
 use function strncmp;
@@ -20,6 +21,9 @@ use function trim;
 /** @SuppressWarnings(PHPMD.ExcessiveClassComplexity) */
 final class TrueURL
 {
+    /** @var array<int, object|null> */
+    private array $rootPages = [];
+
     public function __construct(private readonly Connection $connection, private readonly ContaoFramework $framework)
     {
     }
@@ -381,6 +385,11 @@ EOT;
 
     private function getRootPageFromPageModel(PageModel $pageModel): object|null
     {
+        $rootPageId = (int) $pageModel->hofff_root_page_id;
+        if (array_key_exists($rootPageId, $this->rootPages)) {
+            return $this->rootPages[$rootPageId];
+        }
+
         $this->framework->initialize();
 
         $strQuery = <<<'EOT'
@@ -393,6 +402,8 @@ EOT;
         $objRoot  = (object) $result->fetchAssociative();
 
         if ($result->rowCount() > 0 && $objRoot->type === 'root') {
+            $this->rootPages[$rootPageId] = $objRoot;
+
             return $objRoot;
         }
 
@@ -401,6 +412,8 @@ EOT;
         } elseif ($pageModel->rootId) {
             $intRootID = $pageModel->rootId;
         } else {
+            $this->rootPages[$rootPageId] = null;
+
             return null;
         }
 
@@ -412,10 +425,14 @@ EOT;
 
         $result = $this->connection->executeQuery($strQuery, [$intRootID]);
         if ($result->rowCount() === 0) {
+            $this->rootPages[$rootPageId] = null;
+
             return null;
         }
 
-        return (object) $result->fetchAssociative();
+        $this->rootPages[$rootPageId] = (object) $result->fetchAssociative();
+
+        return $this->rootPages[$rootPageId];
     }
 
     /**
