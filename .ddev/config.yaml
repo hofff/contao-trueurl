@@ -1,7 +1,7 @@
 name: contao-trueurl
 type: php
 docroot: ./.ddev/contao/public
-php_version: "8.1"
+php_version: "8.4"
 webserver_type: nginx-fpm
 xdebug_enabled: false
 additional_hostnames: []
