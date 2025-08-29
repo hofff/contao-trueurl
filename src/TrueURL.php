@@ -336,6 +336,7 @@ EOT;
             return $this->aliases[$pageId];
         }
 
+        $currentPageId         = $pageId;
         $rootPage || $rootPage = $this->getRootPage($pageId);
 
         do {
@@ -349,7 +350,7 @@ EOT;
             $result   = $this->connection->executeQuery($strQuery, [$pageId]);
             $parent   = (object) $result->fetchAssociative();
             if ($result->rowCount() === 0 || ! $parent->id) {
-                $this->aliases[$pageId] = '';
+                $this->aliases[$currentPageId] = '';
 
                 return '';
             }
@@ -372,7 +373,7 @@ EOT;
             }
         }
 
-        $this->aliases[$pageId] = $alias;
+        $this->aliases[$currentPageId] = $alias;
 
         return $alias;
     }
