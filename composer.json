@@ -43,12 +43,12 @@
     "contao/core-bundle": "^4.13 || ^5.3",
     "doctrine/dbal": "^3.8",
     "hofff/contao-root-relations": "^3.1",
-    "symfony/asset": "^5.4 || ^6.4",
-    "symfony/config": "^5.4 || ^6.4",
-    "symfony/dependency-injection": "^5.4 || ^6.4",
-    "symfony/http-foundation": "^5.4 || ^6.4",
-    "symfony/http-kernel": "^5.4 || ^6.4",
-    "symfony/security-core": "^5.4 || ^6.4",
+    "symfony/asset": "^5.4 || ^6.4 || ^7.4",
+    "symfony/config": "^5.4 || ^6.4 || ^7.4",
+    "symfony/dependency-injection": "^5.4 || ^6.4 || ^7.4",
+    "symfony/http-foundation": "^5.4 || ^6.4 || ^7.4",
+    "symfony/http-kernel": "^5.4 || ^6.4 || ^7.4",
+    "symfony/security-core": "^5.4 || ^6.4 || ^7.4",
     "symfony/translation-contracts": "^1.1.6 || ^2 || ^3.0"
   },
   "require-dev": {
