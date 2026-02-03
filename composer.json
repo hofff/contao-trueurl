@@ -41,7 +41,7 @@
     "ext-pdo": "*",
     "ext-reflection": "*",
     "contao/core-bundle": "^4.13 || ^5.3",
-    "doctrine/dbal": "^3.8",
+    "doctrine/dbal": "^3.8 || ^4.0",
     "hofff/contao-root-relations": "^3.1",
     "symfony/asset": "^5.4 || ^6.4 || ^7.4",
     "symfony/config": "^5.4 || ^6.4 || ^7.4",

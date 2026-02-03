@@ -12,7 +12,8 @@ use Contao\DataContainer;
 use Contao\Input;
 use Doctrine\DBAL\Connection;
 use Hofff\Contao\TrueUrl\TrueURL;
-use Symfony\Component\Security\Core\Security;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Security\Core\Security as CoreSecurity;
 
 use function array_key_exists;
 use function count;
@@ -25,7 +26,7 @@ final class GenerateAliasListener
         private readonly TrueURL $trueUrl,
         private readonly Connection $connection,
         private readonly ContaoFramework $framework,
-        private readonly Security $security,
+        private readonly Security|CoreSecurity $security,
     ) {
     }
 

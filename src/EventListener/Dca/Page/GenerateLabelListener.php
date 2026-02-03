@@ -13,7 +13,8 @@ use Contao\System;
 use Hofff\Contao\TrueUrl\DataContainer\Page\LabelViewMode;
 use Hofff\Contao\TrueUrl\TrueURL;
 use Symfony\Component\Asset\Packages;
-use Symfony\Component\Security\Core\Security;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Security\Core\Security as CoreSecurity;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 use function implode;
@@ -33,7 +34,7 @@ final class GenerateLabelListener
         private readonly ContaoFramework $framework,
         private readonly TranslatorInterface $translator,
         private readonly Packages $packages,
-        private readonly Security $security,
+        private readonly Security|CoreSecurity $security,
         private readonly TrueURL $trueUrl,
         private readonly array $unrouteablePageTypes,
     ) {
